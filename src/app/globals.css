@@ -1,10 +1,67 @@
 @import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a2e;
+  --muted: #6b7280;
+  --muted-foreground: #9ca3af;
+  --border: #e5e7eb;
+  --input: #f3f4f6;
+  --ring: #7c3aed;
+
+  /* Mindora purple palette (Figma) */
+  --mindora-purple: #7c3aed;
+  --mindora-purple-dark: #5b21b6;
+  --mindora-purple-light: #a78bfa;
+  --mindora-purple-pale: #ede9fe;
+  --mindora-purple-bg: #f5f3ff;
+  --mindora-section-lavender: #ebe4f7;
+  --mindora-lavender: #ddd6fe;
+  --mindora-sidebar: #0f0f14;
+  --mindora-sidebar-hover: #1a1a24;
+  --mindora-gradient-start: #4c1d95;
+  --mindora-gradient-end: #7c3aed;
+  --mindora-card-dark: #1a1a24;
+  --mindora-success: #22c55e;
+  --mindora-success-bg: #dcfce7;
+  --mindora-pending: #7c3aed;
+  --mindora-pending-bg: #ede9fe;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-mindora-purple: var(--mindora-purple);
+  --color-mindora-purple-dark: var(--mindora-purple-dark);
+  --color-mindora-purple-light: var(--mindora-purple-light);
+  --color-mindora-purple-pale: var(--mindora-purple-pale);
+  --color-mindora-purple-bg: var(--mindora-purple-bg);
+  --color-mindora-section-lavender: var(--mindora-section-lavender);
+  --color-mindora-lavender: var(--mindora-lavender);
+  --color-mindora-sidebar: var(--mindora-sidebar);
+  --color-mindora-sidebar-hover: var(--mindora-sidebar-hover);
+  --color-mindora-card-dark: var(--mindora-card-dark);
+  --color-mindora-success: var(--mindora-success);
+  --color-mindora-success-bg: var(--mindora-success-bg);
+  --color-mindora-pending-bg: var(--mindora-pending-bg);
+  --font-sans: var(--font-dm-sans);
+  --font-serif: var(--font-lora);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  /* ── Mindora colour tokens ───────────────────────── */
+
 
   /* Primary purple */
   --color-primary: oklch(45% 0.27 293);
