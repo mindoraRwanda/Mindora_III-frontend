@@ -8,9 +8,9 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex h-screen overflow-hidden bg-white">
       <AppSidebar />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 >>>>>>> 2b4f226 (Add UI-only auth and home pages from Figma designs.)

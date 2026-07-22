@@ -30,9 +30,9 @@ export function AppSidebar() {
   const user = mockCurrentUser;
 
   return (
-    <aside className="flex h-screen w-[220px] shrink-0 flex-col bg-mindora-sidebar text-white">
-      <div className="px-5 py-6">
-        <MindoraLogo variant="light" />
+    <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch bg-mindora-sidebar text-white">
+      <div className="px-5 py-5">
+        <MindoraLogo variant="light" size="md" />
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3">
