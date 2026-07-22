@@ -1,32 +1,53 @@
 @import "tailwindcss";
 
 :root {
+  /* Design system — Figma tokens */
+  --color-primary: #7c3aed;
+  --color-primary-dark: #5b21d0;
+  --color-bg-dark: #0d0d0d;
+  --color-bg-card: #1a1a1a;
+  --color-bg-light: #ffffff;
+  --color-purple-panel: #3b0764;
+  --color-text-primary: #f9fafb;
+  --color-text-muted: #9ca3af;
+  --color-border-dark: #2d2d2d;
+
+  /* App surfaces (light pages) */
   --background: #ffffff;
-  --foreground: #1a1a2e;
+  --foreground: #111827;
   --muted: #6b7280;
   --muted-foreground: #9ca3af;
   --border: #e5e7eb;
   --input: #f3f4f6;
-  --ring: #9010c0;
+  --ring: var(--color-primary);
 
-  /* Mindora purple palette — sampled from logo (#9010C0) */
-  --mindora-purple: #9010c0;
-  --mindora-purple-dark: #6e0c94;
-  --mindora-purple-light: #c45fe8;
-  --mindora-purple-pale: #f8e8fc;
-  --mindora-purple-bg: #fbf0fd;
-  --mindora-section-lavender: #f3e0f8;
-  --mindora-lavender: #e8c4f5;
-  --mindora-sidebar: #0f0f14;
-  --mindora-sidebar-hover: #1a1a24;
-  --mindora-gradient-start: #5c0a7a;
-  --mindora-gradient-mid: #7a0da3;
-  --mindora-gradient-end: #9010c0;
-  --mindora-card-dark: #1a1a24;
+  /* Aliases used across components */
+  --mindora-purple: var(--color-primary);
+  --mindora-purple-dark: var(--color-primary-dark);
+  --mindora-purple-light: #a78bfa;
+  --mindora-purple-pale: #ede9fe;
+  --mindora-purple-bg: #f5f3ff;
+  --mindora-section-lavender: #ebe4f7;
+  --mindora-lavender: #ddd6fe;
+  --mindora-sidebar: var(--color-bg-dark);
+  --mindora-sidebar-hover: #1a1a1a;
+  --mindora-gradient-start: var(--color-purple-panel);
+  --mindora-gradient-mid: #5b21b6;
+  --mindora-gradient-end: var(--color-primary);
+  --mindora-card-dark: var(--color-bg-card);
   --mindora-success: #22c55e;
   --mindora-success-bg: #dcfce7;
-  --mindora-pending: #9010c0;
-  --mindora-pending-bg: #f8e8fc;
+  --mindora-pending: var(--color-primary);
+  --mindora-pending-bg: #ede9fe;
+
+  /* Type scale */
+  --text-caption: 12px;
+  --text-small: 14px;
+  --text-body: 16px;
+  --text-subtitle: 20px;
+  --text-h3: 24px;
+  --text-h2: 32px;
+  --text-h1: 48px;
 }
 
 @theme inline {
@@ -37,6 +58,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-primary: #7c3aed;
+  --color-primary-dark: #5b21d0;
+  --color-bg-dark: #0d0d0d;
+  --color-bg-card: #1a1a1a;
+  --color-bg-light: #ffffff;
+  --color-purple-panel: #3b0764;
+  --color-text-primary: #f9fafb;
+  --color-text-muted: #9ca3af;
+  --color-border-dark: #2d2d2d;
   --color-mindora-purple: var(--mindora-purple);
   --color-mindora-purple-dark: var(--mindora-purple-dark);
   --color-mindora-purple-light: var(--mindora-purple-light);
@@ -140,4 +170,60 @@ body {
     background-color: var(--color-bg-light);
     color: var(--color-text-dark);
   }
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: var(--text-body);
+}
+
+/* Custom range slider for mood check-in — force purple (not browser blue) */
+.mood-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  accent-color: #7c3aed;
+  background: #e5e7eb;
+}
+
+.mood-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.mood-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #7c3aed;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.25);
+  cursor: pointer;
+}
+
+.mood-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: #e5e7eb;
+}
+
+.mood-slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 9999px;
+  background: #7c3aed;
+}
+
+.mood-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid #7c3aed;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.25);
+  cursor: pointer;
 }

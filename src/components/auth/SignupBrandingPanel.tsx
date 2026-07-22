@@ -3,7 +3,7 @@ import { signupFeatures } from "@/lib/mock-data/auth";
 
 export function SignupBrandingPanel() {
   return (
-    <div className="relative hidden min-h-screen flex-col justify-between overflow-hidden bg-gradient-to-br from-mindora-purple-dark via-[#7a0da3] to-mindora-purple px-12 py-14 text-white lg:flex xl:px-16 xl:py-16">
+    <div className="relative hidden min-h-screen flex-col justify-between overflow-hidden bg-gradient-to-br from-purple-panel via-[#5b21b6] to-mindora-purple px-12 py-14 text-white lg:flex xl:px-16 xl:py-16">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_15%,rgba(255,255,255,0.14),transparent_55%)]" />
       <div className="absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
