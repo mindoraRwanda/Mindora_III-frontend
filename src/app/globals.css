@@ -7,25 +7,26 @@
   --muted-foreground: #9ca3af;
   --border: #e5e7eb;
   --input: #f3f4f6;
-  --ring: #7c3aed;
+  --ring: #9010c0;
 
-  /* Mindora purple palette (Figma) */
-  --mindora-purple: #7c3aed;
-  --mindora-purple-dark: #5b21b6;
-  --mindora-purple-light: #a78bfa;
-  --mindora-purple-pale: #ede9fe;
-  --mindora-purple-bg: #f5f3ff;
-  --mindora-section-lavender: #ebe4f7;
-  --mindora-lavender: #ddd6fe;
+  /* Mindora purple palette — sampled from logo (#9010C0) */
+  --mindora-purple: #9010c0;
+  --mindora-purple-dark: #6e0c94;
+  --mindora-purple-light: #c45fe8;
+  --mindora-purple-pale: #f8e8fc;
+  --mindora-purple-bg: #fbf0fd;
+  --mindora-section-lavender: #f3e0f8;
+  --mindora-lavender: #e8c4f5;
   --mindora-sidebar: #0f0f14;
   --mindora-sidebar-hover: #1a1a24;
-  --mindora-gradient-start: #4c1d95;
-  --mindora-gradient-end: #7c3aed;
+  --mindora-gradient-start: #5c0a7a;
+  --mindora-gradient-mid: #7a0da3;
+  --mindora-gradient-end: #9010c0;
   --mindora-card-dark: #1a1a24;
   --mindora-success: #22c55e;
   --mindora-success-bg: #dcfce7;
-  --mindora-pending: #7c3aed;
-  --mindora-pending-bg: #ede9fe;
+  --mindora-pending: #9010c0;
+  --mindora-pending-bg: #f8e8fc;
 }
 
 @theme inline {
@@ -49,12 +50,11 @@
   --color-mindora-success: var(--mindora-success);
   --color-mindora-success-bg: var(--mindora-success-bg);
   --color-mindora-pending-bg: var(--mindora-pending-bg);
-  --font-sans: var(--font-dm-sans);
-  --font-serif: var(--font-lora);
+  --font-sans: var(--font-inter);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }

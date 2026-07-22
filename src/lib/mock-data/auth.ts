@@ -14,12 +14,12 @@ export const joinReasons = [
   {
     id: "routine" as const,
     label: "Start a gentle routine",
-    icon: "sparkles",
+    icon: "routine",
   },
   {
     id: "reflect" as const,
     label: "Reflect & journal",
-    icon: "feather",
+    icon: "journal",
   },
 ] as const;
 

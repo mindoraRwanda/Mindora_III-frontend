@@ -42,8 +42,8 @@ export function PasswordInput({
         </button>
       </div>
       {showStrength && password.length > 0 && (
-        <div className="space-y-1">
-          <div className="flex gap-1">
+        <div className="space-y-1.5">
+          <div className="flex gap-1.5">
             {[1, 2, 3, 4].map((level) => (
               <div
                 key={level}
@@ -54,7 +54,7 @@ export function PasswordInput({
               />
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">{strengthLabel}</p>
+          <p className="text-[12px] text-muted-foreground">{strengthLabel}</p>
         </div>
       )}
     </div>
@@ -76,8 +76,8 @@ function getStrengthLabel(strength: number): string {
     "",
     "Weak — add more characters",
     "Fair — getting there",
-    "Strong — nice and calm.",
-    "Strong — nice and calm.",
+    "Strong — keep it secret, keep it safe.",
+    "Strong — keep it secret, keep it safe.",
   ];
   return labels[strength] ?? "";
 }

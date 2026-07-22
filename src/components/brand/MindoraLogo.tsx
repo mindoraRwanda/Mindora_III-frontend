@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -5,42 +6,56 @@ interface MindoraLogoProps {
   className?: string;
   showTagline?: boolean;
   variant?: "default" | "light";
+  /** Overall lockup scale. Icon diameter ≈ “Mindora” wordmark height (Figma). */
+  size?: "md" | "lg";
 }
+
+const scales = {
+  /** Sidebar lockup — icon slightly taller than wordmark */
+  md: { icon: 42, word: 20, tag: 9, gap: "gap-2.5" },
+  /** Auth pages */
+  lg: { icon: 56, word: 28, tag: 11, gap: "gap-3" },
+} as const;
 
 export function MindoraLogo({
   className,
   showTagline = true,
   variant = "default",
+  size = "lg",
 }: MindoraLogoProps) {
   const isLight = variant === "light";
+  const s = scales[size];
 
   return (
-    <Link href="/today" className={cn("flex items-center gap-3", className)}>
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-mindora-purple">
-        <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="currentColor">
-          <path d="M12 2C8.5 2 6 4.5 6 8c0 2 1 3.5 2.5 4.5C7 14 6 16 6 18c0 2 1.5 3.5 3.5 3.5.5 0 1-.1 1.5-.3C12 22 13 22.5 14 22.5c2.5 0 4-1.5 4-4 0-2-1-4-2.5-5.5C17 11.5 18 10 18 8c0-3.5-2.5-6-6-6z" />
-        </svg>
-      </div>
-      <div className="flex flex-col">
+    <Link href="/today" className={cn("flex items-center", s.gap, className)}>
+      <Image
+        src="/images/Mindora_Logo.png"
+        alt="Mindora"
+        width={s.icon}
+        height={s.icon}
+        className="shrink-0 self-center object-contain"
+        style={{ width: s.icon, height: s.icon }}
+        priority
+      />
+      <span className="flex flex-col justify-center leading-none">
         <span
-          className={cn(
-            "text-lg font-bold leading-tight tracking-tight",
-            isLight ? "text-white" : "text-foreground"
-          )}
+          className={cn("font-bold tracking-tight", isLight ? "text-white" : "text-foreground")}
+          style={{ fontSize: s.word, lineHeight: 1 }}
         >
           Mindora
         </span>
-        {showTagline && (
+        {showTagline ? (
           <span
             className={cn(
-              "text-[10px] font-medium uppercase tracking-widest",
-              isLight ? "text-white/60" : "text-muted-foreground"
+              "mt-1.5 font-medium uppercase tracking-[0.18em]",
+              isLight ? "text-white/55" : "text-muted-foreground"
             )}
+            style={{ fontSize: s.tag, lineHeight: 1 }}
           >
             Care, gently
           </span>
-        )}
-      </div>
+        ) : null}
+      </span>
     </Link>
   );
 }
