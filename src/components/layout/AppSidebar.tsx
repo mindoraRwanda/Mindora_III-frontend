@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  CalendarHeart,
-  Circle,
-  Flame,
-  Home,
-  LogOut,
-  MessageCircleHeart,
-  PenLine,
-  RefreshCw,
-} from "lucide-react";
+import { CalendarHeart, Circle, Flame, Home, LogOut, PenLine, RefreshCw } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { Button } from "@/components/ui/button";
 import { mockCurrentUser } from "@/lib/mock-data/user";
@@ -62,12 +53,12 @@ export function AppSidebar() {
 
       <div className="space-y-3 px-3 pb-4">
         <div className="rounded-xl bg-mindora-card-dark px-3.5 py-3.5">
-          <p className="text-[11px] leading-relaxed text-white/65">
-            Need someone now? 24/7 crisis response — always free, always answered
+          <p className="text-[13px] font-semibold text-white">Need someone now?</p>
+          <p className="mt-1 text-[11px] leading-relaxed text-white/65">
+            24/7 crisis line — always free, always answered.
           </p>
           <Button className="mt-2.5 h-9 w-full text-xs" size="sm">
-            <MessageCircleHeart className="h-3.5 w-3.5" />
-            Talk to our Chatbot
+            Call 988
           </Button>
         </div>
 
