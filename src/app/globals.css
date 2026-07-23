@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   /* Design system — Figma tokens */
@@ -48,6 +51,31 @@
   --text-h3: 24px;
   --text-h2: 32px;
   --text-h1: 48px;
+
+  /* Shadcn-compatible semantic surfaces (dark-theme components) */
+  --primary-light: oklch(93% 0.06 293);
+  --primary-foreground: oklch(98% 0 0);
+  --bg-elevated: oklch(17% 0 0);
+  --purple-panel-from: oklch(22% 0.22 293);
+  --purple-panel-to: oklch(37% 0.25 293);
+  --text-subtle: oklch(52% 0 0);
+  --text-dark: oklch(11% 0 0);
+  --border-light: oklch(90% 0 0);
+  --destructive: oklch(55% 0.22 29);
+  --destructive-foreground: oklch(98% 0 0);
+  --accent: oklch(17% 0 0);
+  --accent-foreground: oklch(97% 0 0);
+  --popover: oklch(13% 0 0);
+  --popover-foreground: oklch(97% 0 0);
+  --card: oklch(13% 0 0);
+  --card-foreground: oklch(97% 0 0);
+  --secondary: oklch(17% 0 0);
+  --secondary-foreground: oklch(97% 0 0);
+  --success: oklch(68% 0.18 160);
+  --warning: oklch(75% 0.18 75);
+  --error: oklch(60% 0.22 29);
+  --crisis: oklch(95% 0.08 90);
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -81,78 +109,41 @@
   --color-mindora-success-bg: var(--mindora-success-bg);
   --color-mindora-pending-bg: var(--mindora-pending-bg);
   --font-sans: var(--font-inter);
+
+  --color-primary-light: var(--primary-light);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-purple-panel-from: var(--purple-panel-from);
+  --color-purple-panel-to: var(--purple-panel-to);
+  --color-text-subtle: var(--text-subtle);
+  --color-text-dark: var(--text-dark);
+  --color-border-light: var(--border-light);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-crisis: var(--crisis);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-
-
-
-  /* Primary purple */
-  --color-primary: oklch(45% 0.27 293);
-  --color-primary-dark: oklch(37% 0.25 293);
-  --color-primary-light: oklch(93% 0.06 293);
-  --color-primary-foreground: oklch(98% 0 0);
-
-  /* Dark canvas */
-  --color-bg-dark: oklch(8% 0 0);
-  --color-bg-card: oklch(13% 0 0);
-  --color-bg-elevated: oklch(17% 0 0);
-
-  /* Auth pages */
-  --color-bg-light: oklch(100% 0 0);
-  --color-purple-panel-from: oklch(22% 0.22 293);
-  --color-purple-panel-to: oklch(37% 0.25 293);
-
-  /* Text */
-  --color-text-primary: oklch(97% 0 0);
-  --color-text-muted: oklch(63% 0 0);
-  --color-text-subtle: oklch(52% 0 0);
-  --color-text-dark: oklch(11% 0 0);
-
-  /* Borders */
-  --color-border: oklch(22% 0 0);
-  --color-border-light: oklch(90% 0 0);
-  --color-input: oklch(22% 0 0);
-  --color-ring: oklch(45% 0.27 293);
-
-  /* Semantic (shadcn compatibility) */
-  --color-background: oklch(8% 0 0);
-  --color-foreground: oklch(97% 0 0);
-  --color-muted: oklch(13% 0 0);
-  --color-muted-foreground: oklch(63% 0 0);
-  --color-destructive: oklch(55% 0.22 29);
-  --color-destructive-foreground: oklch(98% 0 0);
-  --color-accent: oklch(17% 0 0);
-  --color-accent-foreground: oklch(97% 0 0);
-  --color-popover: oklch(13% 0 0);
-  --color-popover-foreground: oklch(97% 0 0);
-  --color-card: oklch(13% 0 0);
-  --color-card-foreground: oklch(97% 0 0);
-  --color-secondary: oklch(17% 0 0);
-  --color-secondary-foreground: oklch(97% 0 0);
-
-  /* Status */
-  --color-success: oklch(68% 0.18 160);
-  --color-warning: oklch(75% 0.18 75);
-  --color-error: oklch(60% 0.22 29);
-  --color-crisis: oklch(95% 0.08 90);
-
-  /* ── Typography ──────────────────────────────────── */
-  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
-
-  /* ── Border radius ───────────────────────────────── */
-  --radius: 0.5rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
 }
 
 /* Base styles */
@@ -170,8 +161,6 @@ body {
     background-color: var(--color-bg-light);
     color: var(--color-text-dark);
   }
-  font-family: var(--font-inter), system-ui, sans-serif;
-  font-size: var(--text-body);
 }
 
 /* Custom range slider for mood check-in — force purple (not browser blue) */
