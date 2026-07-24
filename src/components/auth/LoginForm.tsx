@@ -11,6 +11,7 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -22,6 +23,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const { setUser, setToken } = useAuth();
 
   const {
     register,
@@ -42,7 +44,15 @@ export function LoginForm() {
   const rememberMe = watch("rememberMe");
 
   const onSubmit = (data: LoginForm) => {
+    // UI-only mock session until Auth Service is ready
     console.log("Would login:", data);
+    setToken("mock-access-token");
+    setUser({
+      userId: "usr-theodora-001",
+      email: data.email || "theodora@mindora.app",
+      role: "PATIENT",
+      userName: "Theodora",
+    });
     router.push("/today");
   };
 

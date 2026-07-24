@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { joinReasons } from "@/lib/mock-data/auth";
 import { cn } from "@/lib/utils";
 import type { JoinReason } from "@/types/domain";
+import { useAuth } from "@/contexts/AuthContext";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -34,6 +35,7 @@ const reasonIcons = {
 
 export function SignupForm() {
   const router = useRouter();
+  const { setUser, setToken } = useAuth();
   const [selectedReason, setSelectedReason] = useState<JoinReason>("grounded");
 
   const {
@@ -57,7 +59,15 @@ export function SignupForm() {
   const termsAccepted = watch("terms");
 
   const onSubmit = (data: SignupForm) => {
+    // UI-only mock session until Auth Service is ready
     console.log("Would register:", data);
+    setToken("mock-access-token");
+    setUser({
+      userId: "usr-new-001",
+      email: data.email,
+      role: "PATIENT",
+      userName: data.name,
+    });
     router.push("/today");
   };
 
