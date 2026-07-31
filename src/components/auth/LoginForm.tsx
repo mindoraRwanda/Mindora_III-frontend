@@ -52,7 +52,7 @@ export function LoginForm() {
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
         <span className="mb-4 inline-flex w-fit items-center rounded-full bg-mindora-purple-pale px-3 py-1 text-xs font-medium text-mindora-purple">
-          👋 Welcome back
+          Welcome back
         </span>
 
         <h1 className="text-3xl font-bold tracking-tight">Good to see you again.</h1>

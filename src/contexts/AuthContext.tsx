@@ -7,7 +7,6 @@ interface User {
   userId: string;
   email: string;
   role: "PATIENT" | "THERAPIST" | "ADMIN";
-  userName: string;
 }
 
 interface AuthContextValue {
@@ -23,6 +22,17 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// The Auth Service's /login and /refresh only ever return { accessToken } —
+// there is no `user` field on that response. Identity claims (userId/email/role)
+// live in the JWT payload itself, so decode them from there instead of expecting
+// the server to send a separate user object.
+function userFromAccessToken(token: string): User {
+  const payload = token.split(".")[1];
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+  const decoded = JSON.parse(atob(base64));
+  return { userId: decoded.sub, email: decoded.email, role: decoded.role };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setTokenState] = useState<string | null>(null);
@@ -37,11 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const data = await apiFetch<{ accessToken: string; user: User }>("/api/v1/auth/refresh", {
+        const data = await apiFetch<{ accessToken: string }>("/api/v1/auth/refresh", {
           method: "POST",
         });
         setToken(data.accessToken);
-        setUser(data.user);
+        setUser(userFromAccessToken(data.accessToken));
       } catch {
         // No valid session — user needs to log in
         setToken(null);
@@ -55,12 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const data = await apiFetch<{ accessToken: string; user: User }>("/api/v1/auth/login", {
+      const data = await apiFetch<{ accessToken: string }>("/api/v1/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
       setToken(data.accessToken);
-      setUser(data.user);
+      setUser(userFromAccessToken(data.accessToken));
     },
     [setToken]
   );

@@ -23,7 +23,8 @@ function formatAppointmentDate(iso: string): string {
 }
 
 function formatSessionType(type: Appointment["sessionType"]): string {
-  return `${type.charAt(0) + type.slice(1).toLowerCase()} session`;
+  const label = type === "IN_PERSON" ? "In-person" : type.charAt(0) + type.slice(1).toLowerCase();
+  return `${label} session`;
 }
 
 interface AppointmentCardProps {
