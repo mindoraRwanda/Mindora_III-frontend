@@ -22,14 +22,14 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
     }
 
     if (requiredRole && user?.role !== requiredRole) {
-      router.push("/home");
+      router.push("/today");
     }
   }, [isAuthenticated, isLoading, user, requiredRole, router]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-bg-dark flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-mindora-purple border-t-transparent" />
       </div>
     );
   }

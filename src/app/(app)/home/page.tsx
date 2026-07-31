@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function HomePage() {
-  return <p>Home coming soon</p>;
+  redirect("/today");
 }
