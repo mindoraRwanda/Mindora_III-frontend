@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { ApiError } from "@/lib/api";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -23,14 +25,15 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const { setUser, setToken } = useAuth();
+  const { login } = useAuth();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -43,16 +46,16 @@ export function LoginForm() {
   const password = watch("password");
   const rememberMe = watch("rememberMe");
 
-  const onSubmit = (data: LoginForm) => {
-    // UI-only mock session until Auth Service is ready
-    console.log("Would login:", data);
-    setToken("mock-access-token");
-    setUser({
-      userId: "usr-theodora-001",
-      email: data.email || "theodora@mindora.app",
-      role: "PATIENT",
-    });
-    router.push("/today");
+  const onSubmit = async (data: LoginForm) => {
+    setApiError(null);
+    try {
+      await login(data.email, data.password);
+      router.push("/today");
+    } catch (err) {
+      setApiError(
+        err instanceof ApiError ? err.message : "Something went wrong. Please try again."
+      );
+    }
   };
 
   return (
@@ -105,8 +108,10 @@ export function LoginForm() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full" size="lg">
-            Sign in
+          {apiError && <p className="text-xs text-red-500">{apiError}</p>}
+
+          <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign in"}
             <ArrowRight className="h-4 w-4" />
           </Button>
 

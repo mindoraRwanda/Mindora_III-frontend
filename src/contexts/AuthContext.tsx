@@ -9,12 +9,20 @@ interface User {
   role: "PATIENT" | "THERAPIST" | "ADMIN";
 }
 
+interface RegisterParams {
+  email: string;
+  password: string;
+  role: User["role"];
+  userName: string;
+}
+
 interface AuthContextValue {
   user: User | null;
   accessToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (params: RegisterParams) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -75,6 +83,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [setToken]
   );
 
+  // POST /register only returns { userId } — no tokens — so a successful
+  // registration is followed by a real login to establish the session.
+  const register = useCallback(
+    async (params: RegisterParams) => {
+      await apiFetch<{ userId: string }>("/api/v1/auth/register", {
+        method: "POST",
+        body: JSON.stringify(params),
+      });
+      await login(params.email, params.password);
+    },
+    [login]
+  );
+
   const logout = useCallback(async () => {
     try {
       await apiFetch("/api/v1/auth/logout", { method: "POST" });
@@ -92,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthenticated: !!user && !!accessToken,
         login,
+        register,
         logout,
         setUser,
         setToken,
