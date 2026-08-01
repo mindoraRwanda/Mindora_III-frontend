@@ -51,7 +51,6 @@ export function LoginForm() {
       userId: "usr-theodora-001",
       email: data.email || "theodora@mindora.app",
       role: "PATIENT",
-      userName: "Theodora",
     });
     router.push("/today");
   };

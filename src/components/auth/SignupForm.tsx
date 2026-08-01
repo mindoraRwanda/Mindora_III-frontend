@@ -66,7 +66,6 @@ export function SignupForm() {
       userId: "usr-new-001",
       email: data.email,
       role: "PATIENT",
-      userName: data.name,
     });
     router.push("/today");
   };
