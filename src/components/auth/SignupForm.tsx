@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import type { JoinReason } from "@/types/domain";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/lib/api";
+import { dashboardPathForRole } from "@/lib/roles";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -63,13 +64,13 @@ export function SignupForm() {
   const onSubmit = async (data: SignupForm) => {
     setApiError(null);
     try {
-      await registerAccount({
+      const user = await registerAccount({
         email: data.email,
         password: data.password,
         role: "PATIENT",
         userName: data.name,
       });
-      router.push("/today");
+      router.push(dashboardPathForRole(user.role));
     } catch (err) {
       setApiError(
         err instanceof ApiError ? err.message : "Something went wrong. Please try again."

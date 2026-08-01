@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/lib/api";
+import { dashboardPathForRole } from "@/lib/roles";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -49,8 +50,8 @@ export function LoginForm() {
   const onSubmit = async (data: LoginForm) => {
     setApiError(null);
     try {
-      await login(data.email, data.password);
-      router.push("/today");
+      const user = await login(data.email, data.password);
+      router.push(dashboardPathForRole(user.role));
     } catch (err) {
       setApiError(
         err instanceof ApiError ? err.message : "Something went wrong. Please try again."
