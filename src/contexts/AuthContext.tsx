@@ -21,8 +21,8 @@ interface AuthContextValue {
   accessToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (params: RegisterParams) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (params: RegisterParams) => Promise<User>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -78,7 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
       setToken(data.accessToken);
-      setUser(userFromAccessToken(data.accessToken));
+      const loggedInUser = userFromAccessToken(data.accessToken);
+      setUser(loggedInUser);
+      return loggedInUser;
     },
     [setToken]
   );
@@ -91,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         body: JSON.stringify(params),
       });
-      await login(params.email, params.password);
+      return login(params.email, params.password);
     },
     [login]
   );
