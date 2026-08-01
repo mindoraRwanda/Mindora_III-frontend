@@ -1,4 +1,4 @@
-import type { Appointment } from "@/types/domain";
+import type { BookedAppointment } from "@/types/domain";
 import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -22,17 +22,28 @@ function formatAppointmentDate(iso: string): string {
   );
 }
 
-function formatSessionType(type: Appointment["sessionType"]): string {
+function formatSessionType(type: BookedAppointment["sessionType"]): string {
   const label = type === "IN_PERSON" ? "In-person" : type.charAt(0) + type.slice(1).toLowerCase();
   return `${label} session`;
 }
 
+function initialsFor(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
 interface AppointmentCardProps {
-  appointment: Appointment;
+  appointment: BookedAppointment;
+  therapistName: string;
   compact?: boolean;
 }
 
-export function AppointmentCard({ appointment, compact = false }: AppointmentCardProps) {
+export function AppointmentCard({
+  appointment,
+  therapistName,
+  compact = false,
+}: AppointmentCardProps) {
   const statusVariant = appointment.status === "CONFIRMED" ? "success" : "pending";
 
   if (compact) {
@@ -45,7 +56,7 @@ export function AppointmentCard({ appointment, compact = false }: AppointmentCar
         <p className="mt-2 text-[14px] font-bold leading-snug text-foreground">
           {formatAppointmentDate(appointment.slotStart)}
         </p>
-        <p className="mt-0.5 text-[13px] text-muted-foreground">{appointment.therapistName}</p>
+        <p className="mt-0.5 text-[13px] text-muted-foreground">{therapistName}</p>
       </div>
     );
   }
@@ -54,10 +65,10 @@ export function AppointmentCard({ appointment, compact = false }: AppointmentCar
     <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3.5">
       <div className="flex items-center gap-3.5">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mindora-purple-pale text-[12px] font-bold text-mindora-purple">
-          {appointment.therapistInitials}
+          {initialsFor(therapistName)}
         </div>
         <div>
-          <p className="text-[14px] font-semibold">{appointment.therapistName}</p>
+          <p className="text-[14px] font-semibold">{therapistName}</p>
           <p className="text-[12px] text-muted-foreground">
             {formatAppointmentDate(appointment.slotStart)} —{" "}
             {formatSessionType(appointment.sessionType)}
@@ -72,14 +83,19 @@ export function AppointmentCard({ appointment, compact = false }: AppointmentCar
 }
 
 interface AppointmentListProps {
-  appointments: Appointment[];
+  appointments: BookedAppointment[];
+  therapistNameFor: (therapistId: string) => string;
 }
 
-export function AppointmentList({ appointments }: AppointmentListProps) {
+export function AppointmentList({ appointments, therapistNameFor }: AppointmentListProps) {
   return (
     <div className="space-y-2.5">
       {appointments.map((apt) => (
-        <AppointmentCard key={apt.id} appointment={apt} />
+        <AppointmentCard
+          key={apt.id}
+          appointment={apt}
+          therapistName={therapistNameFor(apt.therapistId)}
+        />
       ))}
     </div>
   );

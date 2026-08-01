@@ -9,12 +9,20 @@ interface User {
   role: "PATIENT" | "THERAPIST" | "ADMIN";
 }
 
+interface RegisterParams {
+  email: string;
+  password: string;
+  role: User["role"];
+  userName: string;
+}
+
 interface AuthContextValue {
   user: User | null;
   accessToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (params: RegisterParams) => Promise<User>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -70,9 +78,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
       setToken(data.accessToken);
-      setUser(userFromAccessToken(data.accessToken));
+      const loggedInUser = userFromAccessToken(data.accessToken);
+      setUser(loggedInUser);
+      return loggedInUser;
     },
     [setToken]
+  );
+
+  // POST /register only returns { userId } — no tokens — so a successful
+  // registration is followed by a real login to establish the session.
+  const register = useCallback(
+    async (params: RegisterParams) => {
+      await apiFetch<{ userId: string }>("/api/v1/auth/register", {
+        method: "POST",
+        body: JSON.stringify(params),
+      });
+      return login(params.email, params.password);
+    },
+    [login]
   );
 
   const logout = useCallback(async () => {
@@ -92,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthenticated: !!user && !!accessToken,
         login,
+        register,
         logout,
         setUser,
         setToken,

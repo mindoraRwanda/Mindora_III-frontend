@@ -3,6 +3,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { dashboardPathForRole } from "@/lib/roles";
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -21,8 +22,8 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
       return;
     }
 
-    if (requiredRole && user?.role !== requiredRole) {
-      router.push("/today");
+    if (requiredRole && user && user.role !== requiredRole) {
+      router.push(dashboardPathForRole(user.role));
     }
   }, [isAuthenticated, isLoading, user, requiredRole, router]);
 

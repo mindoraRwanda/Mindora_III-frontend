@@ -1,11 +1,18 @@
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
 import { StreakBadge } from "@/components/layout/AppSidebar";
 import { AppointmentCard, AppointmentList } from "@/components/home/AppointmentCard";
 import { CommunityHighlights } from "@/components/home/CommunityPostCard";
 import { HomeHeroPortrait, MindoraAICard, MoodCheckInBar } from "@/components/home/HomeSections";
-import { mockUpcomingAppointments, mockNextSession } from "@/lib/mock-data/appointments";
 import { mockCommunityPosts } from "@/lib/mock-data/community";
-import { mockCurrentUser } from "@/lib/mock-data/user";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMyProfile } from "@/hooks/useMyProfile";
+import { useMoodStreak } from "@/hooks/useMood";
+import { useMyAppointments } from "@/hooks/useAppointments";
+import { useTherapists } from "@/hooks/useTherapists";
+import type { TherapistProfile } from "@/types/domain";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -23,14 +30,38 @@ function getFormattedDate(): string {
 }
 
 export default function TodayPage() {
-  const user = mockCurrentUser;
+  const { user } = useAuth();
+  const { data: profile } = useMyProfile();
+  const { data: streak } = useMoodStreak();
+  const { data: appointmentData } = useMyAppointments();
+  const { data: therapistData } = useTherapists({});
+
+  const displayName = profile?.profile?.userName ?? user?.email ?? "there";
+
+  const therapistByUserId = useMemo(() => {
+    const map = new Map<string, TherapistProfile>();
+    (therapistData?.therapists ?? []).forEach((t) => map.set(t.userId, t));
+    return map;
+  }, [therapistData]);
+
+  function therapistNameFor(therapistId: string): string {
+    return therapistByUserId.get(therapistId)?.userName ?? "Therapist";
+  }
+
+  const upcomingAppointments = useMemo(() => {
+    return (appointmentData?.appointments ?? [])
+      .filter((a) => a.status === "PENDING" || a.status === "CONFIRMED")
+      .sort((a, b) => new Date(a.slotStart).getTime() - new Date(b.slotStart).getTime());
+  }, [appointmentData]);
+
+  const nextSession = upcomingAppointments[0] ?? null;
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* Hero — matches Figma: copy + cards left, portrait right flush to bottom */}
       <section className="relative overflow-hidden bg-white">
         <div className="absolute right-6 top-7 z-20 lg:right-9 lg:top-8">
-          <StreakBadge days={user.streakDays} />
+          <StreakBadge days={streak?.streak ?? 0} />
         </div>
 
         <div className="relative mx-auto min-h-[580px] lg:min-h-[640px]">
@@ -46,7 +77,7 @@ export default function TodayPage() {
             <div className="max-w-lg pr-4 lg:pr-8">
               <p className="text-[13px] font-medium text-mindora-purple">{getFormattedDate()}</p>
               <h1 className="mt-1 text-[26px] font-bold leading-tight tracking-tight lg:text-[32px]">
-                {getGreeting()}, {user.name}
+                {getGreeting()}, {displayName}
               </h1>
               <p className="mt-1.5 max-w-md text-[13px] text-mindora-purple/70">
                 You&apos;re doing beautifully. A gentle check-in today keeps your streak alive.
@@ -54,7 +85,13 @@ export default function TodayPage() {
             </div>
 
             <div className="mt-auto flex max-w-xl flex-col gap-4 pt-10 lg:pt-16">
-              <AppointmentCard appointment={mockNextSession} compact />
+              {nextSession && (
+                <AppointmentCard
+                  appointment={nextSession}
+                  therapistName={therapistNameFor(nextSession.therapistId)}
+                  compact
+                />
+              )}
               <MoodCheckInBar />
             </div>
           </div>
@@ -81,7 +118,10 @@ export default function TodayPage() {
                 View all
               </Link>
             </div>
-            <AppointmentList appointments={mockUpcomingAppointments} />
+            <AppointmentList
+              appointments={upcomingAppointments}
+              therapistNameFor={therapistNameFor}
+            />
           </div>
 
           <div className="lg:row-span-1">

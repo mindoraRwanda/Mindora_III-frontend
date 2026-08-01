@@ -16,6 +16,8 @@ import { joinReasons } from "@/lib/mock-data/auth";
 import { cn } from "@/lib/utils";
 import type { JoinReason } from "@/types/domain";
 import { useAuth } from "@/contexts/AuthContext";
+import { ApiError } from "@/lib/api";
+import { dashboardPathForRole } from "@/lib/roles";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -35,15 +37,16 @@ const reasonIcons = {
 
 export function SignupForm() {
   const router = useRouter();
-  const { setUser, setToken } = useAuth();
+  const { register: registerAccount } = useAuth();
   const [selectedReason, setSelectedReason] = useState<JoinReason>("grounded");
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -58,16 +61,21 @@ export function SignupForm() {
   const password = watch("password");
   const termsAccepted = watch("terms");
 
-  const onSubmit = (data: SignupForm) => {
-    // UI-only mock session until Auth Service is ready
-    console.log("Would register:", data);
-    setToken("mock-access-token");
-    setUser({
-      userId: "usr-new-001",
-      email: data.email,
-      role: "PATIENT",
-    });
-    router.push("/today");
+  const onSubmit = async (data: SignupForm) => {
+    setApiError(null);
+    try {
+      const user = await registerAccount({
+        email: data.email,
+        password: data.password,
+        role: "PATIENT",
+        userName: data.name,
+      });
+      router.push(dashboardPathForRole(user.role));
+    } catch (err) {
+      setApiError(
+        err instanceof ApiError ? err.message : "Something went wrong. Please try again."
+      );
+    }
   };
 
   return (
@@ -170,8 +178,15 @@ export function SignupForm() {
           </div>
           {errors.terms && <p className="text-xs text-red-500">{errors.terms.message}</p>}
 
-          <Button type="submit" className="mt-1 h-12 w-full rounded-xl text-[15px]" size="lg">
-            Create my space
+          {apiError && <p className="text-xs text-red-500">{apiError}</p>}
+
+          <Button
+            type="submit"
+            className="mt-1 h-12 w-full rounded-xl text-[15px]"
+            size="lg"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating your space..." : "Create my space"}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </form>

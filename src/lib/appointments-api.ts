@@ -94,3 +94,23 @@ export function rateAppointment(id: string, rating: number): Promise<BookedAppoi
     body: JSON.stringify({ rating }),
   });
 }
+
+// GET /api/v1/appointments/schedule — therapist only. Appointments for the authenticated
+// therapist, ordered by slotStart.
+export function fetchTherapistSchedule(params: {
+  date?: string;
+  page?: number;
+  limit?: number;
+}): Promise<AppointmentListResponse> {
+  return apiFetch(`/api/v1/appointments/schedule${toQueryString(params)}`);
+}
+
+// PUT /api/v1/appointments/:id/confirm — therapist only. PENDING -> CONFIRMED.
+export function confirmAppointment(id: string): Promise<BookedAppointment> {
+  return apiFetch(`/api/v1/appointments/${id}/confirm`, { method: "PUT" });
+}
+
+// PUT /api/v1/appointments/:id/complete — therapist only.
+export function completeAppointment(id: string): Promise<BookedAppointment> {
+  return apiFetch(`/api/v1/appointments/${id}/complete`, { method: "PUT" });
+}

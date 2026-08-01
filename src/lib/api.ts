@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.mindora.rw";
 
 // Token stored in memory — never in localStorage (XSS protection)
 // Access token lives in React state via AuthContext
