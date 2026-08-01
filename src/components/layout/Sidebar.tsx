@@ -80,10 +80,10 @@ export function Sidebar() {
           className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg hover:bg-bg-elevated transition-colors text-left"
         >
           <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {user?.userName?.[0]?.toUpperCase() ?? "U"}
+            {user?.email?.[0]?.toUpperCase() ?? "U"}
           </div>
           <div className="min-w-0">
-            <p className="text-white text-xs font-medium truncate">{user?.userName ?? "User"}</p>
+            <p className="text-white text-xs font-medium truncate">{user?.email ?? "User"}</p>
             <p className="text-text-muted text-xs truncate">{user?.role?.toLowerCase()}</p>
           </div>
         </button>

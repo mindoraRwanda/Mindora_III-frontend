@@ -10,7 +10,7 @@ describe("Mock data", () => {
   it("provides upcoming appointments with valid statuses", () => {
     expect(mockUpcomingAppointments.length).toBeGreaterThan(0);
     mockUpcomingAppointments.forEach((apt) => {
-      expect(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED", "NO_SHOW"]).toContain(apt.status);
+      expect(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]).toContain(apt.status);
     });
   });
 });

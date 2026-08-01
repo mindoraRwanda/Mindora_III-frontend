@@ -46,7 +46,7 @@ export default function TodayPage() {
             <div className="max-w-lg pr-4 lg:pr-8">
               <p className="text-[13px] font-medium text-mindora-purple">{getFormattedDate()}</p>
               <h1 className="mt-1 text-[26px] font-bold leading-tight tracking-tight lg:text-[32px]">
-                {getGreeting()}, {user.name} 🌤️
+                {getGreeting()}, {user.name}
               </h1>
               <p className="mt-1.5 max-w-md text-[13px] text-mindora-purple/70">
                 You&apos;re doing beautifully. A gentle check-in today keeps your streak alive.

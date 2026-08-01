@@ -1,12 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CalendarHeart, Circle, Flame, Home, LogOut, PenLine, RefreshCw } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { Button } from "@/components/ui/button";
-import { mockCurrentUser } from "@/lib/mock-data/user";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMyProfile } from "@/hooks/useMyProfile";
 import { cn } from "@/lib/utils";
+
+function initialsFor(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
 
 const navItems = [
   { href: "/today", label: "Today", icon: Home },
@@ -18,7 +25,17 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const user = mockCurrentUser;
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const { data: profile } = useMyProfile();
+
+  const displayName = profile?.profile?.userName ?? user?.email ?? "User";
+  const roleLabel = user ? user.role.charAt(0) + user.role.slice(1).toLowerCase() : "Member";
+
+  async function handleSignOut() {
+    await logout();
+    router.push("/login");
+  }
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch bg-mindora-sidebar text-white">
@@ -64,14 +81,15 @@ export function AppSidebar() {
 
         <div className="flex items-center gap-2.5 rounded-lg px-1 py-1">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mindora-purple text-xs font-semibold">
-            {user.avatarInitials}
+            {initialsFor(displayName)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium">{user.name}</p>
-            <p className="text-[11px] text-white/45">Member</p>
+            <p className="truncate text-[13px] font-medium">{displayName}</p>
+            <p className="text-[11px] text-white/45">{roleLabel}</p>
           </div>
           <button
             type="button"
+            onClick={handleSignOut}
             className="rounded-md p-1.5 text-white/45 hover:bg-white/5 hover:text-white"
             aria-label="Sign out"
           >
