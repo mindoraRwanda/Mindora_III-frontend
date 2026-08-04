@@ -66,11 +66,11 @@ export function Sidebar() {
             24/7 crisis line — always free, always answered.
           </p>
           <a
-            href="tel:988"
+            href="tel:0783974066"
             className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white text-xs font-medium py-1.5 rounded-md transition-colors"
           >
             <Phone size={12} />
-            Call 988
+            Call 0 783 974 066
           </a>
         </div>
 
