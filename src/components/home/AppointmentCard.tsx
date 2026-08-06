@@ -70,7 +70,7 @@ export function AppointmentCard({
         <div>
           <p className="text-[14px] font-semibold">{therapistName}</p>
           <p className="text-[12px] text-muted-foreground">
-            {formatAppointmentDate(appointment.slotStart)} —{" "}
+            {formatAppointmentDate(appointment.slotStart)} -{" "}
             {formatSessionType(appointment.sessionType)}
           </p>
         </div>

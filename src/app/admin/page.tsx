@@ -25,7 +25,7 @@ export default function AdminOverviewPage() {
       <div className="mb-6">
         <h1 className="text-[28px] font-bold tracking-tight text-foreground">Platform overview</h1>
         <p className="mt-1.5 text-[14px] text-muted-foreground">
-          Aggregated across every service — a field reads &ldquo;Unavailable&rdquo; only if that
+          Aggregated across every service - a field reads &ldquo;Unavailable&rdquo; only if that
           specific service couldn&apos;t be reached.
         </p>
       </div>

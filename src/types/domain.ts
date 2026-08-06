@@ -42,7 +42,7 @@ export interface TherapistProfile {
   photoUrl: string | null;
 }
 
-// The Appointment Service's own appointment shape — distinct from the `Appointment`
+// The Appointment Service's own appointment shape - distinct from the `Appointment`
 // mock type above, which the dashboard pages use with denormalized therapist name/initials
 // baked in. This one only carries therapistId (see TherapistProfile.userId to resolve a name).
 export interface BookedAppointment {
@@ -64,7 +64,7 @@ export interface AvailabilitySlot {
   slotEnd: string;
 }
 
-// Opt-out model — all three channels default to true.
+// Opt-out model - all three channels default to true.
 export interface NotificationPreferences {
   push: boolean;
   email: boolean;
@@ -96,7 +96,7 @@ export interface CommunityPost {
 
 // --- Real backend API types (Mood Tracking Service) ---
 // See src/lib/mood-api.ts. Response shapes for everything but LogMoodRequest aren't
-// schema'd in the service's OpenAPI spec (prose descriptions only) — treat these as
+// schema'd in the service's OpenAPI spec (prose descriptions only) - treat these as
 // best-effort until verified against a running backend.
 
 export interface LogMoodRequest {
@@ -109,7 +109,7 @@ export interface LogMoodRequest {
   triggers?: string[];
 }
 
-// Verified against the live API — field is `streak`, not `currentStreak`.
+// Verified against the live API - field is `streak`, not `currentStreak`.
 export interface MoodStreak {
   streak: number;
   lastCheckedIn: string | null;
@@ -143,7 +143,7 @@ export interface ChatResponse {
   sessionId: string | null;
 }
 
-// crisisLevel is always 5 and sessionId always null — the AI provider is bypassed entirely.
+// crisisLevel is always 5 and sessionId always null - the AI provider is bypassed entirely.
 export interface CrisisChatResponse {
   response: string;
   crisisLevel: 5;
@@ -178,7 +178,7 @@ export interface SystemAlert {
   createdAt: string;
 }
 
-// Every field is null (never 0) if that specific dependent service was unreachable —
+// Every field is null (never 0) if that specific dependent service was unreachable -
 // the endpoint always returns 200, per the /analytics description.
 export interface PlatformAnalytics {
   totalUsers: number | null;
@@ -193,7 +193,7 @@ export interface PlatformAnalytics {
 }
 
 // --- Real backend API types (Messaging Service) ---
-// Schemas only — the service's OpenAPI spec has no documented REST paths (Socket.io only,
+// Schemas only - the service's OpenAPI spec has no documented REST paths (Socket.io only,
 // see src/lib/messaging-socket.ts). Best-effort based on the described event payloads.
 
 export interface PresenceStatus {

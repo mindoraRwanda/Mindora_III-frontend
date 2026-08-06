@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Design system — Figma tokens */
+  /* Design system - Figma tokens */
   --color-primary: #7c3aed;
   --color-primary-dark: #5b21d0;
   --color-bg-dark: #0d0d0d;
@@ -162,7 +162,7 @@ body {
   }
 }
 
-/* Custom range slider for mood check-in — force purple (not browser blue) */
+/* Custom range slider for mood check-in - force purple (not browser blue) */
 .mood-slider {
   -webkit-appearance: none;
   appearance: none;

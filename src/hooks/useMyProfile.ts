@@ -11,7 +11,7 @@ interface MeResponse {
   profile?: Profile;
 }
 
-// GET /api/v1/users/me — User Service. Requires an authenticated session (RouteGuard
+// GET /api/v1/users/me - User Service. Requires an authenticated session (RouteGuard
 // guarantees one by the time anything using this hook renders).
 export function useMyProfile() {
   return useQuery({

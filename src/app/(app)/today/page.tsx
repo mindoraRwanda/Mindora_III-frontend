@@ -58,14 +58,14 @@ export default function TodayPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Hero — matches Figma: copy + cards left, portrait right flush to bottom */}
+      {/* Hero - matches Figma: copy + cards left, portrait right flush to bottom */}
       <section className="relative overflow-hidden bg-white">
         <div className="absolute right-6 top-7 z-20 lg:right-9 lg:top-8">
           <StreakBadge days={streak?.streak ?? 0} />
         </div>
 
         <div className="relative mx-auto min-h-[580px] lg:min-h-[640px]">
-          {/* Portrait — centered in hero */}
+          {/* Portrait - centered in hero */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 top-0 z-0 hidden lg:block">
             <div className="absolute left-1/2 bottom-0 top-0 w-[min(720px,70%)] -translate-x-1/2">
               <HomeHeroPortrait />

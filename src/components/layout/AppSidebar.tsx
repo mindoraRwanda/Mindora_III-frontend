@@ -72,7 +72,7 @@ export function AppSidebar() {
         <div className="rounded-xl bg-mindora-card-dark px-3.5 py-3.5">
           <p className="text-[13px] font-semibold text-white">Need someone now?</p>
           <p className="mt-1 text-[11px] leading-relaxed text-white/65">
-            24/7 crisis line — always free, always answered.
+            24/7 crisis line - always free, always answered.
           </p>
           <Button className="mt-2.5 h-9 w-full text-xs" size="sm">
             Call 988

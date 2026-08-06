@@ -19,7 +19,7 @@ interface SuspendReactivateResponse {
   auditLogId: string;
 }
 
-// Community Service isn't deployed in V1, so this proxies to something that's always down —
+// Community Service isn't deployed in V1, so this proxies to something that's always down -
 // callers should expect a 503 in the current environment.
 interface ModerationReport {
   id: string;
@@ -58,7 +58,7 @@ function toQueryString(params: Record<string, string | number | boolean | undefi
   return query ? `?${query}` : "";
 }
 
-// GET /api/v1/admin/users — proxies through User Service to Auth Service.
+// GET /api/v1/admin/users - proxies through User Service to Auth Service.
 export function fetchUsers(params: {
   role?: "PATIENT" | "THERAPIST" | "ADMIN";
   isActive?: boolean;
@@ -68,7 +68,7 @@ export function fetchUsers(params: {
   return apiFetch(`/api/v1/admin/users${toQueryString(params)}`);
 }
 
-// PUT /api/v1/admin/users/:id/suspend — blocks the account immediately, revokes refresh tokens.
+// PUT /api/v1/admin/users/:id/suspend - blocks the account immediately, revokes refresh tokens.
 export function suspendUser(id: string, reason: string): Promise<SuspendReactivateResponse> {
   return apiFetch(`/api/v1/admin/users/${id}/suspend`, {
     method: "PUT",
@@ -84,7 +84,7 @@ export function reactivateUser(id: string, reason: string): Promise<SuspendReact
   });
 }
 
-// GET /api/v1/admin/moderation/queue — proxies live to Community Service (not deployed in V1).
+// GET /api/v1/admin/moderation/queue - proxies live to Community Service (not deployed in V1).
 export function fetchModerationQueue(params: {
   page?: number;
   limit?: number;
@@ -103,18 +103,18 @@ export function resolveModerationReport(
   });
 }
 
-// POST /api/v1/admin/moderation/decrypt/:postId — always audit-logged.
+// POST /api/v1/admin/moderation/decrypt/:postId - always audit-logged.
 export function decryptPostAuthor(postId: string): Promise<{ userId: string }> {
   return apiFetch(`/api/v1/admin/moderation/decrypt/${postId}`, { method: "POST" });
 }
 
-// GET /api/v1/admin/analytics — aggregated in parallel from every service; any field may be
+// GET /api/v1/admin/analytics - aggregated in parallel from every service; any field may be
 // null if that specific service was unreachable. Always 200.
 export function fetchAnalytics(): Promise<PlatformAnalytics> {
   return apiFetch("/api/v1/admin/analytics");
 }
 
-// GET /api/v1/admin/audit-log — read-only, immutable.
+// GET /api/v1/admin/audit-log - read-only, immutable.
 export function fetchAuditLog(params: {
   adminId?: string;
   actionType?: string;
@@ -127,12 +127,12 @@ export function fetchAuditLog(params: {
   return apiFetch(`/api/v1/admin/audit-log${toQueryString(params)}`);
 }
 
-// GET /api/v1/admin/alerts — unresolved AI_CRISIS / MOOD_CONCERN alerts, newest first.
+// GET /api/v1/admin/alerts - unresolved AI_CRISIS / MOOD_CONCERN alerts, newest first.
 export function fetchAlerts(params: { page?: number; limit?: number }): Promise<AlertListResponse> {
   return apiFetch(`/api/v1/admin/alerts${toQueryString(params)}`);
 }
 
-// PUT /api/v1/admin/alerts/:id/resolve — always a manual admin action.
+// PUT /api/v1/admin/alerts/:id/resolve - always a manual admin action.
 export function resolveAlert(id: string): Promise<void> {
   return apiFetch(`/api/v1/admin/alerts/${id}/resolve`, { method: "PUT" });
 }

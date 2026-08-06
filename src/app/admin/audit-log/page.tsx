@@ -11,7 +11,7 @@ export default function AdminAuditLogPage() {
       <div className="mb-6">
         <h1 className="text-[28px] font-bold tracking-tight text-foreground">Audit log</h1>
         <p className="mt-1.5 text-[14px] text-muted-foreground">
-          Immutable record of every admin action — read-only.
+          Immutable record of every admin action - read-only.
         </p>
       </div>
 

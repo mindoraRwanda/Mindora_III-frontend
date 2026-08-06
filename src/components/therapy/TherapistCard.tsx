@@ -45,7 +45,7 @@ export function TherapistCard({ therapist, index, onBook }: TherapistCardProps) 
   return (
     <div className="group aspect-[3/4] [perspective:1000px]">
       <div className="relative h-full w-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus-within:[transform:rotateY(180deg)]">
-        {/* FRONT — photo + name */}
+        {/* FRONT - photo + name */}
         <div className="absolute inset-0 flex flex-col overflow-hidden rounded-[20px] shadow-sm [backface-visibility:hidden]">
           <div className={cn("relative min-h-0 flex-1", bgClass)} style={bgStyle}>
             {showPhoto ? (
@@ -74,7 +74,7 @@ export function TherapistCard({ therapist, index, onBook }: TherapistCardProps) 
           </div>
         </div>
 
-        {/* BACK — specialisation, languages, status, booking */}
+        {/* BACK - specialisation, languages, status, booking */}
         <div
           className={cn(
             "absolute inset-0 flex flex-col items-center justify-between overflow-hidden rounded-[20px] p-6 text-center shadow-sm [backface-visibility:hidden] [transform:rotateY(180deg)]",

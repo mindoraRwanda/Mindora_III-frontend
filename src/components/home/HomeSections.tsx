@@ -66,7 +66,7 @@ export function MindoraAICard() {
   );
 }
 
-/** Doctor portrait for the home hero — bottom-aligned, scaled for Figma. */
+/** Doctor portrait for the home hero - bottom-aligned, scaled for Figma. */
 export function HomeHeroPortrait() {
   return (
     <div className="relative h-full w-full">

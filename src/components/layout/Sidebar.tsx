@@ -63,7 +63,7 @@ export function Sidebar() {
         <div className="bg-bg-elevated rounded-lg p-3 mb-3">
           <p className="text-white text-xs font-medium mb-1">Need someone now?</p>
           <p className="text-text-muted text-xs mb-2">
-            24/7 crisis line — always free, always answered.
+            24/7 crisis line - always free, always answered.
           </p>
           <a
             href="tel:988"

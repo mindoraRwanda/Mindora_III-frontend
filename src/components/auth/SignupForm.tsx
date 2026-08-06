@@ -45,6 +45,7 @@ export function SignupForm() {
     register,
     handleSubmit,
     setValue,
+    setError,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<SignupForm>({
@@ -72,9 +73,26 @@ export function SignupForm() {
       });
       router.push(dashboardPathForRole(user.role));
     } catch (err) {
-      setApiError(
-        err instanceof ApiError ? err.message : "Something went wrong. Please try again."
-      );
+      if (err instanceof ApiError && err.fieldErrors) {
+        const formFieldForServerField: Record<string, keyof SignupForm> = {
+          email: "email",
+          password: "password",
+          userName: "name",
+        };
+        let mappedAny = false;
+        for (const [serverField, messages] of Object.entries(err.fieldErrors)) {
+          const formField = formFieldForServerField[serverField];
+          if (formField && messages[0]) {
+            setError(formField, { message: messages[0] });
+            mappedAny = true;
+          }
+        }
+        if (!mappedAny) setApiError(err.message);
+      } else {
+        setApiError(
+          err instanceof ApiError ? err.message : "Something went wrong. Please try again."
+        );
+      }
     }
   };
 
@@ -95,7 +113,7 @@ export function SignupForm() {
           Create your gentle space.
         </h1>
         <p className="mt-2 text-[14px] text-muted-foreground">
-          Takes about 40 seconds—no clinical forms, promise.
+          Takes about 40 seconds - no clinical forms, promise.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">

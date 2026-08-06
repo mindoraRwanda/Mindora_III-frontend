@@ -202,7 +202,7 @@ export function BookingDialog({ therapist, onOpenChange }: BookingDialogProps) {
               {bookMutation.isError && (
                 <div className="mb-3.5 rounded-[9px] bg-red-100 px-3 py-2.5 text-[12.5px] font-semibold text-red-700">
                   {bookMutation.error instanceof ApiError && bookMutation.error.status === 409
-                    ? "That slot was just booked by someone else — please pick another time."
+                    ? "That slot was just booked by someone else - please pick another time."
                     : (bookMutation.error?.message ?? "Could not book this session.")}
                 </div>
               )}

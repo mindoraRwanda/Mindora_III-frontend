@@ -13,7 +13,7 @@ interface MoodHistoryResponse {
   limit: number;
 }
 
-// Therapist-only patient mood summary — no raw journal notes.
+// Therapist-only patient mood summary - no raw journal notes.
 interface MoodReport {
   userId: string;
   avgMoodScore: number;
@@ -29,7 +29,7 @@ function toQueryString(params: Record<string, string | number | undefined>): str
   return query ? `?${query}` : "";
 }
 
-// POST /api/v1/mood/log — patient only. Max 10 logs/day (429).
+// POST /api/v1/mood/log - patient only. Max 10 logs/day (429).
 export function logMood(body: LogMoodRequest): Promise<MoodEntry> {
   return apiFetch("/api/v1/mood/log", {
     method: "POST",
@@ -37,7 +37,7 @@ export function logMood(body: LogMoodRequest): Promise<MoodEntry> {
   });
 }
 
-// GET /api/v1/mood/history — patient only, paginated.
+// GET /api/v1/mood/history - patient only, paginated.
 export function fetchMoodHistory(params: {
   page?: number;
   limit?: number;
@@ -47,17 +47,17 @@ export function fetchMoodHistory(params: {
   return apiFetch(`/api/v1/mood/history${toQueryString(params)}`);
 }
 
-// GET /api/v1/mood/insights — patient only. Redis-cached for 1 hour server-side.
+// GET /api/v1/mood/insights - patient only. Redis-cached for 1 hour server-side.
 export function fetchMoodInsights(): Promise<MoodInsightsResponse> {
   return apiFetch("/api/v1/mood/insights");
 }
 
-// GET /api/v1/mood/streak — patient only.
+// GET /api/v1/mood/streak - patient only.
 export function fetchMoodStreak(): Promise<MoodStreak> {
   return apiFetch("/api/v1/mood/streak");
 }
 
-// GET /api/v1/mood/report/:userId — therapist only. 404 if no data in last 30 days.
+// GET /api/v1/mood/report/:userId - therapist only. 404 if no data in last 30 days.
 export function fetchMoodReport(userId: string): Promise<MoodReport> {
   return apiFetch(`/api/v1/mood/report/${userId}`);
 }

@@ -30,7 +30,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-// The Auth Service's /login and /refresh only ever return { accessToken } —
+// The Auth Service's /login and /refresh only ever return { accessToken } -
 // there is no `user` field on that response. Identity claims (userId/email/role)
 // live in the JWT payload itself, so decode them from there instead of expecting
 // the server to send a separate user object.
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAccessToken(token); // sync to in-memory store for apiFetch
   }, []);
 
-  // On mount — attempt silent refresh using HttpOnly cookie
+  // On mount - attempt silent refresh using HttpOnly cookie
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(data.accessToken);
         setUser(userFromAccessToken(data.accessToken));
       } catch {
-        // No valid session — user needs to log in
+        // No valid session - user needs to log in
         setToken(null);
         setUser(null);
       } finally {
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [setToken]
   );
 
-  // POST /register only returns { userId } — no tokens — so a successful
+  // POST /register only returns { userId } - no tokens - so a successful
   // registration is followed by a real login to establish the session.
   const register = useCallback(
     async (params: RegisterParams) => {

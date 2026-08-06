@@ -35,7 +35,7 @@ export default function AdminUsersPage() {
       <div className="mb-6">
         <h1 className="text-[28px] font-bold tracking-tight text-foreground">Users</h1>
         <p className="mt-1.5 text-[14px] text-muted-foreground">
-          Manage platform accounts — suspend or reactivate access.
+          Manage platform accounts - suspend or reactivate access.
         </p>
       </div>
 

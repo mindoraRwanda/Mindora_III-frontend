@@ -40,7 +40,7 @@ export function CheckInForm() {
   const errorMessage =
     logMoodMutation.error instanceof ApiError
       ? logMoodMutation.error.status === 429
-        ? "You've reached today's check-in limit — try again tomorrow."
+        ? "You've reached today's check-in limit - try again tomorrow."
         : logMoodMutation.error.message
       : logMoodMutation.isError
         ? "Could not log your mood. Please try again."
@@ -118,7 +118,7 @@ export function CheckInForm() {
 
         {submitted ? (
           <div className="rounded-xl bg-mindora-success-bg px-4 py-3 text-[14px] font-medium text-mindora-success">
-            Mood logged — thank you for checking in today.
+            Mood logged - thank you for checking in today.
           </div>
         ) : null}
 

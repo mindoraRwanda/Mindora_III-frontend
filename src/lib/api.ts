@@ -1,17 +1,21 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.mindora.rw";
 
-// Token stored in memory — never in localStorage (XSS protection)
+// Token stored in memory - never in localStorage (XSS protection)
 // Access token lives in React state via AuthContext
 // Refresh token lives in HttpOnly cookie set by Auth Service
 let inMemoryAccessToken: string | null = null;
 
 export class ApiError extends Error {
   status: number;
+  // Zod's flatten().fieldErrors shape, e.g. { email: ["Invalid email address"] } -
+  // present on 400 validation failures, absent otherwise.
+  fieldErrors?: Record<string, string[]>;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, fieldErrors?: Record<string, string[]>) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.fieldErrors = fieldErrors;
   }
 }
 
@@ -33,13 +37,25 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     headers["Authorization"] = `Bearer ${inMemoryAccessToken}`;
   }
 
-  let response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers,
-    credentials: "include", // sends HttpOnly refresh token cookie automatically
-  });
+  const method = options.method ?? "GET";
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers,
+      credentials: "include", // sends HttpOnly refresh token cookie automatically
+    });
+  } catch (networkError) {
+    // fetch() itself throws for anything that never got an HTTP response at all -
+    // backend down, DNS failure, offline, CORS rejection, etc. This is the one
+    // failure mode that isn't an ApiError from a server response, so log it here:
+    // it's the only place in the app that sees it, and every caller's generic
+    // "something went wrong" catch-all would otherwise swallow it silently.
+    console.error(`[api] ${method} ${path} - network error, no response received`, networkError);
+    throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
+  }
 
-  // Silent token refresh on 401 — only meaningful for requests that carried a session
+  // Silent token refresh on 401 - only meaningful for requests that carried a session
   // token to begin with. Login/refresh themselves returning 401 means invalid
   // credentials or no session, not an expired token, so skip the retry dance there
   // and let the real server error surface below.
@@ -55,14 +71,21 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
         credentials: "include",
       });
     } else {
-      // Refresh failed — clear token, let AuthContext handle redirect
+      // Refresh failed - clear token, let AuthContext handle redirect
       setAccessToken(null);
     }
   }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Unknown error" }));
-    throw new ApiError(error.message ?? `API error: ${response.status}`, response.status);
+    console.error(
+      `[api] ${method} ${path} - ${response.status} ${error.message ?? "Unknown error"}`
+    );
+    throw new ApiError(
+      error.message ?? `API error: ${response.status}`,
+      response.status,
+      error.errors
+    );
   }
 
   // Handle 204 No Content

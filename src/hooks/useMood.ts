@@ -16,7 +16,7 @@ export function useMoodStreak() {
   });
 }
 
-// Therapist only. 404 means no mood data for this patient in the last 30 days —
+// Therapist only. 404 means no mood data for this patient in the last 30 days -
 // callers should treat that as an empty state, not an error banner.
 export function useMoodReport(userId: string | null) {
   return useQuery({

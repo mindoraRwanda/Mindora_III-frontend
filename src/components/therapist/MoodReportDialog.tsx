@@ -19,7 +19,7 @@ export function MoodReportDialog({ patientId, onOpenChange }: MoodReportDialogPr
         <DialogHeader>
           <DialogTitle>Mood summary</DialogTitle>
           <p className="text-[13px] text-muted-foreground">
-            Last 30 days — journal notes stay private.
+            Last 30 days - journal notes stay private.
           </p>
         </DialogHeader>
 

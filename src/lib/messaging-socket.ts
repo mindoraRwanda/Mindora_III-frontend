@@ -3,7 +3,7 @@ import type { Message, ConversationParticipant } from "@/types/domain";
 
 const MESSAGING_WS_URL = process.env.NEXT_PUBLIC_MESSAGING_WS_URL ?? "https://api.mindora.rw";
 
-// Best-effort client for the Messaging Service — its OpenAPI spec documents zero REST
+// Best-effort client for the Messaging Service - its OpenAPI spec documents zero REST
 // paths, only these Socket.io events in prose. Untested against a running backend; treat
 // event/payload shapes here as the best available approximation until verified live.
 
