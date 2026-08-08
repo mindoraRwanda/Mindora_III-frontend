@@ -29,7 +29,13 @@ export function AdminSidebar() {
   const { user, logout } = useAuth();
 
   async function handleSignOut() {
-    await logout();
+    // logout() clears local session state in its own finally block even if the
+    // API call fails - always navigate away regardless of that outcome.
+    try {
+      await logout();
+    } catch {
+      // Already logged out locally; nothing more to do here.
+    }
     router.push("/login");
   }
 

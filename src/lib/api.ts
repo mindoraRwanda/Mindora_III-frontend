@@ -27,6 +27,12 @@ export function getAccessToken() {
   return inMemoryAccessToken;
 }
 
+// OAuth is a full browser redirect, not a fetch call - Google's consent screen has to be
+// a real page navigation. Point window.location at this to start the flow.
+export function getGoogleOAuthUrl(): string {
+  return `${API_URL}/api/v1/auth/oauth/google`;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

@@ -1,11 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { emotionOptions, type EmotionTag } from "@/lib/mock-data/mood";
+import { emotionOptions, type EmotionTag } from "@/lib/mood-emotions";
 
 interface EmotionTagsProps {
-  selected: EmotionTag[];
-  onChange: (emotions: EmotionTag[]) => void;
+  // string[], not EmotionTag[] - entries loaded back from the API can carry
+  // any free-form string the backend accepted, even though this picker only
+  // ever adds from the curated `emotionOptions` list itself.
+  selected: string[];
+  onChange: (emotions: string[]) => void;
 }
 
 export function EmotionTags({ selected, onChange }: EmotionTagsProps) {

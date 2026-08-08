@@ -107,6 +107,49 @@ export interface LogMoodRequest {
   energyLevel?: number;
   journalNote?: string;
   triggers?: string[];
+  // Omit for a normal check-in. Supply to backfill a missed day - must not be
+  // future (5min skew tolerance) or >365 days ago, or the server 400s.
+  recordedAt?: string;
+}
+
+// PUT /api/v1/mood/:id - send only what changes; omitted fields stay as-is.
+// journalNote: null clears the note; leave the key out entirely to leave it
+// untouched (JSON.stringify already drops `undefined` keys, so this falls out
+// naturally from a partial object rather than needing special-casing).
+export interface UpdateMoodRequest {
+  moodScore?: number;
+  emotions?: string[];
+  sleepHours?: number;
+  stressLevel?: number;
+  energyLevel?: number;
+  journalNote?: string | null;
+  triggers?: string[];
+}
+
+export interface MoodEntry {
+  id: string;
+  userId: string;
+  moodScore: number;
+  emotions: string[];
+  sleepHours: number | null;
+  stressLevel: number | null;
+  energyLevel: number | null;
+  journalNote: string | null;
+  triggers: string[];
+  recordedAt: string;
+  createdAt: string;
+}
+
+// GET /api/v1/mood/today?timezone=... - call on check-in page mount. Always
+// pass Intl.DateTimeFormat().resolvedOptions().timeZone; the server defaults to
+// UTC otherwise, which is wrong for most local "today" boundaries.
+export interface MoodTodayResponse {
+  hasCheckedIn: boolean;
+  localDate: string;
+  timezone: string;
+  entriesToday: number;
+  remainingToday: number;
+  entry: MoodEntry | null;
 }
 
 // Verified against the live API - field is `streak`, not `currentStreak`.
@@ -115,18 +158,27 @@ export interface MoodStreak {
   lastCheckedIn: string | null;
 }
 
-// One 7-day TimescaleDB time_bucket, per the /insights description.
-export interface WeeklyMoodBucket {
+// GET /api/v1/mood/summary - for charts (unlike /history's raw entry list).
+// No zero-filling: sparse ranges produce sparse `buckets`, not entryCount: 0
+// entries, so a chart consuming this needs to handle discontinuous x-values.
+export interface MoodSummaryBucket {
   bucketStart: string;
   avgMood: number;
   avgSleep: number;
   avgStress: number;
   avgEnergy: number;
+  minMood: number;
+  maxMood: number;
+  entryCount: number;
 }
 
-export interface MoodInsightsResponse {
-  buckets: WeeklyMoodBucket[];
-  trend: "improving" | "stable" | "declining";
+export interface MoodSummaryResponse {
+  startDate: string;
+  endDate: string;
+  granularity: "day" | "week" | "month";
+  totalEntries: number;
+  avgMood: number;
+  buckets: MoodSummaryBucket[];
 }
 
 // --- Real backend API types (AI Integration Service) ---

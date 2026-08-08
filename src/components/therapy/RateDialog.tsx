@@ -28,8 +28,12 @@ export function RateDialog({ appointment, therapistName, onOpenChange }: RateDia
 
   async function handleConfirm() {
     if (!appointment || rating === 0) return;
-    await rateMutation.mutateAsync({ id: appointment.id, rating });
-    handleOpenChange(false);
+    try {
+      await rateMutation.mutateAsync({ id: appointment.id, rating });
+      handleOpenChange(false);
+    } catch {
+      // Surfaced via rateMutation.isError below - nothing more to do here.
+    }
   }
 
   return (

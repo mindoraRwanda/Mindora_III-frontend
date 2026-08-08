@@ -33,7 +33,13 @@ export function AppSidebar() {
   const roleLabel = user ? user.role.charAt(0) + user.role.slice(1).toLowerCase() : "Member";
 
   async function handleSignOut() {
-    await logout();
+    // logout() clears local session state in its own finally block even if the
+    // API call fails - always navigate away regardless of that outcome.
+    try {
+      await logout();
+    } catch {
+      // Already logged out locally; nothing more to do here.
+    }
     router.push("/login");
   }
 
@@ -72,10 +78,10 @@ export function AppSidebar() {
         <div className="rounded-xl bg-mindora-card-dark px-3.5 py-3.5">
           <p className="text-[13px] font-semibold text-white">Need someone now?</p>
           <p className="mt-1 text-[11px] leading-relaxed text-white/65">
-            24/7 crisis line - always free, always answered.
+            24/7 crisis line - always answered.
           </p>
-          <Button className="mt-2.5 h-9 w-full text-xs" size="sm">
-            Call 988
+          <Button asChild className="mt-2.5 h-9 w-full text-xs" size="sm">
+            <a href="tel:+250783974068">Call +250 783 974 068</a>
           </Button>
         </div>
 

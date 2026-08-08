@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { ApiError } from "@/lib/api";
+import { ApiError, getGoogleOAuthUrl } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
 
 const loginSchema = z.object({
@@ -125,7 +125,15 @@ export function LoginForm() {
             </div>
           </div>
 
-          <Button type="button" variant="outline" className="w-full" size="lg">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            size="lg"
+            onClick={() => {
+              window.location.href = getGoogleOAuthUrl();
+            }}
+          >
             <GoogleIcon />
             Google
           </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiFetch, setAccessToken } from "@/lib/api";
 
 interface User {
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const setToken = useCallback((token: string | null) => {
     setTokenState(token);
@@ -77,12 +79,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
+      // Whatever's cached belongs to whoever was signed in before (or nobody) -
+      // purge it so a different account never briefly renders with stale data
+      // left over from a prior session in this same tab.
+      queryClient.clear();
       setToken(data.accessToken);
       const loggedInUser = userFromAccessToken(data.accessToken);
       setUser(loggedInUser);
       return loggedInUser;
     },
-    [setToken]
+    [setToken, queryClient]
   );
 
   // POST /register only returns { userId } - no tokens - so a successful
@@ -104,8 +110,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setToken(null);
       setUser(null);
+      queryClient.clear();
     }
-  }, [setToken]);
+  }, [setToken, queryClient]);
 
   return (
     <AuthContext.Provider
