@@ -74,8 +74,8 @@ export function AppSidebar() {
           <p className="mt-1 text-[11px] leading-relaxed text-white/65">
             24/7 crisis line — always free, always answered.
           </p>
-          <Button className="mt-2.5 h-9 w-full text-xs" size="sm">
-            Call 988
+          <Button asChild className="mt-2.5 h-9 w-full text-xs" size="sm">
+            <a href="tel:0783974066">Call 0 783 974 066</a>
           </Button>
         </div>
 
