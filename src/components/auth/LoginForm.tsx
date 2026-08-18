@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { safeReturnUrl } from "@/lib/booking";
+import { BackLink } from "@/components/public/BackLink";
 import { ApiError } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
 
@@ -61,6 +63,7 @@ export function LoginForm() {
 
   return (
     <div className="flex flex-1 flex-col p-8 lg:p-14">
+      <BackLink fallback="/" className="mb-6" />
       <MindoraLogo />
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
