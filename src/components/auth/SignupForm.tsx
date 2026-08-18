@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,8 @@ import { joinReasons } from "@/lib/mock-data/auth";
 import { cn } from "@/lib/utils";
 import type { JoinReason } from "@/types/domain";
 import { useAuth } from "@/contexts/AuthContext";
+import { safeReturnUrl } from "@/lib/booking";
+import { BackLink } from "@/components/public/BackLink";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -35,6 +37,7 @@ const reasonIcons = {
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setUser, setToken } = useAuth();
   const [selectedReason, setSelectedReason] = useState<JoinReason>("grounded");
 
@@ -68,13 +71,16 @@ export function SignupForm() {
       role: "PATIENT",
       userName: data.name,
     });
-    router.push("/today");
+    router.push(safeReturnUrl(searchParams.get("returnUrl")));
   };
 
   return (
     <div className="flex h-full min-h-screen flex-col px-8 py-8 lg:px-12 lg:py-10 xl:px-16">
       <div className="flex items-center justify-between">
-        <MindoraLogo />
+        <div className="flex flex-col gap-3">
+          <BackLink fallback="/" />
+          <MindoraLogo />
+        </div>
         <p className="text-[13px] text-muted-foreground">
           Have an account?{" "}
           <Link href="/login" className="font-semibold text-mindora-purple hover:underline">

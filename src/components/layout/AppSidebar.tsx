@@ -23,7 +23,7 @@ export function AppSidebar() {
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch bg-mindora-sidebar text-white">
       <div className="px-5 py-5">
-        <MindoraLogo variant="light" size="md" />
+        <MindoraLogo variant="light" size="md" href="/today" />
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3">
