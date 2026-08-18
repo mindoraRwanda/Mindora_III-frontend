@@ -16,6 +16,7 @@ import { joinReasons } from "@/lib/mock-data/auth";
 import { cn } from "@/lib/utils";
 import type { JoinReason } from "@/types/domain";
 import { useAuth } from "@/contexts/AuthContext";
+import { BackLink } from "@/components/public/BackLink";
 import { ApiError } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
 
