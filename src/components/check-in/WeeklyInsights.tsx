@@ -2,19 +2,46 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Moon, Smile, TrendingUp } from "lucide-react";
-import type { MoodInsights } from "@/lib/mock-data/mood";
+import { useMoodInsights } from "@/hooks/useMood";
 
-interface WeeklyInsightsProps {
-  insights: MoodInsights;
-}
+export function WeeklyInsights() {
+  const { data, isLoading, isError } = useMoodInsights();
 
-export function WeeklyInsights({ insights }: WeeklyInsightsProps) {
+  const buckets = data?.buckets ?? [];
+  const weekly = buckets.map((b) => ({
+    day: new Date(b.bucketStart).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    mood: b.avgMood,
+  }));
+  const avgMood = buckets.length
+    ? buckets.reduce((sum, b) => sum + b.avgMood, 0) / buckets.length
+    : 0;
+  const avgSleep = buckets.length
+    ? buckets.reduce((sum, b) => sum + b.avgSleep, 0) / buckets.length
+    : 0;
+  const trend = data?.trend ?? "stable";
+
   const trendLabel =
-    insights.trend === "improving"
-      ? "Improving +"
-      : insights.trend === "declining"
-        ? "Declining"
-        : "Stable";
+    trend === "improving" ? "Improving +" : trend === "declining" ? "Declining" : "Stable";
+
+  if (isLoading) {
+    return <div className="h-[420px] animate-pulse rounded-2xl border border-border bg-muted/40" />;
+  }
+
+  if (isError || buckets.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-white p-5 shadow-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          This week
+        </p>
+        <h2 className="mt-1 text-[20px] font-bold tracking-tight">Weekly insights</h2>
+        <p className="mt-4 text-[13.5px] text-muted-foreground">
+          {isError
+            ? "Could not load your insights right now."
+            : "Log a few check-ins to see your weekly trend here."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-border bg-white p-5 shadow-sm">
@@ -25,7 +52,7 @@ export function WeeklyInsights({ insights }: WeeklyInsightsProps) {
 
       <div className="mt-6 h-[180px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={insights.weekly} barCategoryGap="28%">
+          <BarChart data={weekly} barCategoryGap="28%">
             <XAxis
               dataKey="day"
               axisLine={false}
@@ -55,12 +82,12 @@ export function WeeklyInsights({ insights }: WeeklyInsightsProps) {
         <StatRow
           icon={<Smile className="h-4 w-4" />}
           label="Avg mood"
-          value={`${insights.avgMood.toFixed(1)}/10`}
+          value={`${avgMood.toFixed(1)}/10`}
         />
         <StatRow
           icon={<Moon className="h-4 w-4" />}
           label="Avg sleep"
-          value={`${insights.avgSleep.toFixed(1)} hrs`}
+          value={`${avgSleep.toFixed(1)} hrs`}
         />
         <StatRow
           icon={<TrendingUp className="h-4 w-4 text-mindora-purple" />}

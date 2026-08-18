@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -14,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { safeReturnUrl } from "@/lib/booking";
 import { BackLink } from "@/components/public/BackLink";
+import { ApiError } from "@/lib/api";
+import { dashboardPathForRole } from "@/lib/roles";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -25,15 +28,15 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { setUser, setToken } = useAuth();
+  const { login } = useAuth();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -46,17 +49,16 @@ export function LoginForm() {
   const password = watch("password");
   const rememberMe = watch("rememberMe");
 
-  const onSubmit = (data: LoginForm) => {
-    // UI-only mock session until Auth Service is ready
-    console.log("Would login:", data);
-    setToken("mock-access-token");
-    setUser({
-      userId: "usr-theodora-001",
-      email: data.email || "theodora@mindora.app",
-      role: "PATIENT",
-      userName: "Theodora",
-    });
-    router.push(safeReturnUrl(searchParams.get("returnUrl")));
+  const onSubmit = async (data: LoginForm) => {
+    setApiError(null);
+    try {
+      const user = await login(data.email, data.password);
+      router.push(dashboardPathForRole(user.role));
+    } catch (err) {
+      setApiError(
+        err instanceof ApiError ? err.message : "Something went wrong. Please try again."
+      );
+    }
   };
 
   return (
@@ -66,7 +68,7 @@ export function LoginForm() {
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
         <span className="mb-4 inline-flex w-fit items-center rounded-full bg-mindora-purple-pale px-3 py-1 text-xs font-medium text-mindora-purple">
-          👋 Welcome back
+          Welcome back
         </span>
 
         <h1 className="text-3xl font-bold tracking-tight">Good to see you again.</h1>
@@ -110,8 +112,10 @@ export function LoginForm() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full" size="lg">
-            Sign in
+          {apiError && <p className="text-xs text-red-500">{apiError}</p>}
+
+          <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign in"}
             <ArrowRight className="h-4 w-4" />
           </Button>
 

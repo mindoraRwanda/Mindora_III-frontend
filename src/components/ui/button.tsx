@@ -12,12 +12,14 @@ const buttonVariants = cva(
         outline: "border border-border bg-white text-foreground hover:bg-mindora-purple-bg",
         ghost: "text-mindora-purple hover:bg-mindora-purple-pale",
         dark: "bg-mindora-card-dark text-white hover:bg-mindora-sidebar-hover",
+        secondary: "bg-mindora-purple-pale text-mindora-purple hover:bg-mindora-purple-bg",
       },
       size: {
         default: "h-12 px-6",
         sm: "h-9 px-4 text-xs",
         lg: "h-14 px-8 text-base",
         icon: "h-10 w-10",
+        "icon-sm": "h-8 w-8",
       },
     },
     defaultVariants: {

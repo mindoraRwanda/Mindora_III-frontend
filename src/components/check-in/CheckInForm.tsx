@@ -5,7 +5,9 @@ import { MoodSlider } from "@/components/check-in/MoodSlider";
 import { EmotionTags } from "@/components/check-in/EmotionTags";
 import { WeeklyInsights } from "@/components/check-in/WeeklyInsights";
 import { Button } from "@/components/ui/button";
-import { mockMoodInsights, type EmotionTag } from "@/lib/mock-data/mood";
+import { ApiError } from "@/lib/api";
+import { useLogMood } from "@/hooks/useMood";
+import { type EmotionTag } from "@/lib/mock-data/mood";
 
 export function CheckInForm() {
   const [mood, setMood] = useState(7);
@@ -15,29 +17,34 @@ export function CheckInForm() {
   const [emotions, setEmotions] = useState<EmotionTag[]>(["Calm", "Hopeful"]);
   const [journalNote, setJournalNote] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const logMoodMutation = useLogMood();
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setSubmitted(false);
 
-    const payload = {
-      moodScore: mood,
-      stressLevel: stress,
-      sleepHours: sleep,
-      energyLevel: energy,
-      emotions,
-      journalNote,
-    };
-
-    // UI-only for now — swap for POST /api/v1/mood/log
-    console.log("Would log mood:", payload);
-
-    window.setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
-    }, 600);
+    logMoodMutation.mutate(
+      {
+        moodScore: mood,
+        stressLevel: stress,
+        sleepHours: sleep,
+        energyLevel: energy,
+        emotions,
+        journalNote: journalNote || undefined,
+      },
+      { onSuccess: () => setSubmitted(true) }
+    );
   };
+
+  const errorMessage =
+    logMoodMutation.error instanceof ApiError
+      ? logMoodMutation.error.status === 429
+        ? "You've reached today's check-in limit — try again tomorrow."
+        : logMoodMutation.error.message
+      : logMoodMutation.isError
+        ? "Could not log your mood. Please try again."
+        : null;
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.75fr)]">
@@ -115,13 +122,23 @@ export function CheckInForm() {
           </div>
         ) : null}
 
-        <Button type="submit" className="h-12 w-full text-[15px]" disabled={isSubmitting}>
-          {isSubmitting ? "Logging…" : "Log today\u2019s mood"}
+        {errorMessage ? (
+          <div className="rounded-xl bg-red-100 px-4 py-3 text-[14px] font-medium text-red-700">
+            {errorMessage}
+          </div>
+        ) : null}
+
+        <Button
+          type="submit"
+          className="h-12 w-full text-[15px]"
+          disabled={logMoodMutation.isPending}
+        >
+          {logMoodMutation.isPending ? "Logging…" : "Log today\u2019s mood"}
         </Button>
       </form>
 
       <aside className="lg:pt-14">
-        <WeeklyInsights insights={mockMoodInsights} />
+        <WeeklyInsights />
       </aside>
     </div>
   );

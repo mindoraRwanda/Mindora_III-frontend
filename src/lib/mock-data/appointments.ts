@@ -30,7 +30,7 @@ export const mockUpcomingAppointments: Appointment[] = [
     slotStart: "2026-07-10T14:00:00",
     slotEnd: "2026-07-10T15:00:00",
     status: "PENDING",
-    sessionType: "AUDIO",
+    sessionType: "IN_PERSON",
   },
   {
     id: "apt-003",

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -16,9 +17,11 @@ export function MoodCheckInBar() {
           </p>
         </div>
       </div>
-      <Button className="h-10 shrink-0 rounded-xl px-5 text-[13px]">
-        Log today&apos;s mood
-        <ArrowRight className="h-3.5 w-3.5" />
+      <Button asChild className="h-10 shrink-0 rounded-xl px-5 text-[13px]">
+        <Link href="/check-in">
+          Log today&apos;s mood
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </Button>
     </div>
   );
@@ -53,9 +56,11 @@ export function MindoraAICard() {
         </li>
       </ul>
 
-      <Button className="mt-5 h-11 w-full rounded-xl text-[13px]">
-        Start Talking
-        <ArrowRight className="h-3.5 w-3.5" />
+      <Button asChild className="mt-5 h-11 w-full rounded-xl text-[13px]">
+        <Link href="/reflect">
+          Start Talking
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </Button>
     </div>
   );
