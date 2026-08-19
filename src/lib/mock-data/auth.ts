@@ -2,7 +2,7 @@ export const signupFeatures = [
   "Daily mood check-ins in under a minute",
   "Vetted therapists, booked in two taps",
   "Reflect - a private AI journal that listens",
-  "Circle - anonymous community held with care",
+  "Message your therapist between sessions",
 ] as const;
 
 export const joinReasons = [

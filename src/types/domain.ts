@@ -1,8 +1,22 @@
 export type UserRole = "PATIENT" | "THERAPIST" | "ADMIN";
 
+// --- Real backend API types (Auth Service) ---
+
+// /login and /refresh both only ever return this - no separate `user` object.
+export interface AuthTokenResponse {
+  accessToken: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  role: UserRole;
+  userName: string;
+}
+
 export type AppointmentStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
-export type SessionType = "VIDEO" | "IN_PERSON" | "CHAT";
+export type SessionType = "VIDEO" | "AUDIO";
 
 export type JoinReason = "grounded" | "routine" | "reflect";
 
@@ -78,20 +92,24 @@ export interface UpdateProfileRequest {
   languagePreference?: string;
 }
 
+export interface Profile {
+  userName: string | null;
+  bio: string | null;
+}
+
+// GET /api/v1/users/me
+export interface MeResponse {
+  role: "PATIENT" | "THERAPIST" | "ADMIN";
+  profile?: Profile;
+  message?: string;
+}
+
 export interface UserPreferencesResponse {
   fcmToken: string | null;
   email: string | null;
   phoneNumber: null; // not currently collected, per the spec
   userName: string | null;
   notificationPreferences: NotificationPreferences;
-}
-
-export interface CommunityPost {
-  id: string;
-  content: string;
-  likes: number;
-  relateCount: number;
-  postedAgo: string;
 }
 
 // --- Real backend API types (Mood Tracking Service) ---
@@ -183,23 +201,41 @@ export interface MoodSummaryResponse {
 
 // --- Real backend API types (AI Integration Service) ---
 
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  crisisLevel?: number;
-}
-
+// crisisLevel is 0-5. Only 5 is a safety interstitial - fixed clinical copy,
+// sessionId always null, the AI provider never actually called for that turn.
+// 1-4 render as an ordinary reply; the backend's crisis-response behavior below
+// level 5 is still being redefined, so don't branch UI on those values.
 export interface ChatResponse {
   response: string;
   crisisLevel: number;
   sessionId: string | null;
 }
 
-// crisisLevel is always 5 and sessionId always null - the AI provider is bypassed entirely.
-export interface CrisisChatResponse {
-  response: string;
-  crisisLevel: 5;
-  sessionId: null;
+// GET /api/v1/ai/history - newest first. One item is a full exchange (both
+// sides), not a single message - don't try to pair separate user/assistant rows.
+export interface AiInteraction {
+  id: string;
+  sessionId: string | null;
+  message: string | null; // null if this row couldn't be decrypted
+  response: string | null; // null if this row couldn't be decrypted
+  crisisLevel: number;
+  createdAt: string;
+}
+
+export interface AiHistoryResponse {
+  interactions: AiInteraction[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// DELETE /api/v1/ai/history
+export interface DeleteAiHistoryResponse {
+  message: string;
+  localInteractionsDeleted: number;
+  // false means the transcript may still exist on the third-party AI provider's
+  // servers - must be surfaced honestly, never reported as a completed deletion.
+  remoteConversationDeleted: boolean;
 }
 
 // --- Real backend API types (Admin Service) ---
@@ -245,23 +281,33 @@ export interface PlatformAnalytics {
 }
 
 // --- Real backend API types (Messaging Service) ---
-// Schemas only - the service's OpenAPI spec has no documented REST paths (Socket.io only,
-// see src/lib/messaging-socket.ts). Best-effort based on the described event payloads.
+// Realtime is Socket.io (src/lib/messaging-socket.ts); conversation lists, message
+// history/pagination, and presence lookups go through Kong as real REST (src/lib/
+// messaging-api.ts). The socket connects directly to the messaging service, not
+// through Kong - see NEXT_PUBLIC_SOCKET_URL vs NEXT_PUBLIC_API_URL.
 
+// lastSeen expires ~5 minutes after disconnect and becomes null - there's no
+// "last seen 3 days ago", only a recent-or-nothing signal.
 export interface PresenceStatus {
   userId: string;
   online: boolean;
-  lastSeen: string;
+  lastSeen: string | null;
 }
 
+// Same shape whether it arrives via new_message/message_history (socket) or
+// GET /conversations/:id (REST) - one rendering path for all three.
 export interface Message {
   _id: string;
   conversationId: string;
   senderId: string;
   content: string;
   createdAt: string;
-  readAt?: string | null;
-  readBy?: string | null;
+  // Set once the recipient has actually opened the conversation (true delivery,
+  // not presence) and never changes again after that, even once read. null until
+  // then.
+  deliveredAt: string | null;
+  // Set by mark_read/mark_conversation_read. null until read.
+  readAt: string | null;
 }
 
 export interface ConversationParticipant {
@@ -274,9 +320,28 @@ export interface Conversation {
   participants: string[];
 }
 
+// GET /api/v1/messaging/conversations list item, and the shape POST .../conversations
+// returns for a single conversation (create-or-get). participantName can be null -
+// it's resolved from another service and falls back to null on failure.
 export interface ConversationSummary {
-  _id: string;
-  participant: ConversationParticipant | null;
+  conversationId: string;
+  participantId: string;
+  participantName: string | null;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
   unreadCount: number;
-  updatedAt: string;
+}
+
+export interface ConversationListResponse {
+  conversations: ConversationSummary[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// GET /api/v1/messaging/conversations/:id - newest-first. Pass the previous
+// nextCursor back as `cursor` to page further back; null means start of history.
+export interface ConversationHistoryResponse {
+  messages: Message[];
+  nextCursor: string | null;
 }

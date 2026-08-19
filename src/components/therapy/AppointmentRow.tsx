@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { BookedAppointment } from "@/types/domain";
 
 const STATUS_VARIANT = {
@@ -21,7 +21,7 @@ const STATUS_LABEL: Record<BookedAppointment["status"], string> = {
 };
 
 function formatSessionType(type: BookedAppointment["sessionType"]): string {
-  return type === "IN_PERSON" ? "In-person" : type.charAt(0) + type.slice(1).toLowerCase();
+  return type === "VIDEO" ? "Video call" : "Audio call";
 }
 
 function fmtWhen(iso: string): string {
@@ -100,19 +100,25 @@ export function AppointmentRow({
         {STATUS_LABEL[appointment.status]}
       </Badge>
       {showCancel && (
-        <Button
-          variant="outline"
-          size="sm"
+        <button
+          type="button"
           onClick={onCancel}
-          className="shrink-0 text-destructive"
+          className={cn(
+            "shrink-0 rounded-full px-3.5 py-2 text-[12.5px] font-semibold text-destructive",
+            "shadow-[3px_3px_7px_#cdc6e0,-3px_-3px_7px_#fdfbff]"
+          )}
         >
           Cancel
-        </Button>
+        </button>
       )}
       {showRateButton && (
-        <Button variant="secondary" size="sm" onClick={onRate} className="shrink-0">
+        <button
+          type="button"
+          onClick={onRate}
+          className="shrink-0 rounded-full bg-mindora-purple-pale px-3.5 py-2 text-[12.5px] font-semibold text-mindora-purple-dark shadow-[3px_3px_7px_#cdc6e0,-3px_-3px_7px_#fdfbff]"
+        >
           Rate session
-        </Button>
+        </button>
       )}
     </div>
   );

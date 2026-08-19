@@ -11,9 +11,8 @@ import { cn } from "@/lib/utils";
 
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SESSION_TYPES: { value: SessionType; label: string }[] = [
-  { value: "VIDEO", label: "Video" },
-  { value: "IN_PERSON", label: "In-person" },
-  { value: "CHAT", label: "Chat" },
+  { value: "VIDEO", label: "Video call" },
+  { value: "AUDIO", label: "Audio call" },
 ];
 
 function fmtTime(iso: string): string {

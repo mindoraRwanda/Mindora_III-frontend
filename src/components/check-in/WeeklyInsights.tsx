@@ -35,12 +35,14 @@ export function WeeklyInsights() {
     : 0;
 
   if (isLoading) {
-    return <div className="h-[420px] animate-pulse rounded-2xl border border-border bg-muted/40" />;
+    return (
+      <div className="h-[420px] animate-pulse rounded-[34px] bg-white/60 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]" />
+    );
   }
 
   if (isError || buckets.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-white p-5 shadow-sm">
+      <div className="rounded-[34px] bg-white p-5 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           This week
         </p>
@@ -55,7 +57,7 @@ export function WeeklyInsights() {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-5 shadow-sm">
+    <div className="rounded-[34px] bg-white p-5 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         This week
       </p>
@@ -124,7 +126,7 @@ function StatRow({ icon, label, value }: { icon: React.ReactNode; label: string;
   return (
     <div className="flex items-center justify-between border-t border-border pt-3 first:border-0 first:pt-0">
       <div className="flex items-center gap-2.5 text-[14px] text-muted-foreground">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-mindora-purple-pale text-mindora-purple">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-mindora-purple-pale text-mindora-purple shadow-[2px_2px_5px_#c6bade,-2px_-2px_5px_#fdfbff]">
           {icon}
         </span>
         {label}

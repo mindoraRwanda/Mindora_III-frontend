@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { toQueryString } from "@/lib/query-string";
 import type {
   LogMoodRequest,
   MoodEntry,
@@ -20,15 +21,6 @@ interface MoodReport {
   userId: string;
   avgMoodScore: number;
   entryCount: number;
-}
-
-function toQueryString(params: Record<string, string | number | undefined>): string {
-  const qs = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== "") qs.set(key, String(value));
-  }
-  const query = qs.toString();
-  return query ? `?${query}` : "";
 }
 
 // GET /api/v1/mood/today - call on check-in page mount. Always pass the

@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { toQueryString } from "@/lib/query-string";
 import type {
   AdminUserRecord,
   AuditLogEntry,
@@ -47,15 +48,6 @@ interface AuditLogResponse {
   total: number;
   page: number;
   limit: number;
-}
-
-function toQueryString(params: Record<string, string | number | boolean | undefined>): string {
-  const qs = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== "") qs.set(key, String(value));
-  }
-  const query = qs.toString();
-  return query ? `?${query}` : "";
 }
 
 // GET /api/v1/admin/users - proxies through User Service to Auth Service.

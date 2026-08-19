@@ -2,19 +2,19 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { apiFetch, setAccessToken } from "@/lib/api";
+import { setAccessToken } from "@/lib/api";
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+  refreshSession,
+  register as registerRequest,
+} from "@/lib/auth-api";
+import type { RegisterRequest } from "@/types/domain";
 
 interface User {
   userId: string;
   email: string;
   role: "PATIENT" | "THERAPIST" | "ADMIN";
-}
-
-interface RegisterParams {
-  email: string;
-  password: string;
-  role: User["role"];
-  userName: string;
 }
 
 interface AuthContextValue {
@@ -23,13 +23,25 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<User>;
-  register: (params: RegisterParams) => Promise<User>;
+  register: (params: RegisterRequest) => Promise<User>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+// Thrown specifically for a structurally-valid JWT whose `sub` isn't a UUID -
+// distinct from a plain parse failure so callers can react to it (see initAuth).
+class InvalidSessionError extends Error {}
+
+// Every real account's id comes from Prisma's @default(uuid()), so a non-UUID
+// sub means this token wasn't issued by a real /login - most likely a stale
+// hand-made dev token still sitting in the refresh cookie from before dev-login
+// was removed. Every backend route that casts userId to ::uuid in SQL 500s on
+// it, so reject it here rather than let the app run on a broken identity until
+// it surfaces as an unexplained crash in some unrelated feature later.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // The Auth Service's /login and /refresh only ever return { accessToken } -
 // there is no `user` field on that response. Identity claims (userId/email/role)
@@ -39,6 +51,9 @@ function userFromAccessToken(token: string): User {
   const payload = token.split(".")[1];
   const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
   const decoded = JSON.parse(atob(base64));
+  if (typeof decoded.sub !== "string" || !UUID_PATTERN.test(decoded.sub)) {
+    throw new InvalidSessionError("Access token has a non-UUID subject.");
+  }
   return { userId: decoded.sub, email: decoded.email, role: decoded.role };
 }
 
@@ -57,15 +72,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const data = await apiFetch<{ accessToken: string }>("/api/v1/auth/refresh", {
-          method: "POST",
-        });
+        const data = await refreshSession();
+        const refreshedUser = userFromAccessToken(data.accessToken);
         setToken(data.accessToken);
-        setUser(userFromAccessToken(data.accessToken));
-      } catch {
+        setUser(refreshedUser);
+      } catch (err) {
         // No valid session - user needs to log in
         setToken(null);
         setUser(null);
+        if (err instanceof InvalidSessionError) {
+          // Clearing local state alone isn't enough here - the refresh cookie
+          // itself is the broken part, so the next reload would just refresh
+          // right back into this same invalid token. Best-effort: also ask the
+          // server to drop it so it can't keep resurfacing.
+          logoutRequest().catch(() => {});
+        }
       } finally {
         setIsLoading(false);
       }
@@ -75,10 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const data = await apiFetch<{ accessToken: string }>("/api/v1/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
+      const data = await loginRequest(email, password);
       // Whatever's cached belongs to whoever was signed in before (or nobody) -
       // purge it so a different account never briefly renders with stale data
       // left over from a prior session in this same tab.
@@ -94,11 +112,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // POST /register only returns { userId } - no tokens - so a successful
   // registration is followed by a real login to establish the session.
   const register = useCallback(
-    async (params: RegisterParams) => {
-      await apiFetch<{ userId: string }>("/api/v1/auth/register", {
-        method: "POST",
-        body: JSON.stringify(params),
-      });
+    async (params: RegisterRequest) => {
+      await registerRequest(params);
       return login(params.email, params.password);
     },
     [login]
@@ -106,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await apiFetch("/api/v1/auth/logout", { method: "POST" });
+      await logoutRequest();
     } finally {
       setToken(null);
       setUser(null);

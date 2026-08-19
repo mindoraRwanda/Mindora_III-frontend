@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Activity, Stethoscope, BookOpen, Users, Phone } from "lucide-react";
+import { Home, Activity, Stethoscope, BookOpen, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -11,7 +11,6 @@ const navItems = [
   { label: "Check-in", href: "/check-in", icon: Activity },
   { label: "Therapy", href: "/therapy", icon: Stethoscope },
   { label: "Reflect", href: "/reflect", icon: BookOpen },
-  { label: "Circle", href: "/circle", icon: Users },
 ];
 
 export function Sidebar() {

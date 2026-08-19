@@ -1,19 +1,14 @@
 import { apiFetch } from "@/lib/api";
 import type {
+  MeResponse,
   NotificationPreferences,
   UpdateProfileRequest,
   UserPreferencesResponse,
 } from "@/types/domain";
 
-interface Profile {
-  userName: string | null;
-  bio: string | null;
-}
-
-interface MeResponse {
-  role: "PATIENT" | "THERAPIST" | "ADMIN";
-  profile?: Profile;
-  message?: string;
+// GET /api/v1/users/me
+export function fetchMyProfile(): Promise<MeResponse> {
+  return apiFetch("/api/v1/users/me");
 }
 
 // PUT /api/v1/users/me - patient/therapist only. All fields optional; only ones present

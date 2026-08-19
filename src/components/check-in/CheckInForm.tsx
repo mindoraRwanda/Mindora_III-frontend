@@ -5,23 +5,24 @@ import { CalendarPlus } from "lucide-react";
 import {
   MoodEntryFields,
   DEFAULT_MOOD_FIELDS,
+  scaleIndexToScore,
+  scoreToScaleIndex,
+  emotionIndexToArray,
+  emotionsArrayToIndex,
   type MoodFieldsValue,
 } from "@/components/check-in/MoodEntryFields";
 import { TodaysCheckIns } from "@/components/check-in/TodaysCheckIns";
 import { BackfillDialog } from "@/components/check-in/BackfillDialog";
 import { WeeklyInsights } from "@/components/check-in/WeeklyInsights";
-import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import { useLogMood, useMoodToday, useUpdateMoodEntry } from "@/hooks/useMood";
 import type { MoodEntry } from "@/types/domain";
 
 function fieldsFromEntry(entry: MoodEntry): MoodFieldsValue {
   return {
-    mood: entry.moodScore,
-    stress: entry.stressLevel ?? DEFAULT_MOOD_FIELDS.stress,
-    sleep: entry.sleepHours ?? DEFAULT_MOOD_FIELDS.sleep,
-    energy: entry.energyLevel ?? DEFAULT_MOOD_FIELDS.energy,
-    emotions: entry.emotions,
+    moodIndex: scoreToScaleIndex(entry.moodScore),
+    emotionIndex: emotionsArrayToIndex(entry.emotions),
+    feelingIndex: scoreToScaleIndex(entry.energyLevel),
     journalNote: entry.journalNote ?? "",
   };
 }
@@ -54,19 +55,24 @@ export function CheckInForm() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(false);
+    // Mood is the one scale with nowhere to hide - moodScore is a required
+    // field on both create and (once we're always sending it) update, unlike
+    // Emotion/Feeling which the backend has no dedicated field for anyway.
+    if (value.moodIndex === null) return;
+    const moodScore = scaleIndexToScore(value.moodIndex)!;
 
     if (editingEntry) {
       updateMutation.mutate(
         {
           id: editingEntry.id,
           body: {
-            moodScore: value.mood,
-            stressLevel: value.stress,
-            sleepHours: value.sleep,
-            energyLevel: value.energy,
-            emotions: value.emotions,
-            // WYSIWYG: an emptied textarea means "clear the note", not "leave
-            // it alone" - the field is visibly editable, so what's shown is
+            moodScore,
+            energyLevel: scaleIndexToScore(value.feelingIndex),
+            // WYSIWYG, same as journalNote below: an explicit [] clears it -
+            // there's no dedicated "leave unchanged" gesture in this picker UI.
+            emotions: emotionIndexToArray(value.emotionIndex) ?? [],
+            // An emptied textarea means "clear the note," not "leave it
+            // alone" - the field is visibly editable, so what's shown is
             // what gets saved. undefined (leave-as-is) only ever applies to
             // fields this form doesn't touch, which isn't the case here.
             journalNote: value.journalNote.trim() === "" ? null : value.journalNote,
@@ -83,11 +89,9 @@ export function CheckInForm() {
     } else {
       logMoodMutation.mutate(
         {
-          moodScore: value.mood,
-          stressLevel: value.stress,
-          sleepHours: value.sleep,
-          energyLevel: value.energy,
-          emotions: value.emotions,
+          moodScore,
+          energyLevel: scaleIndexToScore(value.feelingIndex),
+          emotions: emotionIndexToArray(value.emotionIndex),
           journalNote: value.journalNote || undefined,
         },
         { onSuccess: () => setSubmitted(true) }
@@ -112,47 +116,51 @@ export function CheckInForm() {
   // Editing an existing entry doesn't consume a new write, so the cap only
   // blocks new check-ins and backfills, not saving edits to what's already there.
   const submitBlocked = !editingEntry && (dailyLimitReached || atDailyLimit);
+  const answeredCount = [value.moodIndex, value.emotionIndex, value.feelingIndex].filter(
+    (i) => i !== null
+  ).length;
+  const moodMissing = value.moodIndex === null;
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.75fr)]">
-      <div className="space-y-8">
-        <form onSubmit={onSubmit} className="space-y-8">
+      <div className="space-y-6">
+        <form
+          onSubmit={onSubmit}
+          className="space-y-8 rounded-[34px] bg-white p-7 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff] lg:p-9"
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-[32px] font-bold tracking-tight">
-                {editingEntry ? "Edit check-in" : "Today’s check-in"}
+                {editingEntry ? "Edit check-in" : "Today's check-in"}
               </h1>
               <p className="mt-2 text-[14px] text-muted-foreground">
-                {editingEntry
-                  ? "Update this entry - editing re-runs the same wellbeing check the original logging did."
-                  : "A gentle pause to notice how you’re feeling."}
+                {editingEntry ? "Update this entry." : "Pick the face that fits."}
               </p>
               {!editingEntry && today && (
                 <p className="mt-1.5 text-[12.5px] text-muted-foreground">
                   {today.remainingToday > 0
                     ? `${today.remainingToday} check-in${today.remainingToday === 1 ? "" : "s"} left today`
-                    : "You’ve reached today’s check-in limit"}
+                    : "You've reached today's check-in limit"}
                 </p>
               )}
             </div>
             {!editingEntry && (
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                size="sm"
                 onClick={() => setBackfillOpen(true)}
                 disabled={atDailyLimit}
+                className="flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold text-mindora-purple-dark shadow-[5px_5px_12px_#cdc6e0,-5px_-5px_12px_#fdfbff] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
               >
                 <CalendarPlus className="h-3.5 w-3.5" />
                 Log a missed day
-              </Button>
+              </button>
             )}
           </div>
 
           <MoodEntryFields value={value} onChange={setValue} />
 
           {submitted ? (
-            <div className="rounded-xl bg-mindora-success-bg px-4 py-3 text-[14px] font-medium text-mindora-success">
+            <div className="rounded-2xl bg-[#eafaf0] px-4 py-3 text-[14px] font-medium text-mindora-success shadow-[inset_3px_3px_7px_#c9ecd8,inset_-3px_-3px_7px_#ffffff]">
               {editingEntry === null
                 ? "Mood logged - thank you for checking in today."
                 : "Check-in updated."}
@@ -160,40 +168,39 @@ export function CheckInForm() {
           ) : null}
 
           {submitBlocked && !dailyLimitReached ? (
-            <div className="rounded-xl bg-mindora-purple-pale px-4 py-3 text-[14px] font-medium text-mindora-purple-dark">
+            <div className="rounded-2xl bg-mindora-purple-pale px-4 py-3 text-[14px] font-medium text-mindora-purple-dark shadow-[inset_3px_3px_7px_#d3caeb,inset_-3px_-3px_7px_#fdfbff]">
               You&apos;ve checked in 10 times today - that&apos;s today&apos;s limit. Come back
               tomorrow for your next one.
             </div>
           ) : null}
 
           {dailyLimitReached ? (
-            <div className="rounded-xl bg-mindora-purple-pale px-4 py-3 text-[14px] font-medium text-mindora-purple-dark">
+            <div className="rounded-2xl bg-mindora-purple-pale px-4 py-3 text-[14px] font-medium text-mindora-purple-dark shadow-[inset_3px_3px_7px_#d3caeb,inset_-3px_-3px_7px_#fdfbff]">
               You&apos;ve checked in 10 times today - that&apos;s today&apos;s limit. Come back
               tomorrow for your next one.
             </div>
           ) : null}
 
           {errorMessage ? (
-            <div className="rounded-xl bg-red-100 px-4 py-3 text-[14px] font-medium text-red-700">
+            <div className="rounded-2xl bg-red-50 px-4 py-3 text-[14px] font-medium text-red-700 shadow-[inset_3px_3px_7px_#f3d9d9,inset_-3px_-3px_7px_#ffffff]">
               {errorMessage}
             </div>
           ) : null}
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             {editingEntry && (
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                className="h-12 flex-1 text-[15px]"
                 onClick={cancelEdit}
+                className="h-13 flex-1 rounded-full text-[15px] font-semibold text-mindora-purple-dark shadow-[6px_6px_14px_#cdc6e0,-6px_-6px_14px_#fdfbff]"
               >
                 Cancel edit
-              </Button>
+              </button>
             )}
-            <Button
+            <button
               type="submit"
-              className="h-12 flex-1 text-[15px]"
-              disabled={activeMutation.isPending || submitBlocked}
+              disabled={activeMutation.isPending || submitBlocked || moodMissing}
+              className="flex h-14 flex-1 items-center justify-center gap-2.5 rounded-full bg-mindora-purple px-7 text-[15px] font-bold text-white shadow-[8px_8px_18px_#c6bade,-8px_-8px_18px_#fdfbff] hover:bg-mindora-purple-dark disabled:cursor-not-allowed disabled:bg-mindora-lavender disabled:text-white/70 disabled:shadow-none"
             >
               {activeMutation.isPending
                 ? editingEntry
@@ -201,10 +208,17 @@ export function CheckInForm() {
                   : "Logging…"
                 : submitBlocked
                   ? "Limit reached for today"
-                  : editingEntry
-                    ? "Save changes"
-                    : "Log today’s mood"}
-            </Button>
+                  : moodMissing
+                    ? "Pick a mood to save"
+                    : editingEntry
+                      ? "Save changes"
+                      : answeredCount === 3
+                        ? "Save today's check-in"
+                        : "Save what I have"}
+            </button>
+            <span className="text-[13px] font-semibold text-[#736c88]">
+              {answeredCount} of 3 answered
+            </span>
           </div>
         </form>
 

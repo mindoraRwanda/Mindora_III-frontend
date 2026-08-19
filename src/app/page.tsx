@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { CalendarHeart, Circle, PenLine, RefreshCw } from "lucide-react";
+import { CalendarHeart, MessageCircle, PenLine, RefreshCw } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { Button } from "@/components/ui/button";
 import { RedirectIfAuthenticated } from "@/components/landing/RedirectIfAuthenticated";
 import { signupFeatures, loginTestimonial } from "@/lib/mock-data/auth";
 
-const featureIcons = [RefreshCw, CalendarHeart, PenLine, Circle];
+const featureIcons = [RefreshCw, CalendarHeart, PenLine, MessageCircle];
 
 export default function LandingPage() {
   return (

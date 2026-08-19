@@ -5,22 +5,47 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://api.mindora.rw";
 // Refresh token lives in HttpOnly cookie set by Auth Service
 let inMemoryAccessToken: string | null = null;
 
+// Notifies subscribers on every token change - login, silent refresh (below), and
+// logout alike. This is the one choke point every code path already updates the
+// token through, so it's also the one place that can tell the messaging socket
+// (which lives outside React/AuthContext) to reconnect with a fresh token instead
+// of running on a stale one until the next unrelated 401 happens to trigger a
+// refresh.
+type TokenListener = (token: string | null) => void;
+const tokenListeners = new Set<TokenListener>();
+
+export function onAccessTokenChange(listener: TokenListener): () => void {
+  tokenListeners.add(listener);
+  return () => tokenListeners.delete(listener);
+}
+
 export class ApiError extends Error {
   status: number;
   // Zod's flatten().fieldErrors shape, e.g. { email: ["Invalid email address"] } -
   // present on 400 validation failures, absent otherwise.
   fieldErrors?: Record<string, string[]>;
+  // Full parsed error response body, for callers that need endpoint-specific
+  // fields apiFetch itself doesn't know about (e.g. the AI chat endpoint's
+  // retryAfterSeconds on 429). Most callers only need message/status/fieldErrors.
+  body?: unknown;
 
-  constructor(message: string, status: number, fieldErrors?: Record<string, string[]>) {
+  constructor(
+    message: string,
+    status: number,
+    fieldErrors?: Record<string, string[]>,
+    body?: unknown
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.fieldErrors = fieldErrors;
+    this.body = body;
   }
 }
 
 export function setAccessToken(token: string | null) {
   inMemoryAccessToken = token;
+  tokenListeners.forEach((listener) => listener(token));
 }
 
 export function getAccessToken() {
@@ -84,14 +109,12 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Unknown error" }));
-    console.error(
-      `[api] ${method} ${path} - ${response.status} ${error.message ?? "Unknown error"}`
-    );
-    throw new ApiError(
-      error.message ?? `API error: ${response.status}`,
-      response.status,
-      error.errors
-    );
+    // Almost every endpoint uses {message, errors} on failure, but at least one
+    // (AI chat's 400) uses {error} instead - fall back to that key rather than
+    // losing the real validation string behind a generic "API error: 400".
+    const message = error.message ?? error.error ?? `API error: ${response.status}`;
+    console.error(`[api] ${method} ${path} - ${response.status} ${message}`);
+    throw new ApiError(message, response.status, error.errors, error);
   }
 
   // Handle 204 No Content

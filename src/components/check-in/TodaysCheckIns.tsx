@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMoodHistory, useMoodToday } from "@/hooks/useMood";
 import { DeleteMoodEntryDialog } from "@/components/check-in/DeleteMoodEntryDialog";
@@ -37,16 +36,17 @@ export function TodaysCheckIns({ editingId, onEdit }: TodaysCheckInsProps) {
   return (
     <div className="space-y-3">
       <h2 className="text-[15px] font-bold text-foreground">Today&apos;s check-ins</h2>
-      <div className="overflow-hidden rounded-2xl border border-border">
+      <div className="overflow-hidden rounded-[26px] bg-white p-2 shadow-[10px_10px_22px_#cbc4de,-10px_-10px_22px_#fdfbff]">
         {todaysEntries.map((entry) => (
           <div
             key={entry.id}
             className={cn(
-              "flex items-center gap-4 border-b border-border px-5 py-3.5 last:border-b-0",
-              editingId === entry.id && "bg-mindora-purple-pale/40"
+              "flex items-center gap-4 rounded-[18px] px-3.5 py-3.5",
+              editingId === entry.id &&
+                "shadow-[inset_3px_3px_7px_#cdc6e0,inset_-3px_-3px_7px_#fdfbff]"
             )}
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mindora-purple-pale text-[13px] font-bold text-mindora-purple">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mindora-purple-pale text-[13px] font-bold text-mindora-purple shadow-[2px_2px_5px_#c6bade,-2px_-2px_5px_#fdfbff]">
               {entry.moodScore}
             </div>
             <div className="min-w-0 flex-1">
@@ -62,24 +62,22 @@ export function TodaysCheckIns({ editingId, onEdit }: TodaysCheckInsProps) {
                 </p>
               )}
             </div>
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="icon-sm"
               aria-label="Edit check-in"
               onClick={() => onEdit(entry)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/70 shadow-[3px_3px_7px_#cdc6e0,-3px_-3px_7px_#fdfbff]"
             >
               <Pencil className="h-3.5 w-3.5" />
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="ghost"
-              size="icon-sm"
               aria-label="Delete check-in"
               onClick={() => setDeleteTarget(entry)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-destructive shadow-[3px_3px_7px_#cdc6e0,-3px_-3px_7px_#fdfbff]"
             >
-              <Trash2 className="h-3.5 w-3.5 text-destructive" />
-            </Button>
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           </div>
         ))}
       </div>

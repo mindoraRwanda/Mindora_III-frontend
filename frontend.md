@@ -14,9 +14,11 @@ Documentation of the patient-facing Next.js frontend. Originally written while t
 
 ## Folder structure
 
+Stale as of the original placeholder-only scaffold below - see [Real feature buildout](#real-feature-buildout-2026-08) for what actually got built. Current top-level shape:
+
 ```
 (repo root)
-├── .env.local, .env.example          # NEXT_PUBLIC_API_URL=http://localhost:8000
+├── .env.local, .env.example          # NEXT_PUBLIC_API_URL (Kong REST) + NEXT_PUBLIC_SOCKET_URL (messaging socket, different host - no /socket.io/ route on Kong)
 ├── eslint.config.mjs                 # native flat config: eslint-config-next/core-web-vitals + /typescript
 ├── components.json                   # shadcn/ui config
 ├── next.config.ts
@@ -26,31 +28,95 @@ Documentation of the patient-facing Next.js frontend. Originally written while t
     ├── app/
     │   ├── globals.css               # Mindora design tokens (Tailwind v4 @theme block)
     │   ├── layout.tsx                # Inter font + <Providers> wrapper
-    │   ├── page.tsx                  # redirects to /login
-    │   ├── (auth)/
-    │   │   ├── login/page.tsx
-    │   │   └── register/page.tsx
-    │   ├── (app)/
-    │   │   ├── layout.tsx            # wraps children in <AppLayout>
-    │   │   ├── home/page.tsx
-    │   │   ├── check-in/page.tsx
-    │   │   ├── therapy/page.tsx
-    │   │   ├── reflect/page.tsx
-    │   │   └── circle/page.tsx
-    │   └── admin/page.tsx
+    │   ├── page.tsx                  # real landing page (marketing copy + sign in/get started)
+    │   ├── error.tsx, global-error.tsx, not-found.tsx
+    │   ├── (auth)/                   # no sidebar
+    │   │   ├── login/page.tsx, register/page.tsx, signup/page.tsx
+    │   ├── (app)/                    # wrapped in AppSidebar + RouteGuard(requiredRole: "PATIENT")
+    │   │   ├── layout.tsx
+    │   │   ├── today/page.tsx        # patient dashboard (hero, upcoming appointment, mood check-in bar)
+    │   │   ├── check-in/page.tsx     # mood check-in - real CRUD, see below
+    │   │   ├── therapy/page.tsx      # browse therapists + book/manage appointments
+    │   │   ├── messages/page.tsx     # peer chat - see below
+    │   │   ├── reflect/page.tsx      # AI companion chat (unrelated to peer messaging) - see below
+    │   │   └── error.tsx
+    │   ├── admin/                    # AdminSidebar; page.tsx, users/, moderation/, alerts/, audit-log/
+    │   ├── therapist/                # TherapistSidebar; own schedule view, outside (app) group
+    │   └── oauth/success/page.tsx    # Google OAuth callback landing page
     ├── components/
-    │   ├── auth/RouteGuard.tsx       # redirects unauthenticated users to /login
-    │   ├── layout/Sidebar.tsx        # nav, crisis block, user/logout
-    │   ├── layout/AppLayout.tsx      # RouteGuard + Sidebar wrapper
-    │   └── ui/                       # shadcn: button, input, label, card, badge, avatar, separator, sonner
+    │   ├── auth/                     # RouteGuard, LoginForm/SignupForm + branding panels
+    │   ├── check-in/                 # CheckInForm, MoodEntryFields, TodaysCheckIns, BackfillDialog, ...
+    │   ├── therapy/                  # TherapistCard, BookingDialog, GetStartedDialog, Cancel/RateDialog, ...
+    │   ├── messaging/                # MessagesView (conversation list + thread)
+    │   ├── home/                     # AppointmentCard/List, hero sections
+    │   ├── admin/, therapist/        # role-specific dashboard widgets
+    │   ├── layout/                   # AppSidebar (real, active), Sidebar/AppLayout (superseded, unused - see gaps)
+    │   └── ui/                       # shadcn: button, input, label, card, badge, dialog, select, sonner, ...
     ├── contexts/AuthContext.tsx      # AuthProvider + useAuth()
+    ├── hooks/                        # useAppointments, useMood, useMessaging, useAdmin, useTherapists, ...
     └── lib/
         ├── api.ts                   # in-memory token store + apiFetch() with silent refresh
-        ├── providers.tsx            # QueryClientProvider + AuthProvider
+        ├── *-api.ts                 # thin apiFetch wrappers per backend service (auth, appointments, mood, admin, user, ai)
+        ├── query-string.ts          # shared toQueryString() used by every GET wrapper with filter/pagination params
+        ├── messaging-socket.ts      # Socket.io client for the Messaging Service (authenticated handshake)
+        ├── messaging-api.ts         # REST: conversation list/create, message history paging, presence lookup
+        ├── providers.tsx            # QueryClientProvider + AuthProvider + Toaster
         └── utils.ts                 # shadcn's cn() helper
 ```
 
-All pages under `(auth)`/`(app)`/`admin` currently render placeholder text only - no real page content has been built yet. `(auth)` routes have no sidebar; `(app)` routes are wrapped in `AppLayout` (sidebar + `RouteGuard`).
+## Real feature buildout (2026-08)
+
+Everything below happened after the placeholder-only snapshot the folder structure originally described. Documented here at a summary level - the detailed reasoning lives in commit history and PR context; this is the "what and why," not a full diff. Full-scale integration against the real backend (auth-service, user-service, appointment-service, mood-tracking-service, admin-service, ai-service, messaging-service, all behind a Kong gateway) replaced the mock-data placeholder pages, verifying each endpoint's actual behavior against a running backend rather than trusting written specs (this caught several real spec-vs-reality gaps along the way - see the auth bug above, and the session-type/messaging notes below).
+
+**Auth, landing page, mood check-in** (2026-08-06 - 2026-08-08 commits): registration, login (incl. Google OAuth, with an `/oauth/success` callback landing page), a real marketing landing page at `/` with an auto-redirect to `/today` for already-authenticated visitors, and a full mood check-in rebuild - removed all mock/pre-selected emotion data, wired `POST /mood/log`, `GET /mood/history`, `GET /mood/insights` (later replaced, see below), `GET /mood/streak`. Error boundaries (`error.tsx`/`global-error.tsx`/`not-found.tsx`) were added repo-wide so no unhandled error takes down the whole app silently.
+
+**Mood check-in v2** (later pass, same area): added `GET /mood/today` (drives the "N check-ins left today" banner and a timezone-aware daily cap), `PUT /mood/:id` (edit - note `recordedAt` is deliberately not editable, since `mood_entries` is a TimescaleDB hypertable partitioned on that column and moving a row between partitions is a DB-level rejection, not a policy choice), `DELETE /mood/:id`, and a "log a missed day" backfill flow (`POST /mood/log` with an explicit `recordedAt`). `TodaysCheckIns` lists today's entries with edit/delete; `MoodEntryFields` is the shared slider/emotion/journal block reused by the main form, edit mode, and the backfill dialog - all three now default every slider to its own minimum (not a plausible-looking "already has an opinion" value like mood 7) so a fresh check-in genuinely starts blank. `sonner`'s `Toaster` was finally mounted in `providers.tsx` (it was installed but never rendered) and wired into every previously-silent mutation hook (`useAppointments`, `useAdmin`, `useMood`) - selectively, not uniformly, since some flows (the main check-in form, `BookingDialog`) already have their own inline success/error banners and a toast on top would be redundant.
+
+**Weekly insights chart → `/mood/summary`**: `WeeklyInsights` originally read `GET /mood/insights`, whose `WeeklyMoodBucket` type has no `entryCount` field - no way to tell a real week from a zero-filled empty one. `GET /mood/summary` is explicitly documented as never zero-filling (sparse ranges just produce sparse buckets), so the chart now reads from there instead; `/mood/insights` had no other consumers and was removed entirely (`useMoodInsights`, `fetchMoodInsights`, `MoodInsightsResponse`, `WeeklyMoodBucket`). The chart also gained a real Y-axis label, a tooltip that spells out "Avg mood: X/10", and full week-range x-axis labels (`Jul 6-12`, not just `Jul 6`, which read as a single day). The "Trend" stat row was removed per product decision.
+
+**Appointments/booking**: real booking flow against the Appointment Service (availability, book/cancel/rate/confirm/complete), `SessionType` simplified from `VIDEO | IN_PERSON | CHAT` to just `VIDEO | AUDIO` ("Video call" / "Audio call") - it's the single source of truth in `domain.ts`, consumed by `BookingDialog`'s pills and three duplicated `formatSessionType` display helpers (`AppointmentRow`, `AppointmentCard`, the therapist schedule page). A therapist card's "Get started" button no longer jumps straight into booking - it opens `GetStartedDialog`, a choice between "Book an appointment" and "Chat with this therapist" (the latter deep-links into `/messages?therapistId=...`).
+
+**Peer messaging** (new, `src/components/messaging/`, `src/hooks/useMessaging.ts`, `/messages` route): a WhatsApp-style conversation list + thread view, built on top of `src/lib/messaging-socket.ts` - a Socket.io wrapper that existed in the repo but was never imported anywhere until now. `useMessaging` owns the connection lifecycle (connect on mount, 30s heartbeat, disconnect+`logout_presence` on unmount), conversation list, message history, live message delivery, typing indicators, and online presence, all driven by socket events (`joined_conversation`, `conversation_created`, `message_history`, `new_message`, `presence_changed`, ...). **Caveat carried over from `messaging-socket.ts`'s own doc comment: the Messaging Service's OpenAPI spec documents zero REST paths, Socket.io only - this is built to that documented event contract but hasn't been verified against a live backend yet.** Also hit two real `react-hooks/set-state-in-effect` lint violations while building this (React Compiler's stricter effect linting): `isConnected` was being set synchronously right after calling `connect()` instead of reacting to the socket's own `connect`/`disconnect` events, and a deep-link effect was setting `selectedId` directly when a separate "watcher" effect (keyed on the `conversations` list) already covered the same case for free once `startConversationWith`'s own state update landed - both fixed by removing the redundant direct `setState` rather than suppressing the rule.
+
+**Messaging v2 - authenticated socket + delivery/read receipts (2026-08-12)**: the Messaging Service's real contract arrived from the backend team, and several pieces were breaking changes against the best-effort build described in the paragraph above. Rewrote `messaging-socket.ts`, `useMessaging.ts`, `MessagesView.tsx`, and the messaging section of `domain.ts` against it:
+
+- **Handshake now requires a JWT** (`io(SOCKET_URL, { auth: { token } })`) instead of trusting a `userId` sent in each event payload - `register_presence`, `send_message`, `typing_start`, `typing_stop` all dropped their id fields accordingly; the server derives identity from the token now.
+- **Access tokens expire every 15 minutes.** `api.ts` gained a small pub/sub (`onAccessTokenChange`), fired from inside `setAccessToken` itself - the one choke point every token update already goes through (login, the initial silent refresh, and `apiFetch`'s own reactive 401-retry-refresh). `useMessaging` subscribes and calls `reconnectMessagingSocket(newToken)` (updates `.auth`, then `disconnect().connect()` to force an immediate fresh handshake rather than waiting for the next automatic reconnect attempt) on any token change, or disconnects outright when the token goes to `null` on logout.
+- **The socket host is genuinely separate from the REST gateway** - there's no `/socket.io/` route on Kong. Renamed `NEXT_PUBLIC_MESSAGING_WS_URL` → `NEXT_PUBLIC_SOCKET_URL` in both env files; `.env.example`'s production value is left as an explicit placeholder with a comment flagging that the real messaging-service host has to come from the backend team - it is not necessarily the same host as `NEXT_PUBLIC_API_URL`.
+- **Delivery/read ticks** (`Message.deliveredAt`/`readAt`, both `string | null`) - a `MessageTicks` component in `MessagesView.tsx` renders one grey check (sent), two grey (delivered), or two blue (read), only on messages the current user sent. Two new batched socket events, `messages_delivered` and `conversation_read`, update every id in their `messageIds` array in a single state update rather than looping per-message.
+- **Read receipts are conversation-level, not per-message.** Opening a conversation, or the tab regaining focus while one's open, emits `mark_conversation_read` (one call marks everything unread in that conversation - extended slightly beyond spec to also fire on an incoming `new_message` while that conversation is already open and focused, so ticks don't lag during an active chat). The unread badge is driven by the `conversation_read` broadcast the server sends back, not zeroed optimistically client-side - per explicit guidance in the spec, since that same event is what both the sender's ticks and the reader's badge key off of. Per-message `mark_read` (exposed as `markMessageRead` on the hook, disambiguated from the new bulk action) still exists for future read-on-scroll granularity but isn't wired to any UI yet.
+- **Typing indicators now re-emit** (`typing_start` roughly every 3s while composing) instead of the old "start once, auto-stop after 2s" debounce. A short client-side stale-timeout (7s) still force-clears a stuck indicator as a safety net, but it's explicitly secondary now - the server itself guarantees a `user_stopped_typing` within ~5s of a client disappearing.
+- **Conversation list moved from purely socket-derived to real REST** (`GET /api/v1/messaging/conversations`, new `messaging-api.ts`) - necessary because `joined_conversation` no longer carries participant info at all (`{conversationId, participant}` → just `{conversationId}`), so there's no way left to learn who a conversation is with purely from socket events. The list lives in React Query now (key `["messaging","conversations"]`), patched in place by socket events (`new_message` bumps the preview/timestamp, `conversation_read` zeroes the unread badge) instead of being rebuilt from scratch on every event. Starting a chat with someone (`startConversationWith`, used by `GetStartedDialog`'s "Chat with this therapist" deep link) now calls `POST /conversations` directly (idempotent create-or-get) instead of firing a socket event and racing to match the result back by participant id afterward.
+- **Added "load earlier messages"** (`GET /conversations/:id?cursor=...`) - `join_conversation`'s own `message_history` already covers the most recent 50; this only pages further back. REST history is documented newest-first, but the in-memory per-conversation message log stays oldest-first top-to-bottom (matching what `message_history` was already assumed to return), so each older page gets reversed before being spliced onto the front. **Both that reversal assumption and treating the oldest currently-loaded message's `_id` as a valid `cursor` value are unverified against a live backend** - the spec says "pass the previous `nextCursor`", not "pass any message id", though that's the standard way cursor pagination like this normally works.
+- **Presence**: `PresenceStatus.lastSeen` is now `string | null` (expires ~5 minutes after disconnect - no "last seen 3 days ago", only recent-or-nothing). Opening a conversation now also does a one-off `GET /presence/:userId` (new `fetchPresence`) to seed the header's online/last-seen line before any `presence_changed` event has fired for that person; `presence_changed` keeps it live from there.
+- **Composer disables while the socket is disconnected** ("Reconnecting..." state, input+send button both disabled) - there's no REST fallback for sending, it's socket-only, so a dropped connection has to visibly block sending rather than silently accepting input that can't go anywhere.
+
+**Report back to the backend team** (not a code change - needs a human to actually do it): the deployed frontend origin needs to be added to Kong's CORS allowlist (an explicit list, rejects wildcards), and the deployed frontend needs to be confirmed as served over HTTPS - the refresh-token cookie becomes `SameSite=None; Secure` in production, which browsers silently refuse to send over plain HTTP, breaking auth on every page reload.
+
+**Misc fixes**: removed the "Community Highlights" placeholder widget from `/today` (deleted `CommunityPostCard.tsx`, `mock-data/community.ts`, and the unused `CommunityPost` type - nothing else referenced them). `/circle` itself - the standalone "community feed coming soon" placeholder page it linked to - was later removed entirely (2026-08-12): deleted the route, dropped the nav item from both `AppSidebar` and the legacy `Sidebar.tsx`, and replaced the "Circle" bullet in the landing page's `signupFeatures` marketing copy (`mock-data/auth.ts`) with "Message your therapist between sessions" (the real, live messaging feature) rather than leaving the public landing page advertising a feature with no page behind it. Crisis line number changed from the US `988` to `+250 783 974 068` across `AppSidebar`, the landing page footer, and the legacy `Sidebar.tsx`, dropping the "always free" claim since the new number isn't toll-free. Fixed app-wide low-contrast text inside every `Dialog`/`Card`/`Select`: `--popover`/`--card`/`--accent`/`--secondary` in `globals.css` were hardcoded to shadcn's dark-theme defaults (`oklch(13% 0 0)` etc.) with no `.dark` class gating them, while the rest of the app (and the text rendered inside those components) is light-theme-only - repointed all four at the existing light `--background`/`--foreground`/`--input` tokens.
+
+**UI/backend decoupling audit** - the app was audited end-to-end for whether the presentation layer (`components/`, `app/**/page.tsx`) could be entirely rewritten without touching how it talks to the backend. Confirmed clean: `fetch()` is called in exactly one place (`apiFetch` in `lib/api.ts`), no component ever imports `apiFetch` directly (only `ApiError` for typed error handling, or the `getGoogleOAuthUrl()` helper), every endpoint path lives in a `lib/*-api.ts` file per backend service, and both base URLs (`NEXT_PUBLIC_API_URL` for REST, `NEXT_PUBLIC_MESSAGING_WS_URL` for the messaging socket) are env-driven with no hardcoded host anywhere else. Two real gaps in that pattern were found and fixed:
+
+- **`useMyProfile.ts` called `apiFetch("/api/v1/users/me")` directly** instead of going through `lib/user-api.ts`, even though that file already wraps the sibling `/users/me` endpoints. Fixed by adding `fetchMyProfile()` to `user-api.ts` and having the hook call that instead. Its `Profile`/`MeResponse` types were also independently duplicated in both files - consolidated into `types/domain.ts`, matching where every other backend response shape already lives.
+- **Auth calls lived inline in `AuthContext.tsx`** (`/auth/login`, `/auth/refresh`, `/auth/register`, `/auth/logout`) rather than in a `lib/*-api.ts` file like every other service. Extracted to a new `lib/auth-api.ts`; `AuthContext.tsx` now only orchestrates React state (`queryClient.clear()`, the invalid-session guard, decoding identity from the token) and calls the imported functions, aliased (`login as loginRequest`, etc.) to avoid colliding with the context's own same-named exports - the same aliasing pattern `useMessaging.ts` already uses for `messaging-socket.ts`'s functions. `RegisterRequest`/`AuthTokenResponse` request/response shapes moved to `domain.ts` alongside everything else, replacing a local `RegisterParams` interface that only existed in `AuthContext.tsx`.
+
+Also cleaned up while auditing (not decoupling risks, just clutter/duplication found along the way):
+
+- `toQueryString()` was defined identically (or near-identically) three separate times in `mood-api.ts`, `appointments-api.ts`, and `admin-api.ts` - extracted to a shared `lib/query-string.ts`. `appointments-api.ts`'s copy additionally special-cased filtering out a literal `"all"` value; auditing every call site confirmed nothing actually ever passes `"all"` into these functions today (the "all" filter option in `therapy/page.tsx` is applied client-side, not sent to the API), so that check was dead and dropped rather than carried into the shared version.
+- Deleted `mock-data/user.ts` (`mockCurrentUser`) and `mock-data/appointments.ts` (`mockNextSession`/`mockUpcomingAppointments`) - leftover scaffold fixtures with zero live consumers, referenced only by `src/__tests__/page.test.tsx`, which itself only asserted facts about the fixtures rather than anything about real app behavior. That test file was removed too, matching the identical precedent already noted earlier in this doc (a prior placeholder smoke test was removed for the same reason). `jest.config.mjs` already has `passWithNoTests: true`, so `npm test`/`npm run test:coverage` (the one CI runs) both still exit 0 with zero test files - verified directly, not assumed.
+- `lib/user-api.ts`'s `updateProfile`, `updateFcmToken`, `updateNotificationPreferences`, `fetchUserPreferences` are real, correctly-implemented wrappers for endpoints with **no UI wired to them yet** (no hook, no component calls them). Left in place deliberately, unlike the mock data above - this is backend-ready code waiting on a feature (profile editing, notification preferences), not dead weight.
+
+**AI companion chat rewrite** (`/reflect`, `ReflectChat.tsx`, 2026-08-12): rebuilt against a fuller backend spec than the original build had - no persisted history, no delete control, no rate-limit handling, no crisis-specific styling beyond a basic color swap. Briefly un-linked from the sidebar nav (testers-only) while under test, then re-linked the same day once testing moved forward - the route itself was never gated beyond the pre-existing patient-role guard either way.
+
+- Unified `ChatResponse` (dropped the separate `CrisisChatResponse` type in `domain.ts` - crisis level 5 is the same wire shape as any other reply, not a structurally distinct response; "crisis-ness" is a runtime check on `crisisLevel`, which is how the code already used it anyway). Added `AiInteraction`/`AiHistoryResponse`/`DeleteAiHistoryResponse`; new `fetchAiHistory`/`deleteAiHistory` in `ai-api.ts`, new `useAi.ts` hook file.
+- **Crisis level 5** renders as a full-width, distinctly-styled inline panel (no bubble corner/max-width/alignment, a heading, a warning icon), verbatim text, for both live sends and historical playback. Deliberately did not build a separate panel detached from the transcript - the spec's "visually separate from the transcript" is read here as satisfied by the non-bubble treatment while keeping chronological position readable in history; flagging this as a judgment call in case a fully detached panel is wanted instead. No UI at all for levels 1-4, per the spec ("actively being redefined, anything built now gets rebuilt").
+- **History hydration**: `GET /ai/history` (newest-first) is reversed and merged with in-session live messages on mount. One interaction is one full exchange (both sides), not paired records. `message`/`response` are independently nullable (decryption failures) - renders "This message could not be displayed" instead of an empty bubble.
+- **Waiting state** (the highest-effort part per the spec): optimistic user-message render so the screen is never blank during the 20-25s round trip, a "Thinking…" indicator with explicit "This can take up to 30 seconds" copy instead of a bare spinner, composer disabled for the duration. No client-side request timeout is set - the server's own is 45s, so an earlier client abort would kill a legitimately in-flight request.
+- **429 handling**: new `AiRateLimitError` (extends `ApiError`, carries `retryAfterSeconds`) thrown from `sendChatMessage`. Required extending `ApiError` itself with a generic `body` field (the full raw parsed error JSON) so `ai-api.ts` could pull out this one endpoint's bespoke field without every other caller needing to know about it. Composer disables and shows a live countdown; explicitly does not auto-retry, per spec.
+- **502 / other send failures**: the failed optimistic user bubble gets an inline "Failed to send - retry" affordance. Unambiguous despite the API's `error` payload having no error code or correlation id, since the composer only ever allows one send in flight at a time.
+- Fixed a real, generic `apiFetch` bug surfaced by this endpoint's documented 400 shape: `{error: "..."}`, not the `{message: "..."}` every other endpoint in this codebase uses - was silently collapsing to a useless "API error: 400" for AI chat validation failures specifically. `api.ts`'s error parsing now falls back to `error.error` when `.message` is absent - additive, safe for every existing caller.
+- **Delete-history control** (`DeleteAiHistoryDialog.tsx`, mirrors the existing `DeleteMoodEntryDialog` confirm-dialog pattern but stays open after success to show the result instead of closing immediately). Does not collapse `remoteConversationDeleted: false` into a generic success message - shows a separate, visually distinct notice that the AI provider's own copy of the data may still exist, per the spec's explicit "don't report a partial deletion as complete" instruction.
+- **Open question flagged, not guessed at**: the crisis copy's closing line ("We can also help connect you with appropriate support") has no endpoint behind it yet. Left as plain verbatim text with no button - one of the spec's two sanctioned options - rather than inventing an affordance for it.
 
 ## Auth architecture
 
@@ -58,6 +124,9 @@ All pages under `(auth)`/`(app)`/`admin` currently render placeholder text only 
 - **Refresh token**: an HttpOnly cookie set by the backend Auth Service. Never touched by frontend JS - sent automatically via `credentials: 'include'` on every `apiFetch` call.
 - **Silent refresh flow**: on mount, `AuthProvider` calls `POST /api/v1/auth/refresh`; if it succeeds the user is considered logged in. `apiFetch` also retries once on a 401 by calling the same refresh endpoint before giving up and throwing `'UNAUTHORIZED'`.
 - **`RouteGuard`**: wraps `(app)` routes, redirects to `/login` if unauthenticated, or to `/home` if `requiredRole` doesn't match the logged-in user's role.
+- **No `user` object from the backend**: `/login` and `/refresh` only ever return `{ accessToken }` - identity (`userId`/`email`/`role`) is decoded client-side from the JWT payload itself (`userFromAccessToken` in `AuthContext.tsx`), not sent separately. This was a real bug source early on - code that assumed a `user` field on the login response silently got `undefined` forever (see [Real feature buildout](#real-feature-buildout-2026-08)).
+- **Invalid-session guard**: `userFromAccessToken` rejects any token whose `sub` isn't UUID-shaped (real accounts always get a UUID via Prisma's `@default(uuid())`) rather than trusting it blindly. On rejection it clears local session state _and_ calls `/auth/logout` server-side, so a bad refresh cookie can't keep silently reviving the same broken session on every reload. Added after a live bug where a stale hand-made dev token (non-UUID `sub`) crashed every backend route that casts `userId` to `::uuid` in SQL (`/mood/summary`, `/mood/history`, `/mood/today`, `/mood/streak`) with an unhelpful 500.
+- **Query cache is purged on both `login()` and `logout()`** (`queryClient.clear()`) - without this, a different account's cached data (e.g. mood entries) could briefly resurface in the same browser tab after switching accounts, since nothing was clearing it before.
 
 ## Design tokens
 
@@ -138,13 +207,19 @@ Done as an isolated task on its own branch (`frontend/nextjs-16-upgrade`, off `f
 
 ## Known gaps / follow-ups
 
-- **shadcn components (`button`, `card`, `input`, `label`, `badge`, `avatar`, `separator`, `sonner`) aren't visually exercised yet** - no placeholder page renders them except a couple of test `<Button>`s on the login page. Their semantic color classes now resolve correctly against Mindora's tokens (confirmed via grepping installed component source for every `--radius-*`/color var they reference and cross-checking against `globals.css`), but this hasn't been confirmed in an actual browser.
-- **`toast` is not installed** - shadcn deprecated it in favor of `sonner`, which _is_ installed (`src/components/ui/sonner.tsx`), but nothing in the app calls it yet.
-- **RouteGuard sidebar rendering** was only verified via HTTP requests (200 status, correct content, no server errors) with the guard's redirect temporarily bypassed - full visual confirmation (the sidebar actually painting after client-side hydration resolves `isLoading`) needs a real browser, which wasn't available in the environment this work was done in.
-- **React Compiler and `cacheComponents`** (both new/stable in Next 16) are not enabled - worth evaluating once real pages with real data-fetching exist, not before.
-- **Turbopack is now the default bundler** for `dev`/`build` - no custom webpack config existed to migrate, so this was a non-event here, but worth knowing if any future tooling assumes webpack-specific behavior.
-- **No automated tests yet** - this repo's `jest`/Testing Library setup (added when the frontend became its own repo) has nothing to run against real pages yet; only a smoke test for the old scaffold placeholder existed, and that was removed since it tested boilerplate that no longer exists.
-- **`sharp`/`next/image` audit finding**: at the time this doc was written (pre-split), `npm audit` at the monorepo root flagged high-severity `sharp <0.35.0` CVEs pulled in transitively by Next's `next/image` optimizer - not exploitable since `next/image` isn't used anywhere in this app. That finding was monorepo-root-specific and won't carry over 1:1 to this standalone repo's own `npm audit` (worth re-running `npm audit` here directly rather than assuming the old numbers apply). Revisit if `next/image` ever gets used.
+Superseded by real feature work (kept struck through for the record rather than deleted, since "we checked and it was fine at the time" is still useful context):
+
+- ~~shadcn components aren't visually exercised yet~~ - resolved; they're load-bearing across the app now (dialogs, selects, cards, sonner toasts).
+- ~~`toast`/`sonner` isn't wired up~~ - resolved; `Toaster` is mounted in `providers.tsx` and used across mood, appointments, and admin mutations.
+- ~~RouteGuard sidebar rendering only verified via HTTP, not a real browser~~ - resolved; extensively browser-tested since.
+
+Still open:
+
+- **Messaging is unverified against a live backend.** `useMessaging`/`messaging-socket.ts` are built to the Messaging Service's documented Socket.io event contract (its OpenAPI spec has zero REST paths), but that contract itself is described as best-effort/unconfirmed, and this hasn't been smoke-tested against a running instance of the service yet. If conversations don't populate or messages don't send once wired to a real backend, start by confirming the actual event/payload shapes match `ServerToClientEvents`/`ClientToServerEvents` in `messaging-socket.ts`.
+- **`src/components/layout/Sidebar.tsx` and `AppLayout.tsx` are dead code** - superseded by `AppSidebar.tsx` (used by the real `(app)/layout.tsx`), but never deleted since nothing currently breaks by their presence. Nothing imports them; safe to delete, or to keep manually in sync if there's a reason to revive them (it was kept in sync with the crisis-line-number change for exactly this reason).
+- **React Compiler and `cacheComponents`** (both new/stable in Next 16) are not enabled - worth evaluating now that real pages with real data-fetching exist. Note React Compiler's stricter `react-hooks/set-state-in-effect` lint rule is already active and has caught real bugs (see messaging notes above) - it's worth understanding before writing new effects.
+- **No automated tests yet** - this repo's `jest`/Testing Library setup has nothing to run against real pages yet.
+- **`sharp`/`next/image` audit finding**: historical, monorepo-root-specific finding, not re-verified against this standalone repo's own `npm audit`. Not exploitable regardless since `next/image` isn't used anywhere in this app. Revisit if `next/image` ever gets used.
 
 ## For Theodora - what's different writing code against Next 16 vs 14
 

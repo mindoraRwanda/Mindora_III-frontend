@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import {
   MoodEntryFields,
   DEFAULT_MOOD_FIELDS,
+  scaleIndexToScore,
+  emotionIndexToArray,
   type MoodFieldsValue,
 } from "@/components/check-in/MoodEntryFields";
 import { useLogMood } from "@/hooks/useMood";
@@ -43,6 +45,7 @@ export function BackfillDialog({ open, onOpenChange }: BackfillDialogProps) {
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (value.moodIndex === null) return;
     // Midday on the chosen local date, converted to a real instant - keeps the
     // entry landing on the intended calendar day regardless of how the server
     // evaluates "which day" relative to UTC.
@@ -50,11 +53,9 @@ export function BackfillDialog({ open, onOpenChange }: BackfillDialogProps) {
 
     logMoodMutation.mutate(
       {
-        moodScore: value.mood,
-        stressLevel: value.stress,
-        sleepHours: value.sleep,
-        energyLevel: value.energy,
-        emotions: value.emotions,
+        moodScore: scaleIndexToScore(value.moodIndex)!,
+        energyLevel: scaleIndexToScore(value.feelingIndex),
+        emotions: emotionIndexToArray(value.emotionIndex),
         journalNote: value.journalNote || undefined,
         recordedAt,
       },
@@ -125,8 +126,15 @@ export function BackfillDialog({ open, onOpenChange }: BackfillDialogProps) {
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={logMoodMutation.isPending || dailyLimitReached}>
-              {logMoodMutation.isPending ? "Logging…" : "Log this day"}
+            <Button
+              type="submit"
+              disabled={logMoodMutation.isPending || dailyLimitReached || value.moodIndex === null}
+            >
+              {logMoodMutation.isPending
+                ? "Logging…"
+                : value.moodIndex === null
+                  ? "Pick a mood to save"
+                  : "Log this day"}
             </Button>
           </div>
         </form>
