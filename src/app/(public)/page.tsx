@@ -271,7 +271,7 @@ function WhyMindora() {
 function HelpWidget() {
   return (
     <Link
-      href="/contact"
+      href="/support"
       className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-mindora-purple px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-mindora-purple-dark"
     >
       <MessageCircle className="h-4 w-4" />
