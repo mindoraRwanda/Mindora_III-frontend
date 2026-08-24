@@ -16,9 +16,11 @@ function relativeDayLabel(iso: string): string {
   const diffDays = Math.round(
     (startOfDay(target).getTime() - startOfDay(now).getTime()) / 86_400_000
   );
-  if (diffDays <= 0) return "Today";
+  if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
-  return `In ${diffDays} days`;
+  if (diffDays > 1) return `In ${diffDays} days`;
+  if (diffDays === -1) return "Yesterday";
+  return `${Math.abs(diffDays)} days ago`;
 }
 
 function sessionLine(iso: string, sessionType: SessionType): string {

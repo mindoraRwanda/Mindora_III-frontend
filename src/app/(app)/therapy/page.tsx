@@ -84,13 +84,28 @@ export default function TherapyPage() {
   } = useMyAppointments();
   const appointments = useMemo(() => appointmentData?.appointments ?? [], [appointmentData]);
 
+  // Snapshot from mount, not a direct Date.now() call inside the memo below:
+  // React's purity rules forbid calling impure functions during render.
+  const [now] = useState(() => Date.now());
+
   const filteredAppointments = useMemo(() => {
     return appointments.filter((a) => {
-      if (mineStatus === "upcoming") return a.status === "PENDING" || a.status === "CONFIRMED";
-      if (mineStatus === "past") return a.status === "COMPLETED";
+      if (mineStatus === "upcoming") {
+        return (
+          (a.status === "PENDING" || a.status === "CONFIRMED") &&
+          new Date(a.slotStart).getTime() > now
+        );
+      }
+      if (mineStatus === "past") {
+        return (
+          a.status === "COMPLETED" ||
+          ((a.status === "PENDING" || a.status === "CONFIRMED") &&
+            new Date(a.slotStart).getTime() <= now)
+        );
+      }
       return a.status === "CANCELLED";
     });
-  }, [appointments, mineStatus]);
+  }, [appointments, mineStatus, now]);
 
   function therapistNameFor(therapistId: string): string {
     return therapistByUserId.get(therapistId)?.userName ?? "Therapist";

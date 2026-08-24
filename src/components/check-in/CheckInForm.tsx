@@ -13,7 +13,6 @@ import {
 } from "@/components/check-in/MoodEntryFields";
 import { TodaysCheckIns } from "@/components/check-in/TodaysCheckIns";
 import { BackfillDialog } from "@/components/check-in/BackfillDialog";
-import { WeeklyInsights } from "@/components/check-in/WeeklyInsights";
 import { ApiError } from "@/lib/api";
 import { useLogMood, useMoodToday, useUpdateMoodEntry } from "@/hooks/useMood";
 import type { MoodEntry } from "@/types/domain";
@@ -122,7 +121,7 @@ export function CheckInForm() {
   const moodMissing = value.moodIndex === null;
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.75fr)]">
+    <div className="mx-auto max-w-3xl">
       <div className="space-y-6">
         <form
           onSubmit={onSubmit}
@@ -224,10 +223,6 @@ export function CheckInForm() {
 
         <TodaysCheckIns editingId={editingEntry?.id ?? null} onEdit={startEdit} />
       </div>
-
-      <aside className="lg:pt-14">
-        <WeeklyInsights />
-      </aside>
 
       <BackfillDialog open={backfillOpen} onOpenChange={setBackfillOpen} />
     </div>

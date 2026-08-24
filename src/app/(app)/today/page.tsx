@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Bell, Flame } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { HomeHeroPortrait } from "@/components/home/HomeSections";
 import { WeeklyMoodCard } from "@/components/home/WeeklyMoodCard";
 import { NextSessionCard } from "@/components/home/NextSessionCard";
@@ -50,14 +50,31 @@ export default function TodayPage() {
     return therapistByUserId.get(therapistId)?.userName ?? "Therapist";
   }
 
+  // Read once on mount rather than inside the memo below: React's purity
+  // rules forbid calling Date.now() during render (it can run more than once
+  // per commit under Strict Mode / the compiler), so the "now" a memo uses
+  // must come from state, not a direct call. A snapshot from mount is exactly
+  // as fresh as this page needs - see the comment on the memo below.
+  const [now] = useState(() => Date.now());
+
+  // Only recomputes when the appointment list actually changes (matching the
+  // `now` snapshot above), not every render - so a session that quietly slips
+  // into the past while the tab sits open keeps showing as "next" until the
+  // next appointments refetch. Acceptable here: react-query already refetches
+  // this list periodically, and a stale-by-a-few-minutes "next session" card
+  // is a cosmetic gap, not a booking-correctness one.
   const nextSession = useMemo(() => {
     return (
       (appointmentData?.appointments ?? [])
-        .filter((a) => a.status === "PENDING" || a.status === "CONFIRMED")
+        .filter(
+          (a) =>
+            (a.status === "PENDING" || a.status === "CONFIRMED") &&
+            new Date(a.slotStart).getTime() > now
+        )
         .sort((a, b) => new Date(a.slotStart).getTime() - new Date(b.slotStart).getTime())[0] ??
       null
     );
-  }, [appointmentData]);
+  }, [appointmentData, now]);
 
   // Never collapse "couldn't fetch" into "0 days" - in a check-in-streak app,
   // that reads as "you lost your streak" when the truth is just a failed
@@ -104,17 +121,6 @@ export default function TodayPage() {
               </div>
             </div>
           </div>
-          {/* No reminders feature exists yet - disabled + labeled rather than a
-              button that silently does nothing when clicked. */}
-          <button
-            type="button"
-            disabled
-            title="Reminders are coming soon"
-            className="flex h-14 cursor-not-allowed items-center gap-2.5 rounded-full px-5.5 text-[14px] font-semibold text-[#3f3757]/50 shadow-[7px_7px_16px_#cdc6e0,-7px_-7px_16px_#fdfbff]"
-          >
-            <Bell className="h-4.5 w-4.5" />
-            Reminders
-          </button>
         </div>
       </header>
 

@@ -128,13 +128,13 @@ export function MoodEntryFields({ value, onChange }: MoodEntryFieldsProps) {
       />
 
       <div className="flex flex-col gap-3">
-        <span className="text-[16px] font-bold tracking-tight">Anything you want to name?</span>
+        <span className="text-[16px] font-bold tracking-tight">Your daily journal (optional)</span>
         <textarea
           rows={4}
           maxLength={JOURNAL_MAX_LENGTH}
           value={value.journalNote}
           onChange={(e) => set("journalNote", e.target.value)}
-          placeholder="Optional — a sentence for future you."
+          placeholder="A sentence for future you."
           className="min-h-[96px] w-full resize-y rounded-[22px] px-[18px] py-4 text-[14px] leading-relaxed text-foreground shadow-[inset_5px_5px_12px_#cdc6e0,inset_-5px_-5px_12px_#fdfbff] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mindora-purple/30"
         />
         <p className="text-right text-[11px] text-muted-foreground">

@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Mindora - Care, gently",
+  title: "Mindora",
   description: "A calmer mind, one small kindness at a time.",
 };
 
