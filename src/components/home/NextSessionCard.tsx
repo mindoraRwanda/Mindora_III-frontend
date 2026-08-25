@@ -9,7 +9,7 @@ function initialsFor(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-function relativeDayLabel(iso: string): string {
+export function relativeDayLabel(iso: string): string {
   const target = new Date(iso);
   const now = new Date();
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());

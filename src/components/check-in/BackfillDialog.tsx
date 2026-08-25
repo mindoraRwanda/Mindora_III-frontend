@@ -112,7 +112,7 @@ export function BackfillDialog({ open, onOpenChange }: BackfillDialogProps) {
           {dailyLimitReached ? (
             <div className="rounded-xl bg-mindora-purple-pale px-4 py-3 text-[13.5px] font-medium text-mindora-purple-dark">
               You&apos;ve reached today&apos;s check-in limit, so this backfill can&apos;t go
-              through right now &mdash; try again tomorrow.
+              through right now - try again tomorrow.
             </div>
           ) : null}
 

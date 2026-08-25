@@ -6,15 +6,12 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Heart, Mountain, PenLine } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { joinReasons } from "@/lib/mock-data/auth";
-import { cn } from "@/lib/utils";
-import type { JoinReason } from "@/types/domain";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
@@ -23,22 +20,14 @@ const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  reason: z.enum(["grounded", "routine", "reflect"]),
   terms: z.boolean().refine((val) => val === true, { message: "You must agree to continue" }),
 });
 
 type SignupForm = z.infer<typeof signupSchema>;
 
-const reasonIcons = {
-  heart: Heart,
-  routine: Mountain,
-  journal: PenLine,
-};
-
 export function SignupForm() {
   const router = useRouter();
   const { register: registerAccount } = useAuth();
-  const [selectedReason, setSelectedReason] = useState<JoinReason>("grounded");
   const [apiError, setApiError] = useState<string | null>(null);
 
   const {
@@ -54,7 +43,6 @@ export function SignupForm() {
       name: "",
       email: "",
       password: "",
-      reason: "grounded",
       terms: true,
     },
   });
@@ -144,40 +132,6 @@ export function SignupForm() {
             </label>
             <PasswordInput id="password" showStrength value={password} {...register("password")} />
             {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-[13px] font-medium text-foreground/80">
-              What brings you to Mindora?
-            </p>
-            <div className="grid grid-cols-3 gap-2.5">
-              {joinReasons.map((reason) => {
-                const Icon = reasonIcons[reason.icon as keyof typeof reasonIcons];
-                const isSelected = selectedReason === reason.id;
-                return (
-                  <button
-                    key={reason.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedReason(reason.id);
-                      setValue("reason", reason.id);
-                    }}
-                    className={cn(
-                      "flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 text-center text-[11px] font-medium leading-snug transition-colors",
-                      isSelected
-                        ? "border-mindora-purple bg-mindora-purple-pale text-mindora-purple"
-                        : "border-border bg-white text-muted-foreground hover:border-mindora-purple/40"
-                    )}
-                  >
-                    <Icon
-                      className={cn("h-5 w-5", isSelected ? "text-mindora-purple" : "text-muted")}
-                      strokeWidth={1.75}
-                    />
-                    {reason.label}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           <div className="flex items-start gap-3 pt-1">

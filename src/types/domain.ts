@@ -18,28 +18,6 @@ export type AppointmentStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELL
 
 export type SessionType = "VIDEO" | "AUDIO";
 
-export type JoinReason = "grounded" | "routine" | "reflect";
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatarInitials: string;
-  streakDays: number;
-}
-
-export interface Appointment {
-  id: string;
-  therapistId: string;
-  therapistName: string;
-  therapistInitials: string;
-  slotStart: string;
-  slotEnd: string;
-  status: AppointmentStatus;
-  sessionType: SessionType;
-}
-
 // --- Real backend API types (Appointment Service + User Service) ---
 // See src/lib/appointments-api.ts for the endpoints these are fetched from.
 
@@ -56,9 +34,8 @@ export interface TherapistProfile {
   photoUrl: string | null;
 }
 
-// The Appointment Service's own appointment shape - distinct from the `Appointment`
-// mock type above, which the dashboard pages use with denormalized therapist name/initials
-// baked in. This one only carries therapistId (see TherapistProfile.userId to resolve a name).
+// The Appointment Service's own appointment shape - only carries therapistId
+// (see TherapistProfile.userId to resolve a name), not a denormalized name/initials.
 export interface BookedAppointment {
   id: string;
   patientId: string;

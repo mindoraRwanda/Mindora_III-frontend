@@ -19,11 +19,12 @@ import { RateDialog } from "@/components/therapy/RateDialog";
 import { GetStartedDialog } from "@/components/therapy/GetStartedDialog";
 import { useTherapists } from "@/hooks/useTherapists";
 import { useMyAppointments } from "@/hooks/useAppointments";
+import { filterAppointmentsByTab, type AppointmentTab } from "@/lib/appointments";
 import type { BookedAppointment, TherapistProfile } from "@/types/domain";
 import { cn } from "@/lib/utils";
 
 type BrowseTab = "browse" | "mine";
-type MineStatus = "upcoming" | "past" | "cancelled";
+type MineStatus = AppointmentTab;
 
 export default function TherapyPage() {
   const router = useRouter();
@@ -88,24 +89,10 @@ export default function TherapyPage() {
   // React's purity rules forbid calling impure functions during render.
   const [now] = useState(() => Date.now());
 
-  const filteredAppointments = useMemo(() => {
-    return appointments.filter((a) => {
-      if (mineStatus === "upcoming") {
-        return (
-          (a.status === "PENDING" || a.status === "CONFIRMED") &&
-          new Date(a.slotStart).getTime() > now
-        );
-      }
-      if (mineStatus === "past") {
-        return (
-          a.status === "COMPLETED" ||
-          ((a.status === "PENDING" || a.status === "CONFIRMED") &&
-            new Date(a.slotStart).getTime() <= now)
-        );
-      }
-      return a.status === "CANCELLED";
-    });
-  }, [appointments, mineStatus, now]);
+  const filteredAppointments = useMemo(
+    () => filterAppointmentsByTab(appointments, mineStatus, now),
+    [appointments, mineStatus, now]
+  );
 
   function therapistNameFor(therapistId: string): string {
     return therapistByUserId.get(therapistId)?.userName ?? "Therapist";

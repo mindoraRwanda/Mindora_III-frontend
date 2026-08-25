@@ -3,7 +3,7 @@ import { CalendarHeart, MessageCircle, PenLine, RefreshCw } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { Button } from "@/components/ui/button";
 import { RedirectIfAuthenticated } from "@/components/landing/RedirectIfAuthenticated";
-import { signupFeatures, loginTestimonial } from "@/lib/mock-data/auth";
+import { signupFeatures } from "@/lib/content/auth";
 
 const featureIcons = [RefreshCw, CalendarHeart, PenLine, MessageCircle];
 
@@ -37,8 +37,8 @@ export default function LandingPage() {
               A calmer mind, one small kindness at a time.
             </h1>
             <p className="mx-auto mt-5 max-w-lg text-base text-white/75 lg:text-lg">
-              Daily check-ins, real therapists, and a community that holds space for you &mdash; all
-              in one gentle place.
+              Daily check-ins, real therapists, and a community that holds space for you - all in
+              one gentle place.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button
@@ -80,22 +80,11 @@ export default function LandingPage() {
             })}
           </div>
         </section>
-
-        <section className="bg-mindora-purple-bg px-6 py-16 lg:px-14 lg:py-20">
-          <blockquote className="mx-auto max-w-2xl text-center">
-            <p className="text-2xl font-semibold leading-snug tracking-tight text-foreground lg:text-3xl">
-              &ldquo;{loginTestimonial.quote}&rdquo;
-            </p>
-            <footer className="mt-4 text-sm text-muted-foreground">
-              &mdash; {loginTestimonial.author}
-            </footer>
-          </blockquote>
-        </section>
       </main>
 
       <footer className="border-t border-border px-6 py-8 text-center lg:px-14">
         <p className="text-xs text-muted-foreground">
-          24/7 crisis line &mdash; always answered.{" "}
+          24/7 crisis line - always answered.{" "}
           <a href="tel:+250783974068" className="font-semibold text-mindora-purple hover:underline">
             Call +250 783 974 068
           </a>

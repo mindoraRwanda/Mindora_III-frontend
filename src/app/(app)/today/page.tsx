@@ -11,6 +11,7 @@ import { useMyProfile } from "@/hooks/useMyProfile";
 import { useMoodStreak } from "@/hooks/useMood";
 import { useMyAppointments } from "@/hooks/useAppointments";
 import { useTherapists } from "@/hooks/useTherapists";
+import { selectNextSession } from "@/lib/appointments";
 import type { TherapistProfile } from "@/types/domain";
 
 function getGreeting(): string {
@@ -63,18 +64,10 @@ export default function TodayPage() {
   // next appointments refetch. Acceptable here: react-query already refetches
   // this list periodically, and a stale-by-a-few-minutes "next session" card
   // is a cosmetic gap, not a booking-correctness one.
-  const nextSession = useMemo(() => {
-    return (
-      (appointmentData?.appointments ?? [])
-        .filter(
-          (a) =>
-            (a.status === "PENDING" || a.status === "CONFIRMED") &&
-            new Date(a.slotStart).getTime() > now
-        )
-        .sort((a, b) => new Date(a.slotStart).getTime() - new Date(b.slotStart).getTime())[0] ??
-      null
-    );
-  }, [appointmentData, now]);
+  const nextSession = useMemo(
+    () => selectNextSession(appointmentData?.appointments ?? [], now),
+    [appointmentData, now]
+  );
 
   // Never collapse "couldn't fetch" into "0 days" - in a check-in-streak app,
   // that reads as "you lost your streak" when the truth is just a failed
