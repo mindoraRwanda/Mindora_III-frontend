@@ -8,7 +8,7 @@ export function HomeHeroPortrait() {
         src="/images/doctor-image.png"
         alt="A friendly therapist holding a clipboard, ready to help"
         fill
-        className="scale-[1.32] object-contain object-bottom object-center"
+        className="scale-[1.0] object-contain object-bottom object-center"
         priority
         sizes="(max-width: 1024px) 90vw, 60vw"
       />

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { safeReturnUrl } from "@/lib/booking";
+import { BackLink } from "@/components/public/BackLink";
 import { ApiError } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
 
@@ -27,8 +29,10 @@ type SignupForm = z.infer<typeof signupSchema>;
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register: registerAccount } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
+  const returnUrl = searchParams.get("returnUrl");
 
   const {
     register,
@@ -59,7 +63,7 @@ export function SignupForm() {
         role: "PATIENT",
         userName: data.name,
       });
-      router.push(dashboardPathForRole(user.role));
+      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {
         const formFieldForServerField: Record<string, keyof SignupForm> = {
@@ -87,10 +91,16 @@ export function SignupForm() {
   return (
     <div className="flex h-full min-h-screen flex-col px-8 py-8 lg:px-12 lg:py-10 xl:px-16">
       <div className="flex items-center justify-between">
-        <MindoraLogo />
+        <div className="flex flex-col gap-3">
+          <BackLink fallback="/" />
+          <MindoraLogo />
+        </div>
         <p className="text-[13px] text-muted-foreground">
           Have an account?{" "}
-          <Link href="/login" className="font-semibold text-mindora-purple hover:underline">
+          <Link
+            href={returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : "/login"}
+            className="font-semibold text-mindora-purple hover:underline"
+          >
             Sign in
           </Link>
         </p>

@@ -6,8 +6,9 @@ interface MindoraLogoProps {
   className?: string;
   showTagline?: boolean;
   variant?: "default" | "light";
+  href?: string;
   /** Overall lockup scale. Icon diameter ≈ “Mindora” wordmark height (Figma). */
-  size?: "md" | "lg";
+  size?: "md" | "lg" | "sm";
 }
 
 const scales = {
@@ -21,13 +22,14 @@ export function MindoraLogo({
   className,
   showTagline = true,
   variant = "default",
+  href = "/",
   size = "lg",
 }: MindoraLogoProps) {
   const isLight = variant === "light";
   const s = scales[size];
 
   return (
-    <Link href="/today" className={cn("flex items-center", s.gap, className)}>
+    <Link href={href} className={cn("flex items-center", s.gap, className)}>
       <Image
         src="/images/Mindora_Logo.png"
         alt="Mindora"
