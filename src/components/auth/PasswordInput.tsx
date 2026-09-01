@@ -74,10 +74,10 @@ function getPasswordStrength(password: string): number {
 function getStrengthLabel(strength: number): string {
   const labels = [
     "",
-    "Weak — add more characters",
-    "Fair — getting there",
-    "Strong — keep it secret, keep it safe.",
-    "Strong — keep it secret, keep it safe.",
+    "Weak - add more characters",
+    "Fair - getting there",
+    "Strong - keep it secret, keep it safe.",
+    "Strong - keep it secret, keep it safe.",
   ];
   return labels[strength] ?? "";
 }

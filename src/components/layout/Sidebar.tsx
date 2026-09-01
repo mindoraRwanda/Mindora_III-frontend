@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Activity, Stethoscope, BookOpen, Users, Phone } from "lucide-react";
+import { Home, Activity, Stethoscope, BookOpen, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -11,7 +11,6 @@ const navItems = [
   { label: "Check-in", href: "/check-in", icon: Activity },
   { label: "Therapy", href: "/therapy", icon: Stethoscope },
   { label: "Reflect", href: "/reflect", icon: BookOpen },
-  { label: "Circle", href: "/circle", icon: Users },
 ];
 
 export function Sidebar() {
@@ -62,15 +61,13 @@ export function Sidebar() {
       <div className="p-3 border-t border-border">
         <div className="bg-bg-elevated rounded-lg p-3 mb-3">
           <p className="text-white text-xs font-medium mb-1">Need someone now?</p>
-          <p className="text-text-muted text-xs mb-2">
-            24/7 crisis line — always free, always answered.
-          </p>
+          <p className="text-text-muted text-xs mb-2">24/7 crisis line - always answered.</p>
           <a
-            href="tel:0783974066"
+            href="tel:+250783974068"
             className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white text-xs font-medium py-1.5 rounded-md transition-colors"
           >
             <Phone size={12} />
-            Call 0 783 974 066
+            Call +250 783 974 068
           </a>
         </div>
 

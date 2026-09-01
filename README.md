@@ -1,4 +1,4 @@
-# Mindora III — Frontend
+# Mindora III - Frontend
 
 Next.js 16 frontend for the Mindora III project.
 
@@ -67,7 +67,7 @@ See `.env.example` for all available variables. Set `NEXT_PUBLIC_API_URL` to you
 
 GitHub Actions runs on every push/PR to `main` and `develop`:
 
-1. **Lint & Type Check** — ESLint + TypeScript
-2. **Tests** — Jest with coverage artifact
-3. **Build** — Next.js production build
-4. **Docker Build** — only on `main`
+1. **Lint & Type Check** - ESLint + TypeScript
+2. **Tests** - Jest with coverage artifact
+3. **Build** - Next.js production build
+4. **Docker Build** - only on `main`

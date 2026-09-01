@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { safeReturnUrl } from "@/lib/booking";
 import { BackLink } from "@/components/public/BackLink";
-import { ApiError } from "@/lib/api";
+import { ApiError, getGoogleOAuthUrl } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
 
 const loginSchema = z.object({
@@ -28,8 +28,10 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
+  const returnUrl = searchParams.get("returnUrl");
 
   const {
     register,
@@ -53,7 +55,7 @@ export function LoginForm() {
     setApiError(null);
     try {
       const user = await login(data.email, data.password);
-      router.push(dashboardPathForRole(user.role));
+      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
       setApiError(
         err instanceof ApiError ? err.message : "Something went wrong. Please try again."
@@ -128,7 +130,15 @@ export function LoginForm() {
             </div>
           </div>
 
-          <Button type="button" variant="outline" className="w-full" size="lg">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            size="lg"
+            onClick={() => {
+              window.location.href = getGoogleOAuthUrl();
+            }}
+          >
             <GoogleIcon />
             Google
           </Button>
@@ -136,7 +146,10 @@ export function LoginForm() {
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
           New to Mindora?{" "}
-          <Link href="/signup" className="font-semibold text-mindora-purple hover:underline">
+          <Link
+            href={returnUrl ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}` : "/signup"}
+            className="font-semibold text-mindora-purple hover:underline"
+          >
             Create a free account
           </Link>
         </p>

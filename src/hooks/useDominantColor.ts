@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 // Samples the average color of an image's top-left corner (where these headshot-style
 // photos tend to show their solid backdrop, away from the subject) so a card can be
 // tinted to match. Requires the image response to allow cross-origin pixel reads
-// (Access-Control-Allow-Origin) — if it doesn't, the canvas read throws and this
+// (Access-Control-Allow-Origin) - if it doesn't, the canvas read throws and this
 // silently returns null so callers can fall back to a default palette instead.
 export function useDominantColor(src: string | null): string | null {
   const [color, setColor] = useState<string | null>(null);
@@ -41,7 +41,7 @@ export function useDominantColor(src: string | null): string | null {
     };
   }, [src]);
 
-  // Gate on `src` here rather than resetting `color` synchronously in the effect —
+  // Gate on `src` here rather than resetting `color` synchronously in the effect -
   // avoids a same-tick setState-in-effect (flagged by the React Compiler) while still
   // correctly reporting null the instant `src` goes away, not a stale prior color.
   return src ? color : null;

@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import { toQueryString } from "@/lib/query-string";
 import type {
   AppointmentStatus,
   AvailabilitySlot,
@@ -26,16 +27,7 @@ interface AvailabilityResponse {
   slots: AvailabilitySlot[];
 }
 
-function toQueryString(params: Record<string, string | number | undefined>): string {
-  const qs = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== "" && value !== "all") qs.set(key, String(value));
-  }
-  const query = qs.toString();
-  return query ? `?${query}` : "";
-}
-
-// GET /api/v1/users/therapists — User Service. Only returns isAcceptingPatients: true.
+// GET /api/v1/users/therapists - User Service. Only returns isAcceptingPatients: true.
 export function fetchTherapists(params: {
   page?: number;
   limit?: number;
@@ -45,7 +37,7 @@ export function fetchTherapists(params: {
   return apiFetch(`/api/v1/users/therapists${toQueryString(params)}`);
 }
 
-// GET /api/v1/appointments/availability/:therapistId — Appointment Service.
+// GET /api/v1/appointments/availability/:therapistId - Appointment Service.
 // therapistId here is TherapistProfile.userId, not TherapistProfile.id.
 export function fetchAvailability(
   therapistId: string,
@@ -54,7 +46,7 @@ export function fetchAvailability(
   return apiFetch(`/api/v1/appointments/availability/${therapistId}${toQueryString(params)}`);
 }
 
-// GET /api/v1/appointments/mine — Appointment Service, authenticated patient's own appointments.
+// GET /api/v1/appointments/mine - Appointment Service, authenticated patient's own appointments.
 export function fetchMyAppointments(params: {
   page?: number;
   limit?: number;
@@ -63,7 +55,7 @@ export function fetchMyAppointments(params: {
   return apiFetch(`/api/v1/appointments/mine${toQueryString(params)}`);
 }
 
-// POST /api/v1/appointments — creates a PENDING appointment. 409 if the slot was just taken.
+// POST /api/v1/appointments - creates a PENDING appointment. 409 if the slot was just taken.
 export function bookAppointment(body: {
   therapistId: string;
   slotStart: string;
@@ -87,7 +79,7 @@ export function cancelAppointment(
   });
 }
 
-// POST /api/v1/appointments/:id/rate — 422 if the appointment isn't COMPLETED yet.
+// POST /api/v1/appointments/:id/rate - 422 if the appointment isn't COMPLETED yet.
 export function rateAppointment(id: string, rating: number): Promise<BookedAppointment> {
   return apiFetch(`/api/v1/appointments/${id}/rate`, {
     method: "POST",
@@ -95,7 +87,7 @@ export function rateAppointment(id: string, rating: number): Promise<BookedAppoi
   });
 }
 
-// GET /api/v1/appointments/schedule — therapist only. Appointments for the authenticated
+// GET /api/v1/appointments/schedule - therapist only. Appointments for the authenticated
 // therapist, ordered by slotStart.
 export function fetchTherapistSchedule(params: {
   date?: string;
@@ -105,12 +97,12 @@ export function fetchTherapistSchedule(params: {
   return apiFetch(`/api/v1/appointments/schedule${toQueryString(params)}`);
 }
 
-// PUT /api/v1/appointments/:id/confirm — therapist only. PENDING -> CONFIRMED.
+// PUT /api/v1/appointments/:id/confirm - therapist only. PENDING -> CONFIRMED.
 export function confirmAppointment(id: string): Promise<BookedAppointment> {
   return apiFetch(`/api/v1/appointments/${id}/confirm`, { method: "PUT" });
 }
 
-// PUT /api/v1/appointments/:id/complete — therapist only.
+// PUT /api/v1/appointments/:id/complete - therapist only.
 export function completeAppointment(id: string): Promise<BookedAppointment> {
   return apiFetch(`/api/v1/appointments/${id}/complete`, { method: "PUT" });
 }

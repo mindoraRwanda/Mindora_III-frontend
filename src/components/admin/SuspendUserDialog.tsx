@@ -30,8 +30,12 @@ export function SuspendUserDialog({ user, onOpenChange }: SuspendUserDialogProps
 
   async function handleConfirm() {
     if (!user || !reason.trim()) return;
-    await mutation.mutateAsync({ id: user.id, reason: reason.trim() });
-    handleOpenChange(false);
+    try {
+      await mutation.mutateAsync({ id: user.id, reason: reason.trim() });
+      handleOpenChange(false);
+    } catch {
+      // Surfaced via mutation.isError below - nothing more to do here.
+    }
   }
 
   return (

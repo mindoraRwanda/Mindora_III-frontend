@@ -6,16 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Heart, Mountain, PenLine } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { joinReasons } from "@/lib/mock-data/auth";
-import { cn } from "@/lib/utils";
-import type { JoinReason } from "@/types/domain";
 import { useAuth } from "@/contexts/AuthContext";
+import { safeReturnUrl } from "@/lib/booking";
 import { BackLink } from "@/components/public/BackLink";
 import { ApiError } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
@@ -24,28 +22,23 @@ const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  reason: z.enum(["grounded", "routine", "reflect"]),
   terms: z.boolean().refine((val) => val === true, { message: "You must agree to continue" }),
 });
 
 type SignupForm = z.infer<typeof signupSchema>;
 
-const reasonIcons = {
-  heart: Heart,
-  routine: Mountain,
-  journal: PenLine,
-};
-
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register: registerAccount } = useAuth();
-  const [selectedReason, setSelectedReason] = useState<JoinReason>("grounded");
   const [apiError, setApiError] = useState<string | null>(null);
+  const returnUrl = searchParams.get("returnUrl");
 
   const {
     register,
     handleSubmit,
     setValue,
+    setError,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<SignupForm>({
@@ -54,7 +47,6 @@ export function SignupForm() {
       name: "",
       email: "",
       password: "",
-      reason: "grounded",
       terms: true,
     },
   });
@@ -71,11 +63,28 @@ export function SignupForm() {
         role: "PATIENT",
         userName: data.name,
       });
-      router.push(dashboardPathForRole(user.role));
+      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
-      setApiError(
-        err instanceof ApiError ? err.message : "Something went wrong. Please try again."
-      );
+      if (err instanceof ApiError && err.fieldErrors) {
+        const formFieldForServerField: Record<string, keyof SignupForm> = {
+          email: "email",
+          password: "password",
+          userName: "name",
+        };
+        let mappedAny = false;
+        for (const [serverField, messages] of Object.entries(err.fieldErrors)) {
+          const formField = formFieldForServerField[serverField];
+          if (formField && messages[0]) {
+            setError(formField, { message: messages[0] });
+            mappedAny = true;
+          }
+        }
+        if (!mappedAny) setApiError(err.message);
+      } else {
+        setApiError(
+          err instanceof ApiError ? err.message : "Something went wrong. Please try again."
+        );
+      }
     }
   };
 
@@ -88,7 +97,10 @@ export function SignupForm() {
         </div>
         <p className="text-[13px] text-muted-foreground">
           Have an account?{" "}
-          <Link href="/login" className="font-semibold text-mindora-purple hover:underline">
+          <Link
+            href={returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : "/login"}
+            className="font-semibold text-mindora-purple hover:underline"
+          >
             Sign in
           </Link>
         </p>
@@ -99,7 +111,7 @@ export function SignupForm() {
           Create your gentle space.
         </h1>
         <p className="mt-2 text-[14px] text-muted-foreground">
-          Takes about 40 seconds—no clinical forms, promise.
+          Takes about 40 seconds - no clinical forms, promise.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
@@ -130,40 +142,6 @@ export function SignupForm() {
             </label>
             <PasswordInput id="password" showStrength value={password} {...register("password")} />
             {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-[13px] font-medium text-foreground/80">
-              What brings you to Mindora?
-            </p>
-            <div className="grid grid-cols-3 gap-2.5">
-              {joinReasons.map((reason) => {
-                const Icon = reasonIcons[reason.icon as keyof typeof reasonIcons];
-                const isSelected = selectedReason === reason.id;
-                return (
-                  <button
-                    key={reason.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedReason(reason.id);
-                      setValue("reason", reason.id);
-                    }}
-                    className={cn(
-                      "flex flex-col items-center gap-2 rounded-xl border px-2 py-3.5 text-center text-[11px] font-medium leading-snug transition-colors",
-                      isSelected
-                        ? "border-mindora-purple bg-mindora-purple-pale text-mindora-purple"
-                        : "border-border bg-white text-muted-foreground hover:border-mindora-purple/40"
-                    )}
-                  >
-                    <Icon
-                      className={cn("h-5 w-5", isSelected ? "text-mindora-purple" : "text-muted")}
-                      strokeWidth={1.75}
-                    />
-                    {reason.label}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           <div className="flex items-start gap-3 pt-1">

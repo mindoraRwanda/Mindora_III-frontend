@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   decryptPostAuthor,
   fetchAlerts,
@@ -11,6 +12,11 @@ import {
   resolveModerationReport,
   suspendUser,
 } from "@/lib/admin-api";
+import { ApiError } from "@/lib/api";
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiError ? error.message : fallback;
+}
 
 export function useAdminUsers(params: {
   role?: "PATIENT" | "THERAPIST" | "ADMIN";
@@ -28,7 +34,10 @@ export function useSuspendUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => suspendUser(id, reason),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      toast.success("User suspended.");
+    },
   });
 }
 
@@ -36,7 +45,10 @@ export function useReactivateUser() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => reactivateUser(id, reason),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "users"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      toast.success("User reactivated.");
+    },
   });
 }
 
@@ -60,12 +72,19 @@ export function useResolveModerationReport() {
       decision: "REMOVED" | "DISMISSED";
       reason: string;
     }) => resolveModerationReport(id, { decision, reason }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "moderation"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "moderation"] });
+      toast.success("Report resolved.");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not resolve this report.")),
   });
 }
 
 export function useDecryptPostAuthor() {
-  return useMutation({ mutationFn: (postId: string) => decryptPostAuthor(postId) });
+  return useMutation({
+    mutationFn: (postId: string) => decryptPostAuthor(postId),
+    onError: (error) => toast.error(errorMessage(error, "Could not decrypt this post's author.")),
+  });
 }
 
 export function usePlatformAnalytics() {
@@ -99,6 +118,10 @@ export function useResolveAlert() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => resolveAlert(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "alerts"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "alerts"] });
+      toast.success("Alert resolved.");
+    },
+    onError: (error) => toast.error(errorMessage(error, "Could not resolve this alert.")),
   });
 }

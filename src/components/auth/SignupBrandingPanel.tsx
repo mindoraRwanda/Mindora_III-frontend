@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { signupFeatures } from "@/lib/mock-data/auth";
+import { signupFeatures } from "@/lib/content/auth";
 
 export function SignupBrandingPanel() {
   return (

@@ -37,8 +37,12 @@ export function CancelDialog({ appointment, therapistName, onOpenChange }: Cance
 
   async function handleConfirm() {
     if (!appointment || !reason.trim()) return;
-    await cancelMutation.mutateAsync({ id: appointment.id, reason: reason.trim() });
-    handleOpenChange(false);
+    try {
+      await cancelMutation.mutateAsync({ id: appointment.id, reason: reason.trim() });
+      handleOpenChange(false);
+    } catch {
+      // Surfaced via cancelMutation.isError below - nothing more to do here.
+    }
   }
 
   return (

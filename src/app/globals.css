@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Design system — Figma tokens */
+  /* Design system - Figma tokens */
   --color-primary: #7c3aed;
   --color-primary-dark: #5b21d0;
   --color-bg-dark: #0d0d0d;
@@ -32,7 +32,10 @@
   --mindora-purple-bg: #f5f3ff;
   --mindora-section-lavender: #ebe4f7;
   --mindora-lavender: #ddd6fe;
-  --mindora-sidebar: var(--color-bg-dark);
+  /* Neumorphic dark surface (sidebars + dark cards) - shared across AppSidebar,
+     TherapistSidebar, AdminSidebar, and dark cards on /today. */
+  --mindora-sidebar: #211d2c;
+  --mindora-sidebar-elevated: #251f33;
   --mindora-sidebar-hover: #1a1a1a;
   --mindora-gradient-start: var(--color-purple-panel);
   --mindora-gradient-mid: #5b21b6;
@@ -63,14 +66,14 @@
   --border-light: oklch(90% 0 0);
   --destructive: oklch(55% 0.22 29);
   --destructive-foreground: oklch(98% 0 0);
-  --accent: oklch(17% 0 0);
-  --accent-foreground: oklch(97% 0 0);
-  --popover: oklch(13% 0 0);
-  --popover-foreground: oklch(97% 0 0);
-  --card: oklch(13% 0 0);
-  --card-foreground: oklch(97% 0 0);
-  --secondary: oklch(17% 0 0);
-  --secondary-foreground: oklch(97% 0 0);
+  --accent: var(--input);
+  --accent-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --secondary: var(--input);
+  --secondary-foreground: var(--foreground);
   --success: oklch(68% 0.18 160);
   --warning: oklch(75% 0.18 75);
   --error: oklch(60% 0.22 29);
@@ -103,6 +106,7 @@
   --color-mindora-section-lavender: var(--mindora-section-lavender);
   --color-mindora-lavender: var(--mindora-lavender);
   --color-mindora-sidebar: var(--mindora-sidebar);
+  --color-mindora-sidebar-elevated: var(--mindora-sidebar-elevated);
   --color-mindora-sidebar-hover: var(--mindora-sidebar-hover);
   --color-mindora-card-dark: var(--mindora-card-dark);
   --color-mindora-success: var(--mindora-success);
@@ -160,58 +164,4 @@ body {
     background-color: var(--color-bg-light);
     color: var(--color-text-dark);
   }
-}
-
-/* Custom range slider for mood check-in — force purple (not browser blue) */
-.mood-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 9999px;
-  outline: none;
-  cursor: pointer;
-  accent-color: #7c3aed;
-  background: #e5e7eb;
-}
-
-.mood-slider::-webkit-slider-runnable-track {
-  height: 6px;
-  border-radius: 9999px;
-  background: transparent;
-}
-
-.mood-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: -7px;
-  border-radius: 9999px;
-  background: #ffffff;
-  border: 3px solid #7c3aed;
-  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.25);
-  cursor: pointer;
-}
-
-.mood-slider::-moz-range-track {
-  height: 6px;
-  border-radius: 9999px;
-  background: #e5e7eb;
-}
-
-.mood-slider::-moz-range-progress {
-  height: 6px;
-  border-radius: 9999px;
-  background: #7c3aed;
-}
-
-.mood-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 9999px;
-  background: #ffffff;
-  border: 3px solid #7c3aed;
-  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.25);
-  cursor: pointer;
 }

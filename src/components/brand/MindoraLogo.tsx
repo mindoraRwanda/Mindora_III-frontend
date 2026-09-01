@@ -12,8 +12,9 @@ interface MindoraLogoProps {
 }
 
 const scales = {
-  sm: { icon: 36, word: 18, tag: 8, gap: "gap-2" },
-  /** Sidebar lockup — icon slightly taller than wordmark */
+  /** Compact lockup - public nav/footer, quiz headers */
+  sm: { icon: 32, word: 16, tag: 7, gap: "gap-2" },
+  /** Sidebar lockup - icon slightly taller than wordmark */
   md: { icon: 42, word: 20, tag: 9, gap: "gap-2.5" },
   /** Auth pages */
   lg: { icon: 56, word: 28, tag: 11, gap: "gap-3" },
