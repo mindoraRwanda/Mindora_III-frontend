@@ -3,10 +3,12 @@ import type { Message } from "@/types/domain";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL ?? "https://api.mindora.rw";
 
-// Connects directly to the messaging service, NOT through the Kong gateway - there's
-// no /socket.io/ route there, so this is deliberately a separate host from
-// NEXT_PUBLIC_API_URL. The handshake requires a JWT (auth.token); the server derives
-// identity from it, so client->server payloads no longer carry userId/senderId.
+// Goes through the Kong gateway - same host as NEXT_PUBLIC_API_URL by default, proxied
+// via the `messaging-socket` route (infrastructure/kong/kong.railway.yml), since the
+// production backend bundle has no public domain of its own for messaging-service to
+// be reached directly on. Live-verified end to end. The handshake requires a JWT
+// (auth.token); the server derives identity from it, so client->server payloads no
+// longer carry userId/senderId.
 
 interface ServerToClientEvents {
   conversation_created: (payload: { _id: string; participants: string[] }) => void;
