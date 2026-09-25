@@ -3,6 +3,93 @@
 Notable frontend changes, newest first. Working log, not a public release
 changelog — entries describe what changed and why.
 
+## 2026-09-25 (latest — testing + deployment review, Milestone 7 of the production build-out)
+
+### Added — test coverage for admin review-action dialogs and a small extraction
+
+Following the exact RTL pattern already established by
+`RejectApplicationDialog.test.tsx` (mock the mutation hook, assert
+disabled/enabled state and the exact payload sent):
+
+- `src/components/admin/RequestInfoDialog.test.tsx` (new, 3 tests) — note
+  required and trimmed before the mutation fires, matching Reject's reason
+  requirement.
+- `src/components/admin/ApproveApplicationDialog.test.tsx` (new, 3 tests)
+  — no confirmation-text gate (unlike Reject/RequestInfo, Approve needs no
+  free text), confirms it calls the mutation with just the applicationId
+  and surfaces the mutation's own error message on failure.
+- `src/components/admin/SuspendTherapistDialog.test.tsx` (new, 2 tests) —
+  covers both branches of this one dialog (`action: "suspend"` vs.
+  `"reactivate"`), confirming each calls its own distinct mutation hook
+  with the reason, and that they don't cross-fire.
+
+Also extracted `NotificationBell.tsx`'s inline `formatRelativeTime` into
+`src/lib/format-relative-time.ts` specifically so it could be unit-tested
+in isolation (`format-relative-time.test.ts`, new, 5 tests) — same reason
+`public-paths.ts` was pulled out of `proxy.ts` in Milestone 5. Writing the
+test caught a minor rounding quirk worth knowing about, not a bug: a
+timestamp exactly 30 seconds old rounds to "1m ago" rather than "just
+now" (`Math.round(30000 / 60000)` rounds `0.5` up) — acceptable for a
+coarse relative-time label, but the test had to target 10s instead of 30s
+to assert the "just now" branch correctly.
+
+Full suite after this pass: 14 test files, 81 tests, all green;
+`type-check` and `lint` both clean (same 5 pre-existing warnings as every
+prior milestone, no new ones).
+
+## 2026-09-25 (even later — patient/mobile polish, Milestone 6 of the production build-out)
+
+### Added — in-app notification bell (patient, therapist, admin sidebars)
+
+New `src/components/notifications/NotificationBell.tsx`, wired into all
+three existing sidebars (`AppSidebar`, `TherapistSidebar`, `AdminSidebar`)
+next to the logo. Backed by notification-service's new
+`GET/PUT /api/v1/notifications*` endpoints (`src/lib/notifications-api.ts`,
+`src/hooks/useNotifications.ts` — `useNotifications()` polls every 30s
+since there's no websocket for this feed). Unread-count badge (capped
+"9+"), hand-built dropdown panel — no Popover component exists in this
+repo yet, and installing one wasn't worth it for a single panel; styled to
+match the sidebars' existing neumorphic dark theme rather than looking
+like a generic default. Clicking a notification marks it read; a header
+"Mark all read" button clears the whole badge. Live-verified in a real
+browser as both a patient and a therapist account: badge, empty state,
+mark-read, and mark-all-read all confirmed against a running backend
+through Kong.
+
+### Added — Settings page: profile + notification preferences
+
+First UI for `src/lib/user-api.ts`'s `updateProfile`/
+`updateNotificationPreferences`/`fetchUserPreferences` wrappers, which had
+existed unused since an earlier milestone. One shared
+`src/components/settings/SettingsForm.tsx` mounted at two routes —
+`(app)/settings` (patient) and `therapist/settings` (therapist) — since
+the backend endpoints work identically for both roles and the form has no
+role-specific fields. Profile section (display name, bio) uses plain
+`useState` rather than react-hook-form, matching this app's other simple
+forms; deliberately avoids syncing server data into local state via a
+`useEffect` (would trip the `react-hooks/set-state-in-effect` lint rule
+under this repo's React Compiler config) by treating `null` local state as
+"not yet edited, fall back to server value." Only fields the user actually
+changed are sent, matching the backend's partial-update contract.
+Notification preferences render as three hand-built toggle switches (no
+Switch component installed here either) that save immediately on click,
+each with its own pending state. New "Settings" nav entry added to
+`AppSidebar` and `TherapistSidebar` (not `AdminSidebar` — admin settings
+are a separate, out-of-scope concern).
+
+Live-verified end-to-end in a real browser: edited and saved a display
+name + bio as a patient, confirmed a "Saved." confirmation, reloaded the
+page and confirmed the new name persisted (round-tripped through the real
+backend, not just local state); toggled a notification preference and
+confirmed its value flipped. Also verified the page degrades correctly
+for an account with no `TherapistProfile` row yet (a `GET
+/api/v1/users/me` 404) — shows a clear "Could not load your profile."
+banner with blank-but-still-editable inputs, rather than crashing; this
+was an edge case hit only by directly SQL-promoting a test account to
+THERAPIST to bypass the real application-approval flow for testing
+speed, not something the real approve flow (which always provisions a
+profile) would ever produce.
+
 ## 2026-09-25 (later)
 
 ### Added — `src/proxy.ts`, a fail-closed edge session gate
