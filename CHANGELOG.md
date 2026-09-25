@@ -3,6 +3,61 @@
 Notable frontend changes, newest first. Working log, not a public release
 changelog — entries describe what changed and why.
 
+## 2026-09-25 (final — pre-handoff QA pass)
+
+### Fixed — signup's Terms/Privacy checkbox started pre-checked
+
+`SignupForm.tsx`'s `useForm` had `terms: true` as its default value, so the
+"I agree to Mindora's Terms and Privacy Notice" checkbox rendered already
+checked on page load — a user could hit "Create my space" without ever
+affirmatively agreeing to anything. Not just a UX nit: for a platform
+handling health data, a pre-ticked consent checkbox isn't valid consent.
+Changed the default to `false`. Added `SignupForm.test.tsx` (new, 3
+tests) as a regression guard: checkbox starts unchecked, submission is
+blocked with a visible validation error until it's checked, and a single
+real click both registers and allows submission.
+
+While investigating, re-tested the "Radix Checkbox's first click doesn't
+register" quirk flagged (but explicitly not fixed) during earlier
+`/run`-skill browser verification. Under a realistic interaction pattern —
+a short pause after page load before clicking, same as an actual human
+would do, not a script racing the click against hydration — one real
+click on the checkbox now (and reliably) registers correctly, both in this
+new Jest test and in a fresh live Playwright check. Concluded this was a
+hydration-timing artifact specific to a script clicking immediately on
+page load, not a defect in the component or a real user-facing bug — no
+code change was needed for it beyond the default-value fix above, and
+this doesn't need a "wake-up click" workaround in future verification
+scripts.
+
+### Verified — full pre-handoff pass, every layer
+
+Before sending to the PO: full backend suite across all 9 services
+(`@mindora/*`, not just the 5 touched this build-out) — 15/15 tasks
+green, no pre-existing failures anywhere in the repo. Frontend
+`type-check`/`lint`/`test` — 15 suites, 84 tests, 0 errors, same 5
+pre-existing warnings as every prior milestone. Mobile (`mindora-v3`)
+`type-check` and `expo lint` — both clean (no test suite exists for that
+app; out of scope to build one from scratch in this pass).
+
+Live end-to-end smoke test in a real browser across all three roles
+against the running backend: patient (signup → today → check-in →
+therapy/browse → messages → reflect → settings → notification bell),
+therapist (schedule → dashboard → availability → patients → settings →
+notification bell), and admin (users → therapist applications list →
+application detail → analytics → notification bell). Specifically
+re-verified the admin review dialogs added in Milestone 7's test pass
+(Approve/Reject/Request-info) against a real `SUBMITTED` application in
+the running app, not just their unit tests — reject correctly requires a
+non-empty reason before the button enables. Zero unexpected console
+errors, zero crashes, zero broken layouts across all of the above; the
+only console errors seen anywhere were the already-understood, pre-
+existing ones (the initial silent-refresh-attempt 401 on first page load
+before any session cookie exists, and a `GET /users/me` 404 for a test
+account that was SQL-promoted to THERAPIST/ADMIN directly rather than
+through the real approval flow, which correctly shows a "Could not load
+your profile" banner rather than crashing).
+
 ## 2026-09-25 (latest — testing + deployment review, Milestone 7 of the production build-out)
 
 ### Added — test coverage for admin review-action dialogs and a small extraction
