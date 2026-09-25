@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  BarChart3,
+  Briefcase,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -17,7 +19,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/therapist-applications", label: "Therapist Applications", icon: Briefcase },
   { href: "/admin/moderation", label: "Moderation", icon: ListChecks },
   { href: "/admin/alerts", label: "Alerts", icon: AlertTriangle },
   { href: "/admin/audit-log", label: "Audit Log", icon: ScrollText },
