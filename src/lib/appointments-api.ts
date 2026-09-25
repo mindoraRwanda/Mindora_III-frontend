@@ -5,7 +5,12 @@ import type {
   AvailabilitySlot,
   BookedAppointment,
   SessionType,
+  TherapistAvailability,
+  TherapistDashboard,
+  TherapistPatientSummary,
   TherapistProfile,
+  TherapistTimeOff,
+  WorkingHoursWindow,
 } from "@/types/domain";
 
 interface TherapistListResponse {
@@ -25,6 +30,24 @@ interface AppointmentListResponse {
 interface AvailabilityResponse {
   therapistId: string;
   slots: AvailabilitySlot[];
+}
+
+interface TherapistTimeOffListResponse {
+  timeOff: TherapistTimeOff[];
+}
+
+// PUT /availability only echoes {timezone, workingHours} back - no timeOff,
+// unlike the full GET /availability response (TherapistAvailability).
+interface UpdateTherapistAvailabilityResponse {
+  timezone: string;
+  workingHours: WorkingHoursWindow[];
+}
+
+interface TherapistPatientListResponse {
+  patients: TherapistPatientSummary[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // GET /api/v1/users/therapists - User Service. Only returns isAcceptingPatients: true.
@@ -105,4 +128,65 @@ export function confirmAppointment(id: string): Promise<BookedAppointment> {
 // PUT /api/v1/appointments/:id/complete - therapist only.
 export function completeAppointment(id: string): Promise<BookedAppointment> {
   return apiFetch(`/api/v1/appointments/${id}/complete`, { method: "PUT" });
+}
+
+// GET /api/v1/appointments/dashboard - therapist only. Overview stats plus
+// today's CONFIRMED sessions.
+export function fetchTherapistDashboard(): Promise<TherapistDashboard> {
+  return apiFetch("/api/v1/appointments/dashboard");
+}
+
+// GET /api/v1/appointments/availability - therapist only, the caller's own
+// working hours + time off. Distinct from fetchAvailability above (that one
+// computes bookable slots for a given therapist, patient-facing).
+export function fetchTherapistAvailability(): Promise<TherapistAvailability> {
+  return apiFetch("/api/v1/appointments/availability");
+}
+
+// PUT /api/v1/appointments/availability - therapist only. Full replace:
+// always send the complete workingHours list, never a diff. Max 50 entries;
+// each dayOfWeek 0-6, endMinute > startMinute (zod 400 with fieldErrors on
+// violation).
+export function updateTherapistAvailability(body: {
+  timezone: string;
+  workingHours: WorkingHoursWindow[];
+}): Promise<UpdateTherapistAvailabilityResponse> {
+  return apiFetch("/api/v1/appointments/availability", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+// GET /api/v1/appointments/time-off - therapist only. Only future/ongoing blocks.
+export function fetchTherapistTimeOff(): Promise<TherapistTimeOffListResponse> {
+  return apiFetch("/api/v1/appointments/time-off");
+}
+
+// POST /api/v1/appointments/time-off - therapist only. endsAt must be after
+// startsAt (ISO datetimes).
+export function createTherapistTimeOff(body: {
+  startsAt: string;
+  endsAt: string;
+  reason?: string;
+}): Promise<TherapistTimeOff> {
+  return apiFetch("/api/v1/appointments/time-off", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+// DELETE /api/v1/appointments/time-off/:id - therapist only. 404 if it
+// doesn't belong to the caller.
+export function deleteTherapistTimeOff(id: string): Promise<null> {
+  return apiFetch(`/api/v1/appointments/time-off/${id}`, { method: "DELETE" });
+}
+
+// GET /api/v1/appointments/patients - therapist only. Only ever contains
+// patients with an actual appointment relationship to the caller
+// (backend-enforced).
+export function fetchTherapistPatients(params: {
+  page?: number;
+  limit?: number;
+}): Promise<TherapistPatientListResponse> {
+  return apiFetch(`/api/v1/appointments/patients${toQueryString(params)}`);
 }
