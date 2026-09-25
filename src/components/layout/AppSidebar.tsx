@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AlertTriangle, Calendar, Heart, Home, LogOut, MessageCircle, PenLine } from "lucide-react";
+import {
+  AlertTriangle,
+  Briefcase,
+  Calendar,
+  Heart,
+  Home,
+  LogOut,
+  MessageCircle,
+  PenLine,
+} from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +31,7 @@ const navItems = [
   { href: "/therapy", label: "Therapy", icon: Calendar },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/reflect", label: "Reflect", icon: PenLine },
+  { href: "/therapist-application", label: "Become a Therapist", icon: Briefcase },
 ];
 
 export function AppSidebar() {

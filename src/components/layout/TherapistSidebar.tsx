@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarClock, LogOut } from "lucide-react";
+import { CalendarClock, LayoutDashboard, LogOut, Users, Clock } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { cn } from "@/lib/utils";
 
-const navItems = [{ href: "/therapist", label: "Schedule", icon: CalendarClock }];
+const navItems = [
+  { href: "/therapist", label: "Schedule", icon: CalendarClock },
+  { href: "/therapist/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/therapist/availability", label: "Availability", icon: Clock },
+  { href: "/therapist/patients", label: "Patients", icon: Users },
+];
 
 export function TherapistSidebar() {
   const pathname = usePathname();
