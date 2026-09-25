@@ -11,8 +11,10 @@ import {
   LogOut,
   MessageCircle,
   PenLine,
+  Settings,
 } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
@@ -32,6 +34,7 @@ const navItems = [
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/reflect", label: "Reflect", icon: PenLine },
   { href: "/therapist-application", label: "Become a Therapist", icon: Briefcase },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -58,8 +61,9 @@ export function AppSidebar() {
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch bg-mindora-sidebar text-white">
-      <div className="px-5 py-5">
+      <div className="flex items-center justify-between px-5 py-5">
         <MindoraLogo variant="light" size="md" href="/today" />
+        <NotificationBell />
       </div>
 
       <nav className="flex flex-1 flex-col gap-1.5">

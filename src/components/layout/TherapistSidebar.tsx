@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarClock, LayoutDashboard, LogOut, Users, Clock } from "lucide-react";
+import { CalendarClock, LayoutDashboard, LogOut, Users, Clock, Settings } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ const navItems = [
   { href: "/therapist/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/therapist/availability", label: "Availability", icon: Clock },
   { href: "/therapist/patients", label: "Patients", icon: Users },
+  { href: "/therapist/settings", label: "Settings", icon: Settings },
 ];
 
 export function TherapistSidebar() {
@@ -36,8 +38,9 @@ export function TherapistSidebar() {
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch bg-mindora-sidebar text-white">
-      <div className="px-5 py-5">
+      <div className="flex items-center justify-between px-5 py-5">
         <MindoraLogo variant="light" size="md" />
+        <NotificationBell />
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3">

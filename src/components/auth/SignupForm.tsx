@@ -47,7 +47,10 @@ export function SignupForm() {
       name: "",
       email: "",
       password: "",
-      terms: true,
+      // Must start unchecked - a pre-ticked consent checkbox lets someone
+      // submit without ever affirmatively agreeing to anything, which isn't
+      // valid consent for a platform handling health data.
+      terms: false,
     },
   });
 
