@@ -89,6 +89,32 @@ export interface UserPreferencesResponse {
   notificationPreferences: NotificationPreferences;
 }
 
+// --- Real backend API types (Notification Service - in-app notifications) ---
+// See src/lib/notifications-api.ts. These sit alongside the existing admin-only
+// GET /api/v1/notifications/logs, but are callable by any authenticated role for
+// their own notifications. title/body are already human-readable display text
+// from the server, not raw eventType strings - render them directly.
+
+export interface NotificationItem {
+  id: string;
+  eventType: string;
+  title: string;
+  body: string;
+  channel: string;
+  status: string;
+  readAt: string | null;
+  createdAt: string;
+}
+
+// GET /api/v1/notifications?page=&limit=
+export interface NotificationsListResponse {
+  notifications: NotificationItem[];
+  total: number;
+  page: number;
+  limit: number;
+  unreadCount: number;
+}
+
 // --- Real backend API types (Mood Tracking Service) ---
 // See src/lib/mood-api.ts. Response shapes for everything but LogMoodRequest aren't
 // schema'd in the service's OpenAPI spec (prose descriptions only) - treat these as
