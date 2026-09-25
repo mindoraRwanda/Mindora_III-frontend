@@ -3,6 +3,51 @@
 Notable frontend changes, newest first. Working log, not a public release
 changelog — entries describe what changed and why.
 
+## 2026-09-25 (later)
+
+### Added — `src/proxy.ts`, a fail-closed edge session gate
+
+First middleware/proxy this app has ever had (`frontend.md` flagged the
+Next.js 16 `middleware.ts` → `proxy.ts` rename as something to watch for
+"if you add any" — confirmed via the installed `next@16.2.9`'s own
+constants and Next's docs that `proxy.ts` + `export default function
+proxy()` is the current, non-deprecated convention here, not
+`middleware.ts`). Closes a real, specific gap the original audit flagged:
+`RouteGuard` (`components/auth/RouteGuard.tsx`) only ever redirected
+client-side, after the page's JS had already loaded — a fully logged-out
+visitor hitting a protected URL directly still got the full page shell and
+JS bundle first. The proxy now redirects before any of that, at the edge.
+
+Deliberately narrow in what it checks: only whether the `refreshToken`
+httpOnly cookie is _present_ — not which role the session belongs to. The
+access token (which carries role) lives only in browser memory, never in a
+cookie, specifically to keep it out of reach of anything but this tab's
+own JS; giving the proxy role information would mean adding a new
+role-carrying cookie, a real security-architecture tradeoff that wasn't
+this pass's call to make unilaterally. Role-specific gating (e.g. a
+PATIENT hitting `/admin`) still happens exactly as before, client-side in
+`RouteGuard`, backed by the backend's own independent enforcement (the
+actual security boundary regardless of anything the frontend does).
+
+Fail-closed by design: a small explicit allowlist of public routes
+(`src/lib/public-paths.ts`, pure/tested in isolation since `proxy.ts`
+itself imports `next/server` and can't be unit-tested without extra Jest
+environment setup) — everything _not_ on that list requires a session.
+New protected routes need no changes here; only new genuinely-public
+routes need adding to the allowlist, which is the safer direction to be
+wrong in.
+
+Live-verified end-to-end in a real browser: unauthenticated visit to
+`/admin/analytics` → redirected to `/login?returnUrl=%2Fadmin%2Fanalytics`
+→ logging in from there lands back on `/admin/analytics` (reuses the exact
+`returnUrl` param `LoginForm`/`SignupForm` already read and validate via
+`lib/booking.ts`'s `safeReturnUrl`, no new redirect-target validation
+needed) → confirmed an authenticated admin hitting a THERAPIST-only page
+still gets correctly bounced to their own dashboard by the existing
+`RouteGuard` + a real 403 from the backend, not by the proxy (which only
+ever checks session presence) — all three layers doing their own job
+without interfering with each other.
+
 ## 2026-09-25
 
 ### Fixed — the Schedule page (`/therapist`, the default post-login landing for every therapist) has been silently broken this whole time
