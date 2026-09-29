@@ -430,8 +430,8 @@ export interface TherapistDocument {
   mimeType: string;
   sizeBytes: number;
   uploadedAt: string;
-  // Only present when fetched via the presigned-URL endpoint, or in the admin
-  // detail view - never on the plain applicant document list.
+  // Only present when fetched via the signed-download-URL endpoint, or in
+  // the admin detail view - never on the plain applicant document list.
   url?: string;
 }
 

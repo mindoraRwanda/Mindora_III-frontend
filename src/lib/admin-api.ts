@@ -187,7 +187,7 @@ export function fetchTherapistApplications(params: {
 }
 
 // GET /api/v1/admin/therapist-applications/:id - includes `documents` (each with a
-// presigned `url`) and `notes`.
+// short-lived signed download `url`) and `notes`.
 export function fetchTherapistApplication(id: string): Promise<TherapistApplicationDetailResponse> {
   return apiFetch(`/api/v1/admin/therapist-applications/${id}`);
 }

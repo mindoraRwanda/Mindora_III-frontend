@@ -73,8 +73,9 @@ export function uploadTherapistDocument(
 }
 
 // GET /api/v1/users/therapist-applications/:id/documents/:docId - `url` is a
-// presigned S3 URL valid for 5 minutes. Fetch fresh on every "view" click, never
-// cache/reuse it.
+// short-lived signed download link (backend streams the file from MongoDB
+// GridFS, not a real presigned URL - see user-service's object-storage.ts)
+// valid for 5 minutes. Fetch fresh on every "view" click, never cache/reuse it.
 export function fetchTherapistDocumentUrl(
   id: string,
   docId: string
