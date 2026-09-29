@@ -55,15 +55,40 @@ export default function AdminTherapistApplicationDetailPage() {
     if (!application) return;
     setViewError(null);
     setViewingDocId(docId);
+    // Open the tab synchronously, still inside the click's call stack -
+    // Chromium (and others) treat window.open() as a blocked popup once
+    // it's called after an await, even from a real click handler. Point
+    // this blank tab at the real URL once the fetch below resolves,
+    // rather than calling window.open() a second time post-await (found
+    // live: the post-await call opened a tab that never navigated
+    // anywhere, no error surfaced either).
+    //
+    // No "noopener" feature here deliberately - passing it makes
+    // window.open() return null (that's the whole point of noopener: no
+    // reference back), which would defeat keeping a handle to redirect
+    // below. Same live find as above - the first attempt at this fix
+    // passed noopener and silently got a null handle every time, falling
+    // through to the exact same broken post-await window.open() call
+    // this was meant to replace. Get a real handle first, then sever
+    // `opener` by hand to keep the same security property.
+    const tab = window.open("about:blank", "_blank");
+    if (tab) tab.opener = null;
     try {
       const detail = await fetchTherapistApplication(application.id);
       const doc = detail.application.documents?.find((d) => d.id === docId);
-      if (doc?.url) {
+      if (doc?.url && tab) {
+        tab.location.href = doc.url;
+      } else if (doc?.url) {
+        // Popup was blocked before we even got the URL - try once more
+        // directly; if the browser blocks this too, there's nothing left
+        // to fall back to short of a same-tab navigation.
         window.open(doc.url, "_blank", "noopener,noreferrer");
       } else {
+        tab?.close();
         setViewError("Could not get a link for this document.");
       }
     } catch (err) {
+      tab?.close();
       setViewError(err instanceof ApiError ? err.message : "Could not open this document.");
     } finally {
       setViewingDocId(null);

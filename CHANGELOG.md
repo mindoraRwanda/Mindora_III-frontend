@@ -3,6 +3,49 @@
 Notable frontend changes, newest first. Working log, not a public release
 changelog — entries describe what changed and why.
 
+## 2026-09-29 — Admin document viewer: fixed a real popup-blocking bug, found while verifying the backend's S3 → MongoDB migration
+
+### Fixed — `handleViewDocument` (admin therapist-application detail page) opened a popup that could silently never navigate
+
+`Mindora_V3`'s therapist-application document storage moved from S3 to
+MongoDB GridFS this pass (backend-only change, no API contract change:
+`GET .../documents/:docId` still returns `{ url, fileName, mimeType,
+expiresIn }`). Live end-to-end verification of that migration — clicking
+"View" on a real document as an admin, in a real browser, not just curl —
+surfaced a real, pre-existing bug in this page unrelated to the storage
+backend itself:
+
+`handleViewDocument` called `window.open(doc.url, ...)` _after_ `await
+fetchTherapistApplication(...)`. Browsers (Chromium included) only treat
+`window.open()` as an authorized user-gesture popup when it's called
+synchronously within the click's own call stack — once an `await` comes
+first, it's fair game to block, and blocked here meant the button just
+did nothing with no error surfaced anywhere.
+
+Fixed with the standard pattern: open a blank tab synchronously (still
+inside the click), keep the handle, and set its `location.href` once the
+fetch resolves. First attempt at this fix had its own bug, caught before
+shipping: passing the `"noopener"` window feature to the initial
+`window.open()` call makes it return `null` (the entire point of
+`noopener` is severing the reference back to the caller) - a null handle
+meant the code fell straight through to the exact same broken post-await
+`window.open()` call this was meant to replace. Fixed by opening without
+`noopener` to get a real handle, then setting `tab.opener = null` by hand
+afterward to get the same security property without losing the handle.
+
+Live-verified end-to-end against the real GridFS-backed download route
+through Kong: click → tab opens → navigates to the signed download URL →
+correct file loads. One test wrinkle worth recording, not a code issue:
+verifying this via Playwright initially looked broken specifically for
+PDF documents (tab stuck on `about:blank` forever, no errors) — isolated
+down to Chromium's built-in PDF viewer, which Playwright's page-tracking
+doesn't observe as a normal navigation (confirmed by testing the identical
+flow against a JPEG document instead, which navigated correctly on the
+first poll). A real user's browser still opens the PDF normally; this is
+purely a test-observability gap, not a bug, and doesn't need a workaround
+in the app code - only worth knowing if a future verification pass sees
+the same "stuck on blank" symptom against a PDF specifically.
+
 ## 2026-09-25 (final — pre-handoff QA pass)
 
 ### Fixed — signup's Terms/Privacy checkbox started pre-checked
