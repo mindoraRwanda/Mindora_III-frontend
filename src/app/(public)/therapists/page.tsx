@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { TherapistDirectory } from "@/components/therapists/TherapistDirectory";
 import { BackLink } from "@/components/public/BackLink";
+import { TherapistAvatar } from "@/components/therapists/TherapistCard";
+import { THERAPISTS } from "@/lib/mock-data/therapists";
 
 export default function TherapistsPage() {
   return (
@@ -15,18 +17,19 @@ export default function TherapistsPage() {
               </p>
               <div className="mt-3 flex items-center gap-3">
                 <div className="flex -space-x-2">
-                  {["AU", "EM", "DI", "KM"].map((initials) => (
+                  {THERAPISTS.slice(0, 4).map((therapist) => (
                     <span
-                      key={initials}
-                      className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-purple-panel bg-mindora-purple text-[10px] font-bold"
+                      key={therapist.id}
+                      className="rounded-full border-2 border-purple-panel text-[10px]"
                     >
-                      {initials}
+                      <TherapistAvatar therapist={therapist} size={32} />
                     </span>
                   ))}
                 </div>
                 <span className="flex items-center gap-2 text-sm text-white/90">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />6 therapists ready
-                  within 15 mins
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  {THERAPISTS.length} {THERAPISTS.length === 1 ? "therapist" : "therapists"} on
+                  Mindora
                 </span>
               </div>
             </div>
