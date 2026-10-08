@@ -1,7 +1,7 @@
 // Small "just now / 5m ago" label for the notification feed - not a
 // calendar, so intentionally coarse. No date-fns/dayjs dependency in this
 // repo; extracted from NotificationBell.tsx so it can be unit-tested in
-// isolation, same as src/lib/public-paths.ts was pulled out of proxy.ts.
+// isolation.
 export function formatRelativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const diffMin = Math.round(diffMs / 60000);
