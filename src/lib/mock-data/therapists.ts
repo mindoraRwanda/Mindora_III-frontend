@@ -4,13 +4,21 @@ export interface Therapist {
   id: string;
   name: string;
   title: string;
-  sessions: string;
-  rating: number;
-  reviews: number;
+  photo?: string;
+  bio?: string[];
+  languages?: string[];
+  inPerson?: boolean;
+  phone?: string;
+  email?: string;
+  // Marketplace stats - only shown when we actually have them, never
+  // placeholder numbers for a real practitioner.
+  sessions?: string;
+  rating?: number;
+  reviews?: number;
+  nearest?: string;
+  price60?: number;
+  price30?: number;
   specialisations: string[];
-  nearest: string;
-  price60: number;
-  price30: number;
   gender: TherapistGender;
   clientsChoice: boolean;
   availableToday: boolean;
@@ -31,110 +39,46 @@ export const SPECIALISATION_OPTIONS = [
   "Eating disorder",
 ] as const;
 
+// Static directory until the therapist pages are wired to user-service's
+// therapist profiles. Details come from the therapist's own profile sheet.
 export const THERAPISTS: Therapist[] = [
   {
-    id: "1",
-    name: "Dr. Aline Uwase",
-    title: "Psychologist",
-    sessions: "1000+",
-    rating: 4.9,
-    reviews: 253,
-    specialisations: ["Anxiety Disorders", "Depression"],
-    nearest: "Tuesday Aug 19 at 10:00 AM",
-    price60: 60,
-    price30: 45,
-    gender: "female",
-    clientsChoice: true,
-    availableToday: true,
-    availableThisWeek: true,
-    online: true,
-  },
-  {
-    id: "2",
-    name: "Dr. Eric Mugisha",
-    title: "Counselling Therapist",
-    sessions: "250+",
-    rating: 4.7,
-    reviews: 127,
-    specialisations: ["Mood Disorders", "Anxiety Disorders"],
-    nearest: "Thursday Aug 21 at 09:00 AM",
-    price60: 37,
-    price30: 27,
-    gender: "male",
-    clientsChoice: false,
-    availableToday: false,
-    availableThisWeek: true,
-    online: true,
-  },
-  {
-    id: "3",
-    name: "Dr. Patrick Habimana",
-    title: "Psychologist",
-    sessions: "1000+",
-    rating: 4.83,
-    reviews: 249,
-    specialisations: ["Anxiety Disorders", "PTSD"],
-    nearest: "Monday Aug 18 at 11:15 AM",
-    price60: 54,
-    price30: 38,
-    gender: "male",
-    clientsChoice: true,
-    availableToday: true,
-    availableThisWeek: true,
-    online: false,
-  },
-  {
-    id: "4",
-    name: "Dr. Diane Ingabire",
-    title: "Psychologist",
-    sessions: "1000+",
-    rating: 4.87,
-    reviews: 718,
-    specialisations: ["Addiction", "PTSD"],
-    nearest: "Sunday Aug 17 at 01:10 PM",
-    price60: 52,
-    price30: 30,
-    gender: "female",
-    clientsChoice: true,
-    availableToday: false,
-    availableThisWeek: true,
-    online: true,
-  },
-  {
-    id: "5",
-    name: "Dr. Olivier Nzeyimana",
-    title: "Psychiatrist",
-    sessions: "500+",
-    rating: 4.6,
-    reviews: 89,
-    specialisations: ["Depression", "Stress"],
-    nearest: "Wednesday Aug 20 at 02:00 PM",
-    price60: 70,
-    price30: 50,
-    gender: "male",
-    clientsChoice: false,
-    availableToday: true,
-    availableThisWeek: true,
-    online: true,
-  },
-  {
-    id: "6",
-    name: "Dr. Keza Mukamana",
+    id: "nsengiyumva-athanase",
+    name: "Nsengiyumva Athanase",
     title: "Clinical Psychologist",
-    sessions: "750+",
-    rating: 4.95,
-    reviews: 312,
-    specialisations: ["Couple therapy", "Mood Disorders"],
-    nearest: "Tuesday Aug 19 at 04:30 PM",
-    price60: 65,
-    price30: 48,
-    gender: "female",
-    clientsChoice: true,
-    availableToday: false,
-    availableThisWeek: true,
+    photo: "/images/therapists/nsengiyumva-athanase.jpg",
+    bio: [
+      "Psychological support is provided in a safe and supportive space for healing, emotional recovery, and personal growth through professional psychological care.",
+      "Support is available either face-to-face or online, depending on what feels most comfortable and accessible.",
+      "Services are offered in Kinyarwanda, English, and French, allowing people to express themselves freely in the language they prefer. Whether in-person or virtually, the goal is to ensure people feel heard, supported, and guided toward healing and resilience.",
+    ],
+    specialisations: [
+      "Individual therapy",
+      "Problem Management Plus (PM+)",
+      "Family therapy",
+      "Couple therapy",
+      "Motivational therapy",
+      "Trauma-focused therapy",
+      "Cognitive Behaviour Therapy (CBT)",
+      "Resilience Oriented Therapy (ROT)",
+    ],
+    languages: ["Kinyarwanda", "English", "French"],
+    inPerson: true,
     online: true,
+    phone: "+250 788 686 340",
+    email: "athanasensengiyumva@gmail.com",
+    gender: "male",
+    clientsChoice: false,
+    availableToday: false,
+    availableThisWeek: false,
   },
 ];
+
+export function sessionModes(therapist: Pick<Therapist, "online" | "inPerson">) {
+  return [therapist.inPerson ? "In-person" : null, therapist.online ? "Online" : null]
+    .filter(Boolean)
+    .join(" & ");
+}
 
 export function therapistInitials(name: string) {
   return name

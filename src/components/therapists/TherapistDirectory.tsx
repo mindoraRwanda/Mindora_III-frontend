@@ -63,9 +63,10 @@ export function TherapistDirectory() {
     });
 
     list = [...list].sort((a, b) => {
-      if (sort === "price") return a.price60 - b.price60;
-      if (sort === "sessions") return parseInt(b.sessions, 10) - parseInt(a.sessions, 10);
-      return b.rating - a.rating;
+      if (sort === "price") return (a.price60 ?? Infinity) - (b.price60 ?? Infinity);
+      if (sort === "sessions")
+        return parseInt(b.sessions ?? "0", 10) - parseInt(a.sessions ?? "0", 10);
+      return (b.rating ?? 0) - (a.rating ?? 0);
     });
 
     return list;
