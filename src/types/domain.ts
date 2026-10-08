@@ -89,6 +89,32 @@ export interface UserPreferencesResponse {
   notificationPreferences: NotificationPreferences;
 }
 
+// --- Real backend API types (Notification Service - in-app notifications) ---
+// See src/lib/notifications-api.ts. These sit alongside the existing admin-only
+// GET /api/v1/notifications/logs, but are callable by any authenticated role for
+// their own notifications. title/body are already human-readable display text
+// from the server, not raw eventType strings - render them directly.
+
+export interface NotificationItem {
+  id: string;
+  eventType: string;
+  title: string;
+  body: string;
+  channel: string;
+  status: string;
+  readAt: string | null;
+  createdAt: string;
+}
+
+// GET /api/v1/notifications?page=&limit=
+export interface NotificationsListResponse {
+  notifications: NotificationItem[];
+  total: number;
+  page: number;
+  limit: number;
+  unreadCount: number;
+}
+
 // --- Real backend API types (Mood Tracking Service) ---
 // See src/lib/mood-api.ts. Response shapes for everything but LogMoodRequest aren't
 // schema'd in the service's OpenAPI spec (prose descriptions only) - treat these as
@@ -257,6 +283,68 @@ export interface PlatformAnalytics {
   totalCrisisEvents: number | null;
 }
 
+// GET /api/v1/admin/analytics/detailed - aggregated in parallel from every
+// service, same as /analytics above. Each of users/therapists/appointments is
+// null (not an object of nulls) if that specific service was unreachable - the
+// endpoint always returns 200. registrationTrend/applicationTrend/sessionTrend
+// are sparse: a day with zero events is simply absent from the array, not a
+// zero-value entry. usersByRole/byStatus/statusBreakdown are objects keyed by
+// the relevant enum - a key with zero count is absent, not present with 0.
+export interface AnalyticsTrendPoint {
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
+export interface UserAnalytics {
+  totalUsers: number;
+  usersByRole: Partial<Record<UserRole, number>>;
+  newUsersInRange: number;
+  suspendedUsers: number;
+  dau: number;
+  wau: number;
+  mau: number;
+  registrationTrend: AnalyticsTrendPoint[];
+}
+
+export interface TherapistApplicationAnalytics {
+  byStatus: Partial<Record<TherapistApplicationStatus, number>>;
+  // 0-1 fractions, not already-formatted percentages.
+  approvalRate: number;
+  rejectionRate: number;
+  applicationTrend: AnalyticsTrendPoint[];
+}
+
+export interface TherapistAnalytics {
+  totalTherapists: number;
+  suspendedTherapists: number;
+  applications: TherapistApplicationAnalytics;
+}
+
+export interface AnalyticsSessionTrendPoint {
+  date: string; // YYYY-MM-DD
+  completed: number;
+  cancelled: number;
+  pending: number;
+  confirmed: number;
+}
+
+export interface AppointmentAnalytics {
+  totalAppointments: number;
+  completedAppointments: number;
+  statusBreakdown: Partial<Record<AppointmentStatus, number>>;
+  // 0-1 fractions, not already-formatted percentages.
+  completionRate: number;
+  cancellationRate: number;
+  sessionTrend: AnalyticsSessionTrendPoint[];
+}
+
+export interface DetailedAnalytics {
+  range: { from: string; to: string };
+  users: UserAnalytics | null;
+  therapists: TherapistAnalytics | null;
+  appointments: AppointmentAnalytics | null;
+}
+
 // --- Real backend API types (Messaging Service) ---
 // Realtime is Socket.io (src/lib/messaging-socket.ts); conversation lists, message
 // history/pagination, and presence lookups go through Kong as real REST (src/lib/
@@ -321,4 +409,147 @@ export interface ConversationListResponse {
 export interface ConversationHistoryResponse {
   messages: Message[];
   nextCursor: string | null;
+}
+
+// --- Real backend API types (Therapist Application feature) ---
+// Applicant-facing routes live under /api/v1/users/therapist-applications (User
+// Service, see src/lib/therapist-application-api.ts); admin routes live under
+// /api/v1/admin/therapist-applications and /api/v1/admin/therapists (Admin
+// Service, see src/lib/admin-api.ts).
+
+export type TherapistApplicationStatus =
+  "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "MORE_INFORMATION_REQUIRED";
+
+export type TherapistDocumentType = "LICENSE" | "CERTIFICATION" | "ID" | "OTHER";
+
+export interface TherapistDocument {
+  id: string;
+  applicationId: string;
+  documentType: TherapistDocumentType;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedAt: string;
+  // Only present when fetched via the signed-download-URL endpoint, or in
+  // the admin detail view - never on the plain applicant document list.
+  url?: string;
+}
+
+// Internal reviewer commentary - admin-only, appears in the admin detail
+// view's `notes[]` and is never returned to the applicant.
+export interface TherapistApplicationNote {
+  id: string;
+  applicationId: string;
+  authorId: string;
+  note: string;
+  createdAt: string;
+}
+
+export interface TherapistApplication {
+  id: string;
+  userId: string;
+  status: TherapistApplicationStatus;
+  fullName: string;
+  phoneNumber: string;
+  contactEmail: string;
+  professionalBio: string;
+  qualifications: string[];
+  certifications: string[];
+  licenseNumber: string;
+  licenseIssuingBody: string;
+  licenseExpiryDate: string | null;
+  professionalRegistrationNumber: string | null;
+  specialisations: string[];
+  yearsOfExperience: number;
+  languages: string[];
+  availabilitySummary: string | null;
+  location: string;
+  timezone: string;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  reviewedBy: string | null;
+  // Applicant-visible record of the last REJECTED/MORE_INFORMATION_REQUIRED
+  // decision - persisted (not just emailed) so the applicant can still see
+  // why on a later visit, not only in a one-off notification they may have
+  // missed. Only the one matching the current `status` is meaningful; the
+  // other is stale from a prior decision, if the application was resubmitted.
+  rejectionReason: string | null;
+  infoRequestNote: string | null;
+  createdAt: string;
+  updatedAt: string;
+  // Present on the applicant's GET /me and the admin detail view.
+  documents?: TherapistDocument[];
+  // Admin detail view only - never present on the applicant's GET /me.
+  notes?: TherapistApplicationNote[];
+}
+
+// --- Real backend API types (Appointment Service - therapist dashboard,
+// own-availability, and patients endpoints). See src/lib/appointments-api.ts.
+
+// GET /api/v1/appointments/dashboard - therapist only. todaysSessions items
+// are the ordinary BookedAppointment shape above (status=CONFIRMED, today
+// only) - there's no denormalized patient name on them, just patientId.
+export interface TherapistDashboard {
+  todaysSessions: BookedAppointment[];
+  pendingCount: number;
+  upcomingCount: number;
+  patientCount: number;
+}
+
+export interface WorkingHoursWindow {
+  dayOfWeek: number; // 0=Sunday..6=Saturday, matches JS Date.getDay()
+  startMinute: number; // minutes since midnight, Africa/Kigali local time (fixed UTC+2, no DST)
+  endMinute: number;
+}
+
+// GET /api/v1/appointments/availability (own schedule, therapist only) -
+// distinct from AvailabilitySlot above (GET .../availability/:therapistId),
+// which computes bookable slots for a patient rather than returning the
+// therapist's own working-hours configuration.
+export interface TherapistAvailability {
+  timezone: string;
+  workingHours: WorkingHoursWindow[];
+  timeOff: TherapistTimeOff[];
+}
+
+// GET/POST /api/v1/appointments/time-off, DELETE .../time-off/:id - therapist
+// only. GET only ever returns future/ongoing blocks.
+export interface TherapistTimeOff {
+  id: string;
+  startsAt: string;
+  endsAt: string;
+  reason: string | null;
+}
+
+// GET /api/v1/appointments/patients - therapist only. Only ever contains
+// patients the therapist has an actual appointment relationship with
+// (backend-enforced) - never render this as if it could list arbitrary
+// platform patients.
+export interface TherapistPatientSummary {
+  patientId: string;
+  userName: string | null;
+  totalSessions: number;
+  lastSessionAt: string | null;
+}
+
+// PUT /api/v1/users/therapist-applications/:id - partial update/autosave. Every
+// field optional; only keys present in the body are changed. Only allowed while
+// status is DRAFT or MORE_INFORMATION_REQUIRED, otherwise 409.
+export interface UpdateTherapistApplicationRequest {
+  fullName?: string;
+  phoneNumber?: string;
+  contactEmail?: string;
+  professionalBio?: string;
+  qualifications?: string[];
+  certifications?: string[];
+  licenseNumber?: string;
+  licenseIssuingBody?: string;
+  licenseExpiryDate?: string | null;
+  professionalRegistrationNumber?: string | null;
+  specialisations?: string[];
+  yearsOfExperience?: number;
+  languages?: string[];
+  availabilitySummary?: string | null;
+  location?: string;
+  timezone?: string;
 }

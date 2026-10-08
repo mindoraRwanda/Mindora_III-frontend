@@ -123,6 +123,56 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   return response.json();
 }
 
+// Variant of apiFetch for multipart uploads (e.g. therapist application
+// documents). Deliberately does not set Content-Type - the browser must set
+// it itself, with the multipart boundary, which it only does when it sees
+// the raw FormData body and no explicit header. Otherwise mirrors apiFetch
+// exactly: same auth header, same 401-refresh-and-retry, same ApiError shape.
+export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (inMemoryAccessToken) {
+    headers["Authorization"] = `Bearer ${inMemoryAccessToken}`;
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers,
+      body: formData,
+      credentials: "include",
+    });
+  } catch (networkError) {
+    console.error(`[api] POST ${path} - network error, no response received`, networkError);
+    throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
+  }
+
+  if (response.status === 401) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      headers["Authorization"] = `Bearer ${inMemoryAccessToken}`;
+      response = await fetch(`${API_URL}${path}`, {
+        method: "POST",
+        headers,
+        body: formData,
+        credentials: "include",
+      });
+    } else {
+      setAccessToken(null);
+    }
+  }
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Unknown error" }));
+    const message = error.message ?? error.error ?? `API error: ${response.status}`;
+    console.error(`[api] POST ${path} - ${response.status} ${message}`);
+    throw new ApiError(message, response.status, error.errors, error);
+  }
+
+  if (response.status === 204) return null as T;
+  return response.json();
+}
+
 async function refreshAccessToken(): Promise<boolean> {
   try {
     // HttpOnly cookie is sent automatically via credentials: 'include'

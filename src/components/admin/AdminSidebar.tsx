@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   AlertTriangle,
+  BarChart3,
+  Briefcase,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -12,12 +14,15 @@ import {
   Users,
 } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/therapist-applications", label: "Therapist Applications", icon: Briefcase },
   { href: "/admin/moderation", label: "Moderation", icon: ListChecks },
   { href: "/admin/alerts", label: "Alerts", icon: AlertTriangle },
   { href: "/admin/audit-log", label: "Audit Log", icon: ScrollText },
@@ -41,8 +46,9 @@ export function AdminSidebar() {
 
   return (
     <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch gap-6 bg-mindora-sidebar px-3.5 pb-5 pt-6 text-white shadow-[10px_0_26px_rgba(33,29,44,0.22)]">
-      <div className="px-1.5">
+      <div className="flex items-center justify-between px-1.5">
         <MindoraLogo variant="light" size="md" />
+        <NotificationBell />
       </div>
 
       <nav className="flex flex-1 flex-col gap-1.5">
