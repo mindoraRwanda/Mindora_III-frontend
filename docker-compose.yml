@@ -4,11 +4,13 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.mindora.rw}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-https://api.mindora.rw}
     ports:
-      - "3000:3000"
+      - "${HOST_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     restart: unless-stopped
 
   app-dev:
@@ -21,10 +23,11 @@ services:
       - /app/node_modules
       - /app/.next
     ports:
-      - "3000:3000"
+      - "${HOST_PORT:-3000}:3000"
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://api.mindora.rw}
+      - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-https://api.mindora.rw}
     command: npm run dev
     profiles:
       - dev

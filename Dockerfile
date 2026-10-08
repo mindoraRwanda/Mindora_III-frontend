@@ -12,6 +12,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# NEXT_PUBLIC_* values are inlined into the client bundle at build time, so
+# they must be present here - setting them only at runtime has no effect.
+ARG NEXT_PUBLIC_API_URL=https://api.mindora.rw
+ARG NEXT_PUBLIC_SOCKET_URL=https://api.mindora.rw
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build

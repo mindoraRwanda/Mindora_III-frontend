@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Check, MessageCircle, Play, Plus, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RedirectIfAuthenticated } from "@/components/landing/RedirectIfAuthenticated";
 import { HOW_IT_WORKS, SPECIALITIES } from "@/lib/mock-data/public";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ const TRUST_AVATARS = [
 export default function LandingPage() {
   return (
     <div className="bg-white">
+      <RedirectIfAuthenticated />
       <Hero />
       <Specialities />
       <HowItWorks />
