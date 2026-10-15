@@ -7,6 +7,7 @@ import { useModerationQueue } from "@/hooks/useAdmin";
 export default function AdminModerationPage() {
   const { data, isLoading, isError, error } = useModerationQueue({ limit: 50 });
   const isServiceUnavailable = error instanceof ApiError && error.status === 503;
+  const reports = data?.reports ?? [];
 
   return (
     <div className="min-h-full bg-[#eae6f4] px-6 py-8 lg:px-10 lg:py-10">
@@ -29,14 +30,35 @@ export default function AdminModerationPage() {
           <p className="mb-1 text-[15px] font-bold text-foreground">Moderation is unavailable</p>
           <p className="max-w-sm text-[13.5px] text-muted-foreground">
             {isServiceUnavailable
-              ? "Community Service isn't deployed yet, so there's nothing to moderate."
+              ? "Community Service is unreachable right now. Try again shortly."
               : (error?.message ?? "Could not load the moderation queue.")}
           </p>
         </div>
       )}
 
-      {!isLoading && !isError && (data?.reports.length ?? 0) === 0 && (
+      {!isLoading && !isError && reports.length === 0 && (
         <p className="py-8 text-center text-[13.5px] text-muted-foreground">No pending reports.</p>
+      )}
+
+      {!isLoading && !isError && reports.length > 0 && (
+        <div className="overflow-hidden rounded-[26px] bg-white p-2 shadow-[10px_10px_22px_#cbc4de,-10px_-10px_22px_#fdfbff]">
+          {reports.map((report) => (
+            <div key={report._id} className="rounded-[18px] px-3.5 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-[14px] font-semibold text-foreground">
+                  Reported {report.contentType.toLowerCase()}
+                </p>
+                <p className="text-[12px] text-muted-foreground">
+                  {new Date(report.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <p className="mt-1 text-[13.5px] text-foreground">{report.reason}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">
+                Content: {report.contentId}
+              </p>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

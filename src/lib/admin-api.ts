@@ -24,12 +24,17 @@ interface SuspendReactivateResponse {
   auditLogId: string;
 }
 
-// Community Service isn't deployed in V1, so this proxies to something that's always down -
-// callers should expect a 503 in the current environment.
-interface ModerationReport {
-  id: string;
-  postId: string;
+// Proxied verbatim from Community Service's Mongo `Report` documents, so the
+// id is Mongo's `_id` (pass it to resolveModerationReport) and the reported
+// item is `contentId` + `contentType`, not a `postId`. Callers should still
+// expect a 503 if Community Service is unreachable.
+export interface ModerationReport {
+  _id: string;
+  contentId: string;
+  contentType: "POST" | "COMMENT";
+  reportedBy: string;
   reason: string;
+  status: "PENDING" | "REVIEWED" | "DISMISSED";
   createdAt: string;
 }
 
@@ -47,8 +52,10 @@ interface AlertListResponse {
   limit: number;
 }
 
+// Admin Service returns the list under `auditLogs` (matches its OpenAPI spec) -
+// not `entries`.
 interface AuditLogResponse {
-  entries: AuditLogEntry[];
+  auditLogs: AuditLogEntry[];
   total: number;
   page: number;
   limit: number;

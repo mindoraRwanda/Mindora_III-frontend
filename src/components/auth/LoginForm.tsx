@@ -32,6 +32,7 @@ export function LoginForm() {
   const { login } = useAuth();
   const [apiError, setApiError] = useState<string | null>(null);
   const returnUrl = searchParams.get("returnUrl");
+  const justReset = searchParams.get("reset") === "1";
 
   const {
     register,
@@ -76,6 +77,12 @@ export function LoginForm() {
         <h1 className="text-3xl font-bold tracking-tight">Good to see you again.</h1>
         <p className="mt-2 text-muted-foreground">Sign in to continue your gentle practice.</p>
 
+        {justReset && (
+          <p role="status" className="mt-6 rounded-xl bg-mindora-purple-pale p-3 text-sm">
+            Your password was updated. Sign in with your new password.
+          </p>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
@@ -95,7 +102,10 @@ export function LoginForm() {
               <label htmlFor="password" className="text-sm font-medium">
                 Password
               </label>
-              <Link href="#" className="text-xs font-medium text-mindora-purple hover:underline">
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-mindora-purple hover:underline"
+              >
                 Forgot?
               </Link>
             </div>

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   addTherapistApplicationNote,
@@ -28,6 +28,18 @@ function errorMessage(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback;
 }
 
+// Approving, suspending or reactivating a therapist changes more than the
+// application list: the account's role/active state (admin users list), the
+// audit log (every one of these actions writes an entry), and which therapists
+// patients can discover (GET /users/therapists filters on approval and
+// suspension). Refresh all of them, not just the list the button lives on.
+function invalidateTherapistLifecycle(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+  queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+  queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
+  queryClient.invalidateQueries({ queryKey: ["therapists"] });
+}
+
 export function useAdminUsers(params: {
   role?: "PATIENT" | "THERAPIST" | "ADMIN";
   isActive?: boolean;
@@ -46,6 +58,7 @@ export function useSuspendUser() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => suspendUser(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("User suspended.");
     },
   });
@@ -57,6 +70,7 @@ export function useReactivateUser() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => reactivateUser(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("User reactivated.");
     },
   });
@@ -84,6 +98,7 @@ export function useResolveModerationReport() {
     }) => resolveModerationReport(id, { decision, reason }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "moderation"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("Report resolved.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not resolve this report.")),
@@ -137,6 +152,7 @@ export function useResolveAlert() {
     mutationFn: (id: string) => resolveAlert(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "alerts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("Alert resolved.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not resolve this alert.")),
@@ -172,7 +188,7 @@ export function useApproveTherapistApplication() {
   return useMutation({
     mutationFn: (id: string) => approveTherapistApplication(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+      invalidateTherapistLifecycle(queryClient);
       toast.success("Application approved.");
     },
     onError: (error) => {
@@ -197,6 +213,7 @@ export function useRejectTherapistApplication() {
       rejectTherapistApplication(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("Application rejected.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not reject this application.")),
@@ -210,6 +227,7 @@ export function useRequestTherapistApplicationInfo() {
       requestTherapistApplicationInfo(id, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("More information requested.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not request more information.")),
@@ -223,6 +241,7 @@ export function useAddTherapistApplicationNote() {
       addTherapistApplicationNote(id, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "audit-log"] });
       toast.success("Note added.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not add this note.")),
@@ -234,7 +253,7 @@ export function useSuspendTherapist() {
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => suspendTherapist(id, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+      invalidateTherapistLifecycle(queryClient);
       toast.success("Therapist suspended.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not suspend this therapist.")),
@@ -246,7 +265,7 @@ export function useReactivateTherapist() {
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) => reactivateTherapist(id, reason),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "therapist-applications"] });
+      invalidateTherapistLifecycle(queryClient);
       toast.success("Therapist reactivated.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not reactivate this therapist.")),
