@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
 import { MATCH_REASONS } from "@/lib/mock-data/public";
-import { THERAPISTS, matchesSpecialisation } from "@/lib/mock-data/therapists";
+import { matchesSpecialisation, type Therapist } from "@/lib/public-therapists";
 import { cn } from "@/lib/utils";
 
 const reasonIcons = [
@@ -75,7 +75,13 @@ const reasonToSpecialisation: Record<string, string> = {
   child: "Mood disorder",
 };
 
-export function GetMatchedFlow() {
+export function GetMatchedFlow({
+  therapists,
+  loadError = false,
+}: {
+  therapists: Therapist[];
+  loadError?: boolean;
+}) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [reasons, setReasons] = useState<string[]>([]);
@@ -86,15 +92,17 @@ export function GetMatchedFlow() {
   const [errors, setErrors] = useState<Record<number, string>>({});
 
   const firstReason = MATCH_REASONS.find((item) => item.id === reasons[0]);
-  const matched = useMemo(() => {
+  // Matches on specialisation only - the public directory has no gender or
+  // availability data to match the other answers against. With no exact
+  // match, other listed therapists are offered, and the heading says so.
+  const { matched, exactMatch } = useMemo(() => {
     const spec = reasonToSpecialisation[reasons[0]] ?? firstReason?.label;
-    const filtered = THERAPISTS.filter((therapist) => {
-      if (gender === "male" || gender === "female") return therapist.gender === gender;
-      return true;
-    }).filter((therapist) => matchesSpecialisation(therapist.specialisations, spec));
-    const list = filtered.length >= 3 ? filtered : THERAPISTS;
-    return list.slice(0, 3);
-  }, [firstReason?.label, gender, reasons]);
+    const filtered = therapists.filter((therapist) =>
+      matchesSpecialisation(therapist.specialisations, spec)
+    );
+    const exact = filtered.length > 0;
+    return { matched: (exact ? filtered : therapists).slice(0, 3), exactMatch: exact };
+  }, [firstReason?.label, reasons, therapists]);
 
   function toggleReason(id: string) {
     setReasons((current) =>
@@ -319,15 +327,39 @@ export function GetMatchedFlow() {
 
             {step === 5 ? (
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">We found therapists for you</h1>
-                <p className="mt-2 text-[#6B7280]">
-                  Therapists specialising in {firstReason?.label ?? "your selected needs"}
-                </p>
-                <div className="mt-8 space-y-4">
-                  {matched.map((therapist) => (
-                    <TherapistCard key={therapist.id} therapist={therapist} />
-                  ))}
-                </div>
+                {loadError ? (
+                  <div role="alert">
+                    <h1 className="text-3xl font-bold tracking-tight">
+                      We couldn&apos;t load our therapists
+                    </h1>
+                    <p className="mt-2 text-[#6B7280]">Please refresh the page in a moment.</p>
+                  </div>
+                ) : matched.length === 0 ? (
+                  <div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                      No therapists are listed yet
+                    </h1>
+                    <p className="mt-2 text-[#6B7280]">Please check back soon.</p>
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                      {exactMatch
+                        ? "We found therapists for you"
+                        : "Therapists available on Mindora"}
+                    </h1>
+                    <p className="mt-2 text-[#6B7280]">
+                      {exactMatch
+                        ? `Therapists specialising in ${firstReason?.label ?? "your selected needs"}`
+                        : `None of our therapists list ${firstReason?.label ?? "your selected needs"} yet, but they may still be able to help.`}
+                    </p>
+                    <div className="mt-8 space-y-4">
+                      {matched.map((therapist) => (
+                        <TherapistCard key={therapist.id} therapist={therapist} />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             ) : null}
           </motion.div>

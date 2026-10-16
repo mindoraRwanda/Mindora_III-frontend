@@ -34,6 +34,21 @@ export interface TherapistProfile {
   photoUrl: string | null;
 }
 
+// User Service's anonymous directory (GET /api/v1/users/public/therapists and
+// /public/therapists/:userId) returns only this public-safe subset, and only
+// for approved, non-suspended therapists who are accepting patients.
+export type PublicTherapistProfile = Pick<
+  TherapistProfile,
+  "userId" | "userName" | "bio" | "specialisation" | "languages" | "photoUrl"
+>;
+
+export interface PublicTherapistListResponse {
+  therapists: PublicTherapistProfile[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // The Appointment Service's own appointment shape - only carries therapistId
 // (see TherapistProfile.userId to resolve a name), not a denormalized name/initials.
 export interface BookedAppointment {

@@ -3,10 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -17,60 +14,55 @@ import {
 import { TherapistCard } from "@/components/therapists/TherapistCard";
 import {
   SPECIALISATION_OPTIONS,
-  THERAPISTS,
   matchesSpecialisation,
-} from "@/lib/mock-data/therapists";
+  type Therapist,
+} from "@/lib/public-therapists";
 import { Button } from "@/components/ui/button";
 
-type SortKey = "rating" | "price" | "sessions";
-
-export function TherapistDirectory() {
+// Filters only on what User Service's public directory actually returns:
+// name, specialisation and languages. Availability, gender, ratings and
+// prices aren't exposed by any backend service, so there's nothing to filter.
+export function TherapistDirectory({
+  therapists,
+  loadError = false,
+}: {
+  therapists: Therapist[];
+  loadError?: boolean;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortKey>("rating");
-  const [availability, setAvailability] = useState<string[]>([]);
-  const [date, setDate] = useState("");
   const specialisation = searchParams.get("specialisation") ?? "";
-  const [duration, setDuration] = useState("all");
-  const [gender, setGender] = useState("all");
+  const language = searchParams.get("language") ?? "";
 
-  function toggleAvailability(value: string) {
-    setAvailability((current) =>
-      current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
-    );
+  const languageOptions = useMemo(
+    () => [...new Set(therapists.flatMap((therapist) => therapist.languages))].sort(),
+    [therapists]
+  );
+
+  function setParam(key: string, value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set(key, value);
+    else params.delete(key);
+    router.replace(params.toString() ? `/therapists?${params}` : "/therapists");
   }
 
   function clearFilters() {
-    setAvailability([]);
-    setDate("");
-    setDuration("all");
-    setGender("all");
     setQuery("");
     router.replace("/therapists");
   }
 
-  const therapists = useMemo(() => {
-    let list = THERAPISTS.filter((therapist) => {
-      const haystack = `${therapist.name} ${therapist.title}`.toLowerCase();
-      if (query && !haystack.includes(query.toLowerCase())) return false;
-      if (!matchesSpecialisation(therapist.specialisations, specialisation || null)) return false;
-      if (availability.includes("Today") && !therapist.availableToday) return false;
-      if (availability.includes("This Week") && !therapist.availableThisWeek) return false;
-      if (availability.includes("Online") && !therapist.online) return false;
-      if (gender !== "all" && therapist.gender !== gender) return false;
-      return true;
-    });
-
-    list = [...list].sort((a, b) => {
-      if (sort === "price") return (a.price60 ?? Infinity) - (b.price60 ?? Infinity);
-      if (sort === "sessions")
-        return parseInt(b.sessions ?? "0", 10) - parseInt(a.sessions ?? "0", 10);
-      return (b.rating ?? 0) - (a.rating ?? 0);
-    });
-
-    return list;
-  }, [availability, gender, query, sort, specialisation]);
+  const filtered = useMemo(
+    () =>
+      therapists.filter((therapist) => {
+        if (query && !therapist.name.toLowerCase().includes(query.toLowerCase())) return false;
+        if (!matchesSpecialisation(therapist.specialisations, specialisation || null)) return false;
+        // Exact match, same as the endpoint's `languages: { has }` filter.
+        if (language && !therapist.languages.includes(language)) return false;
+        return true;
+      }),
+    [language, query, specialisation, therapists]
+  );
 
   return (
     <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -78,41 +70,12 @@ export function TherapistDirectory() {
         <h2 className="text-lg font-bold text-mindora-purple">Filters</h2>
 
         <section className="mt-6">
-          <h3 className="text-sm font-semibold">Availability</h3>
-          <div className="mt-3 space-y-3">
-            {["Today", "This Week", "Online"].map((option) => (
-              <label key={option} className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={availability.includes(option)}
-                  onCheckedChange={() => toggleAvailability(option)}
-                />
-                {option}
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold">Specific date or range</h3>
-          <Input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            className="mt-3 h-11"
-          />
-        </section>
-
-        <section className="mt-6">
           <h3 className="text-sm font-semibold">Areas of interest</h3>
           <Select
             value={specialisation || "all"}
-            onValueChange={(value) => {
-              const next = value === "all" ? "" : value;
-              const params = new URLSearchParams(searchParams.toString());
-              if (next) params.set("specialisation", next);
-              else params.delete("specialisation");
-              router.replace(params.toString() ? `/therapists?${params}` : "/therapists");
-            }}
+            onValueChange={(value) =>
+              setParam("specialisation", !value || value === "all" ? "" : value)
+            }
           >
             <SelectTrigger className="mt-3 h-11">
               <SelectValue placeholder="Select Specialisation" />
@@ -129,35 +92,23 @@ export function TherapistDirectory() {
         </section>
 
         <section className="mt-6">
-          <h3 className="text-sm font-semibold">Duration</h3>
-          <RadioGroup value={duration} onValueChange={setDuration} className="mt-3">
-            {[
-              ["all", "All"],
-              ["30", "30 Min"],
-              ["60", "60 Min"],
-            ].map(([value, label]) => (
-              <label key={value} className="flex items-center gap-2 text-sm">
-                <RadioGroupItem value={value} id={`duration-${value}`} />
-                <Label htmlFor={`duration-${value}`}>{label}</Label>
-              </label>
-            ))}
-          </RadioGroup>
-        </section>
-
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold">Therapist Gender</h3>
-          <RadioGroup value={gender} onValueChange={setGender} className="mt-3">
-            {[
-              ["all", "All"],
-              ["male", "Male"],
-              ["female", "Female"],
-            ].map(([value, label]) => (
-              <label key={value} className="flex items-center gap-2 text-sm">
-                <RadioGroupItem value={value} id={`gender-${value}`} />
-                <Label htmlFor={`gender-${value}`}>{label}</Label>
-              </label>
-            ))}
-          </RadioGroup>
+          <h3 className="text-sm font-semibold">Language</h3>
+          <Select
+            value={language || "all"}
+            onValueChange={(value) => setParam("language", !value || value === "all" ? "" : value)}
+          >
+            <SelectTrigger className="mt-3 h-11">
+              <SelectValue placeholder="Any language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Any language</SelectItem>
+              {languageOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </section>
 
         <button
@@ -170,29 +121,31 @@ export function TherapistDirectory() {
       </aside>
 
       <div>
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Therapist Name or Title"
-              className="h-11 pl-10"
-            />
-          </div>
-          <Select value={sort} onValueChange={(value) => setSort(value as SortKey)}>
-            <SelectTrigger className="h-11 w-full sm:w-52">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rating">Rating</SelectItem>
-              <SelectItem value="price">Price (low to high)</SelectItem>
-              <SelectItem value="sessions">Sessions</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="relative mb-6">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Therapist name"
+            aria-label="Search therapists by name"
+            className="h-11 pl-10"
+          />
         </div>
 
-        {therapists.length === 0 ? (
+        {loadError ? (
+          <div
+            role="alert"
+            className="rounded-xl border border-dashed border-border bg-[#F9F6FF] p-10 text-center"
+          >
+            <p className="font-semibold">We couldn&apos;t load our therapists right now</p>
+            <p className="mt-1 text-sm text-[#6B7280]">Please refresh the page in a moment.</p>
+          </div>
+        ) : therapists.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-[#F9F6FF] p-10 text-center">
+            <p className="font-semibold">No therapists are listed yet</p>
+            <p className="mt-1 text-sm text-[#6B7280]">Please check back soon.</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-[#F9F6FF] p-10 text-center">
             <p className="font-semibold">No therapists match these filters</p>
             <p className="mt-1 text-sm text-[#6B7280]">
@@ -204,7 +157,7 @@ export function TherapistDirectory() {
           </div>
         ) : (
           <div className="space-y-4">
-            {therapists.map((therapist) => (
+            {filtered.map((therapist) => (
               <TherapistCard key={therapist.id} therapist={therapist} />
             ))}
           </div>
