@@ -6,3 +6,8 @@ out
 public
 coverage
 *.lock
+# Independent applications (each has its own configuration/toolchain)
+/CHATBOT_WEB_CLIENT/**
+/DASHBOARD_VII/**
+/MINDORA_WEB_APP/**
+/OFFICIAL_WEBSITE/**
