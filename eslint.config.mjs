@@ -14,6 +14,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Generated directories
     "coverage/**",
+    // Independent sub-apps have their own package manifests and lint configs.
+    "CHATBOT_WEB_CLIENT/**",
+    "DASHBOARD_VII/**",
+    "MINDORA_WEB_APP/**",
+    "OFFICIAL_WEBSITE/**",
   ]),
 ]);
 

@@ -46,3 +46,10 @@ package-lock.json
 .claude/
 CLAUDE.md
 AG
+# Independent frontend applications in this repository
+**/node_modules/
+**/.next/
+**/dist/
+**/coverage/
+**/.turbo/
+**/*.tsbuildinfo
