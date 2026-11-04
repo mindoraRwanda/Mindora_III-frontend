@@ -1,73 +1,12 @@
-# Mindora III - Frontend
+# MINDORA Final Frontend Source Package
 
-Next.js 16 frontend for the Mindora III project.
+This release preserves four separately identified client-facing source projects:
 
-## Tech stack
+- `MINDORA_WEB_APP/` — the existing Next.js MINDORA web application.
+- `OFFICIAL_WEBSITE/` — the separately maintained official marketing website.
+- `DASHBOARD_VII/` — the supplied Vite/React dashboard; its legacy API routes still need V3 staging mapping.
+- `CHATBOT_WEB_CLIENT/` — the React client supplied with the Python conversational-therapy module.
 
-| Category         | Library                             |
-| ---------------- | ----------------------------------- |
-| Framework        | Next.js 16 (App Router, TypeScript) |
-| Styling          | Tailwind CSS v4                     |
-| Data fetching    | Axios + TanStack Query v5           |
-| State            | Zustand v5                          |
-| Forms            | React Hook Form + Zod               |
-| Testing          | Jest + React Testing Library        |
-| CI               | GitHub Actions                      |
-| Containerisation | Docker (multi-stage)                |
+Read each project's README and `.env.example` before running it. The dashboard, official website, main web app and chatbot client are separate applications and have not been represented as one tested deployment. Use the declared Node runtime for each app. The V3 backend requires Node.js >=24.16.0. Full frontend installs, builds and browser E2E tests remain required in staging.
 
-## Getting started
-
-```bash
-cp .env.example .env.local     # fill in your values
-npm install
-npm run dev                     # http://localhost:3000
-```
-
-## Scripts
-
-| Command                 | Description         |
-| ----------------------- | ------------------- |
-| `npm run dev`           | Start dev server    |
-| `npm run build`         | Production build    |
-| `npm run test`          | Run tests           |
-| `npm run test:coverage` | Tests with coverage |
-| `npm run lint`          | Run ESLint          |
-| `npm run format`        | Run Prettier        |
-| `npm run type-check`    | TypeScript check    |
-
-## Docker
-
-```bash
-# Production
-docker compose up app
-
-# Development (with hot-reload)
-docker compose --profile dev up app-dev
-```
-
-## Project structure
-
-```
-src/
-  app/           Next.js App Router pages and layouts
-  components/    Reusable UI components
-  hooks/         Custom React hooks (useGet, usePost, etc.)
-  lib/           Core utilities (axios client, query client)
-  providers/     React context providers
-  store/         Zustand global state
-  types/         Shared TypeScript types
-  __tests__/     Tests
-```
-
-## Environment variables
-
-See `.env.example` for all available variables. Set `NEXT_PUBLIC_API_URL` to your backend URL.
-
-## CI
-
-GitHub Actions runs on every push/PR to `main` and `develop`:
-
-1. **Lint & Type Check** - ESLint + TypeScript
-2. **Tests** - Jest with coverage artifact
-3. **Build** - Next.js production build
-4. **Docker Build** - only on `main`
+The Shezlong website is a design reference only. No pixel-perfect screenshot match is claimed.
