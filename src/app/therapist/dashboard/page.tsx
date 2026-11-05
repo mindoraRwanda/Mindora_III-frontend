@@ -18,7 +18,7 @@ function fmtTime(iso: string): string {
 }
 
 function formatSessionType(type: BookedAppointment["sessionType"]): string {
-  return type === "VIDEO" ? "Video call" : "Audio call";
+  return type === "VIDEO" ? "Video call" : type === "IN_PERSON" ? "In person" : "Chat";
 }
 
 function patientLabel(patientId: string): string {

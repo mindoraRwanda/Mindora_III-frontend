@@ -34,6 +34,7 @@ export function TherapistAvatar({
       <Image
         src={therapist.photo}
         alt={therapist.name}
+        unoptimized={therapist.photo.startsWith("http")}
         width={size}
         height={size}
         className="shrink-0 rounded-full object-cover"
@@ -100,7 +101,7 @@ export function TherapistCard({
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-[#F9F6FF] px-3 py-1 text-xs font-medium text-mindora-purple"
+                className="rounded-full bg-[#F1F9F8] px-3 py-1 text-xs font-medium text-mindora-purple"
               >
                 {tag}
               </span>
@@ -149,7 +150,7 @@ export function TherapistCard({
                 <Link href={`/therapists/${therapist.id}`}>View Profile</Link>
               </Button>
             )}
-            <BookNowButton therapistId={therapist.id} className="h-10 sm:flex-1" />
+            <BookNowButton therapistId={therapist.userId ?? therapist.id} className="h-10 sm:flex-1" />
           </div>
         </div>
       </div>

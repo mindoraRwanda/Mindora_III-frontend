@@ -16,7 +16,7 @@ export interface RegisterRequest {
 
 export type AppointmentStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
-export type SessionType = "VIDEO" | "AUDIO";
+export type SessionType = "VIDEO" | "IN_PERSON" | "CHAT";
 
 // --- Real backend API types (Appointment Service + User Service) ---
 // See src/lib/appointments-api.ts for the endpoints these are fetched from.
@@ -420,7 +420,7 @@ export interface ConversationHistoryResponse {
 export type TherapistApplicationStatus =
   "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "MORE_INFORMATION_REQUIRED";
 
-export type TherapistDocumentType = "LICENSE" | "CERTIFICATION" | "ID" | "OTHER";
+export type TherapistDocumentType = "CV" | "LICENSE" | "DIPLOMA" | "CERTIFICATION" | "ID" | "OTHER";
 
 export interface TherapistDocument {
   id: string;

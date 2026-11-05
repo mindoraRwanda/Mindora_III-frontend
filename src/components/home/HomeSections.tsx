@@ -5,7 +5,7 @@ export function HomeHeroPortrait() {
   return (
     <div className="relative h-full w-full">
       <Image
-        src="/images/doctor-image.png"
+        src="/images/doctor-image.webp"
         alt="A friendly therapist holding a clipboard, ready to help"
         fill
         className="scale-[1.0] object-contain object-bottom object-center"

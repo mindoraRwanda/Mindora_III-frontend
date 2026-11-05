@@ -22,11 +22,11 @@ export default function TestsPage() {
           scientifically validated but do not replace expert diagnosis or professional advice.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full bg-[#F9F6FF] px-3 py-1.5 text-xs font-semibold text-mindora-purple">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#F1F9F8] px-3 py-1.5 text-xs font-semibold text-mindora-purple">
             <FlaskConical className="h-3.5 w-3.5" />
             Scientific
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-[#F9F6FF] px-3 py-1.5 text-xs font-semibold text-mindora-purple">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#F1F9F8] px-3 py-1.5 text-xs font-semibold text-mindora-purple">
             <ShieldCheck className="h-3.5 w-3.5" />
             Trusted
           </span>

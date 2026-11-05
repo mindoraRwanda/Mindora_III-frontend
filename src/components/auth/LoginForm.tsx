@@ -26,7 +26,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -55,7 +55,7 @@ export function LoginForm() {
     setApiError(null);
     try {
       const user = await login(data.email, data.password);
-      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
+      router.push(therapistMode && user.role === "PATIENT" ? "/therapist-application" : returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
       setApiError(
         err instanceof ApiError ? err.message : "Something went wrong. Please try again."
@@ -73,8 +73,8 @@ export function LoginForm() {
           Welcome back
         </span>
 
-        <h1 className="text-3xl font-bold tracking-tight">Good to see you again.</h1>
-        <p className="mt-2 text-muted-foreground">Sign in to continue your gentle practice.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{therapistMode ? "Therapist sign in" : "Good to see you again."}</h1>
+        <p className="mt-2 text-muted-foreground">{therapistMode ? "Sign in to manage your application or therapist dashboard." : "Sign in to continue your gentle practice."}</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           <div className="space-y-2">
@@ -95,8 +95,8 @@ export function LoginForm() {
               <label htmlFor="password" className="text-sm font-medium">
                 Password
               </label>
-              <Link href="#" className="text-xs font-medium text-mindora-purple hover:underline">
-                Forgot?
+              <Link href="/forgot-password" className="text-xs font-medium text-mindora-purple hover:underline">
+                Forgot password?
               </Link>
             </div>
             <PasswordInput id="password" value={password} {...register("password")} />
@@ -147,7 +147,7 @@ export function LoginForm() {
         <p className="mt-8 text-center text-sm text-muted-foreground">
           New to Mindora?{" "}
           <Link
-            href={returnUrl ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}` : "/signup"}
+            href={therapistMode ? "/therapist/signup" : returnUrl ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}` : "/signup"}
             className="font-semibold text-mindora-purple hover:underline"
           >
             Create a free account

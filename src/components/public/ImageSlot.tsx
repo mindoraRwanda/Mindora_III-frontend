@@ -41,7 +41,7 @@ export function ImageSlot({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-mindora-purple/25 bg-[#F9F6FF] px-4 py-6 text-center",
+        "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-mindora-purple/25 bg-[#F1F9F8] px-4 py-6 text-center",
         className
       )}
     >

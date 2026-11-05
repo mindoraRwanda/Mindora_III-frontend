@@ -21,13 +21,14 @@ import { dashboardPathForRole } from "@/lib/roles";
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
   email: z.string().email("Please enter a valid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters").regex(/^(?=.*[A-Za-z])(?=.*\d).{8,128}$/, "Use at least 8 characters with letters and numbers"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
   terms: z.boolean().refine((val) => val === true, { message: "You must agree to continue" }),
-});
+}).refine((values) => values.password === values.confirmPassword, { path: ["confirmPassword"], message: "Passwords do not match." });
 
 type SignupForm = z.infer<typeof signupSchema>;
 
-export function SignupForm() {
+export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { register: registerAccount } = useAuth();
@@ -47,6 +48,7 @@ export function SignupForm() {
       name: "",
       email: "",
       password: "",
+      confirmPassword: "",
       // Must start unchecked - a pre-ticked consent checkbox lets someone
       // submit without ever affirmatively agreeing to anything, which isn't
       // valid consent for a platform handling health data.
@@ -66,7 +68,7 @@ export function SignupForm() {
         role: "PATIENT",
         userName: data.name,
       });
-      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
+      router.push(therapistFlow ? "/therapist-application/new" : returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {
         const formFieldForServerField: Record<string, keyof SignupForm> = {
@@ -101,7 +103,7 @@ export function SignupForm() {
         <p className="text-[13px] text-muted-foreground">
           Have an account?{" "}
           <Link
-            href={returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : "/login"}
+            href={therapistFlow ? "/therapist/login" : returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : "/login"}
             className="font-semibold text-mindora-purple hover:underline"
           >
             Sign in
@@ -111,7 +113,7 @@ export function SignupForm() {
 
       <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center py-8">
         <h1 className="text-[32px] font-bold leading-tight tracking-tight text-foreground">
-          Create your gentle space.
+          {therapistFlow ? "Apply to join our therapist network." : "Create your gentle space."}
         </h1>
         <p className="mt-2 text-[14px] text-muted-foreground">
           Takes about 40 seconds - no clinical forms, promise.
@@ -147,6 +149,13 @@ export function SignupForm() {
             {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
           </div>
 
+          <div className="space-y-1.5">
+            <label htmlFor="confirmPassword" className="text-[13px] font-medium text-foreground/80">Confirm password</label>
+            <PasswordInput id="confirmPassword" value={watch("confirmPassword")} {...register("confirmPassword")} />
+            {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
+          </div>
+          <p className="text-xs text-muted-foreground">Use at least 8 characters, including letters and numbers.</p>
+
           <div className="flex items-start gap-3 pt-1">
             <Checkbox
               id="terms"
@@ -171,7 +180,7 @@ export function SignupForm() {
             size="lg"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Creating your space..." : "Create my space"}
+            {isSubmitting ? "Creating your space..." : therapistFlow ? "Create account and apply" : "Create my space"}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </form>

@@ -6,3 +6,6 @@ out
 public
 coverage
 *.lock
+
+# Separate legacy apps; they have their own build tools and CI.
+/companion_apps/**

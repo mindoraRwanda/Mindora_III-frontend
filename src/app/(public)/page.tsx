@@ -32,7 +32,7 @@ function Hero() {
     <section className="relative overflow-hidden px-4 py-14 sm:px-6 lg:py-20">
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full bg-[#F9F6FF]"
+        className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full bg-[#F1F9F8]"
       />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
@@ -97,7 +97,7 @@ function Hero() {
               {["Compassionate", "Confidential", "Evidence-based"].map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 rounded-full bg-[#F9F6FF] px-2.5 py-1 text-[11px] font-medium text-mindora-purple"
+                  className="inline-flex items-center gap-1 rounded-full bg-[#F1F9F8] px-2.5 py-1 text-[11px] font-medium text-mindora-purple"
                 >
                   {tag === "Confidential" ? <Check className="h-3 w-3" /> : null}
                   {tag}
@@ -132,7 +132,7 @@ function Specialities() {
               <Link
                 key={item.label}
                 href={href}
-                className="flex items-center gap-3 rounded-xl bg-white px-4 py-5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#F9F6FF] hover:shadow-md"
+                className="flex items-center gap-3 rounded-xl bg-white px-4 py-5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#F1F9F8] hover:shadow-md"
               >
                 <span className="flex h-10 w-10 items-center justify-center text-mindora-purple">
                   <Icon className="h-6 w-6" strokeWidth={1.6} />
@@ -214,7 +214,7 @@ function WhyMindora() {
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <article className="flex min-h-[420px] flex-col justify-between overflow-hidden rounded-2xl bg-[#F5F3FF] p-5 md:row-span-2">
+          <article className="flex min-h-[420px] flex-col justify-between overflow-hidden rounded-2xl bg-[#E8F5F4] p-5 md:row-span-2">
             <Image
               src="/images/landing/phone-checkin.png"
               alt="Mindora daily check-in on a phone"
@@ -230,7 +230,7 @@ function WhyMindora() {
             </div>
           </article>
 
-          <article className="flex items-end justify-between rounded-2xl bg-[#F5F3FF] p-6 lg:col-span-2">
+          <article className="flex items-end justify-between rounded-2xl bg-[#E8F5F4] p-6 lg:col-span-2">
             <div>
               <p className="text-4xl font-bold tracking-tight sm:text-5xl">10,000+</p>
               <p className="mt-2 text-sm text-[#6B7280]">People supported on their care journey</p>
@@ -248,7 +248,7 @@ function WhyMindora() {
             </div>
           </article>
 
-          <article className="rounded-2xl bg-[#F9F6FF] p-6">
+          <article className="rounded-2xl bg-[#F1F9F8] p-6">
             <p className="text-4xl font-bold">
               4.9 <Star className="mb-1 inline h-7 w-7 fill-amber-400 text-amber-400" />
             </p>
@@ -257,7 +257,7 @@ function WhyMindora() {
             </p>
           </article>
 
-          <article className="relative rounded-2xl bg-[#F5F3FF] p-6">
+          <article className="relative rounded-2xl bg-[#E8F5F4] p-6">
             <Play className="absolute right-5 top-5 h-8 w-8 rounded-full bg-[#1A1A1A] p-2 text-white" />
             <p className="text-4xl font-bold">96%</p>
             <p className="mt-2 max-w-[200px] text-sm text-[#6B7280]">

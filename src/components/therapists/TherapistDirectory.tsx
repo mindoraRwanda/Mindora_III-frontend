@@ -2,214 +2,109 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
-import {
-  SPECIALISATION_OPTIONS,
-  THERAPISTS,
-  matchesSpecialisation,
-} from "@/lib/mock-data/therapists";
+import { SPECIALISATION_OPTIONS, matchesSpecialisation } from "@/lib/mock-data/therapists";
 import { Button } from "@/components/ui/button";
+import { useTherapists } from "@/hooks/useTherapists";
+import { toTherapistCard } from "@/lib/therapist-view";
 
-type SortKey = "rating" | "price" | "sessions";
+type SortKey = "recommended" | "name";
 
 export function TherapistDirectory() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortKey>("rating");
-  const [availability, setAvailability] = useState<string[]>([]);
-  const [date, setDate] = useState("");
+  const [language, setLanguage] = useState("all");
+  const [sort, setSort] = useState<SortKey>("recommended");
   const specialisation = searchParams.get("specialisation") ?? "";
-  const [duration, setDuration] = useState("all");
-  const [gender, setGender] = useState("all");
-
-  function toggleAvailability(value: string) {
-    setAvailability((current) =>
-      current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
-    );
-  }
+  const { data, isLoading, isError, error, refetch } = useTherapists({
+    specialisation: specialisation || undefined,
+    language: language === "all" ? undefined : language,
+  });
 
   function clearFilters() {
-    setAvailability([]);
-    setDate("");
-    setDuration("all");
-    setGender("all");
     setQuery("");
+    setLanguage("all");
     router.replace("/therapists");
   }
 
-  const therapists = useMemo(() => {
-    let list = THERAPISTS.filter((therapist) => {
-      const haystack = `${therapist.name} ${therapist.title}`.toLowerCase();
-      if (query && !haystack.includes(query.toLowerCase())) return false;
-      if (!matchesSpecialisation(therapist.specialisations, specialisation || null)) return false;
-      if (availability.includes("Today") && !therapist.availableToday) return false;
-      if (availability.includes("This Week") && !therapist.availableThisWeek) return false;
-      if (availability.includes("Online") && !therapist.online) return false;
-      if (gender !== "all" && therapist.gender !== gender) return false;
-      return true;
+  const languageOptions = useMemo(() => {
+    const options = new Set<string>();
+    (data?.therapists ?? []).forEach((therapist) => {
+      (therapist.languages ?? (therapist.languagePreference ? [therapist.languagePreference] : [])).forEach((item) => options.add(item));
     });
+    return Array.from(options).sort((a, b) => a.localeCompare(b));
+  }, [data]);
 
-    list = [...list].sort((a, b) => {
-      if (sort === "price") return (a.price60 ?? Infinity) - (b.price60 ?? Infinity);
-      if (sort === "sessions")
-        return parseInt(b.sessions ?? "0", 10) - parseInt(a.sessions ?? "0", 10);
-      return (b.rating ?? 0) - (a.rating ?? 0);
-    });
-
-    return list;
-  }, [availability, gender, query, sort, specialisation]);
+  const therapists = useMemo(() =>
+    (data?.therapists ?? [])
+      .map(toTherapistCard)
+      .filter((therapist) => {
+        const searchable = `${therapist.name} ${therapist.title} ${therapist.specialisations.join(" ")} ${(therapist.languages ?? []).join(" ")}`.toLowerCase();
+        return (!query || searchable.includes(query.toLowerCase())) && matchesSpecialisation(therapist.specialisations, specialisation || null);
+      })
+      .sort((a, b) => sort === "name" ? a.name.localeCompare(b.name) : 0),
+    [data, query, specialisation, sort],
+  );
 
   return (
     <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="h-fit rounded-xl border border-border bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-bold text-mindora-purple">Filters</h2>
-
+      <aside className="h-fit rounded-2xl border border-border bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 text-mindora-purple" />
+          <h2 className="text-lg font-bold text-mindora-purple">Find your therapist</h2>
+        </div>
         <section className="mt-6">
-          <h3 className="text-sm font-semibold">Availability</h3>
-          <div className="mt-3 space-y-3">
-            {["Today", "This Week", "Online"].map((option) => (
-              <label key={option} className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={availability.includes(option)}
-                  onCheckedChange={() => toggleAvailability(option)}
-                />
-                {option}
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold">Specific date or range</h3>
-          <Input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            className="mt-3 h-11"
-          />
-        </section>
-
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold">Areas of interest</h3>
-          <Select
-            value={specialisation || "all"}
-            onValueChange={(value) => {
-              const next = value === "all" ? "" : value;
-              const params = new URLSearchParams(searchParams.toString());
-              if (next) params.set("specialisation", next);
-              else params.delete("specialisation");
-              router.replace(params.toString() ? `/therapists?${params}` : "/therapists");
-            }}
-          >
-            <SelectTrigger className="mt-3 h-11">
-              <SelectValue placeholder="Select Specialisation" />
-            </SelectTrigger>
+          <h3 className="text-sm font-semibold">Area of support</h3>
+          <Select value={specialisation || "all"} onValueChange={(value) => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (value !== "all") params.set("specialisation", value);
+            else params.delete("specialisation");
+            router.replace(params.toString() ? `/therapists?${params.toString()}` : "/therapists");
+          }}>
+            <SelectTrigger className="mt-3 h-11"><SelectValue placeholder="All specialities" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Select Specialisation</SelectItem>
-              {SPECIALISATION_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">All specialities</SelectItem>
+              {SPECIALISATION_OPTIONS.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
             </SelectContent>
           </Select>
         </section>
-
         <section className="mt-6">
-          <h3 className="text-sm font-semibold">Duration</h3>
-          <RadioGroup value={duration} onValueChange={setDuration} className="mt-3">
-            {[
-              ["all", "All"],
-              ["30", "30 Min"],
-              ["60", "60 Min"],
-            ].map(([value, label]) => (
-              <label key={value} className="flex items-center gap-2 text-sm">
-                <RadioGroupItem value={value} id={`duration-${value}`} />
-                <Label htmlFor={`duration-${value}`}>{label}</Label>
-              </label>
-            ))}
-          </RadioGroup>
+          <h3 className="text-sm font-semibold">Language</h3>
+          <Select value={language} onValueChange={setLanguage}>
+            <SelectTrigger className="mt-3 h-11"><SelectValue placeholder="Any language" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Any language</SelectItem>
+              {languageOptions.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </section>
-
-        <section className="mt-6">
-          <h3 className="text-sm font-semibold">Therapist Gender</h3>
-          <RadioGroup value={gender} onValueChange={setGender} className="mt-3">
-            {[
-              ["all", "All"],
-              ["male", "Male"],
-              ["female", "Female"],
-            ].map(([value, label]) => (
-              <label key={value} className="flex items-center gap-2 text-sm">
-                <RadioGroupItem value={value} id={`gender-${value}`} />
-                <Label htmlFor={`gender-${value}`}>{label}</Label>
-              </label>
-            ))}
-          </RadioGroup>
-        </section>
-
-        <button
-          type="button"
-          onClick={clearFilters}
-          className="mt-6 text-sm font-medium text-mindora-purple hover:underline"
-        >
-          Clear filters
-        </button>
+        <Button variant="ghost" size="sm" className="mt-5" onClick={clearFilters}>Clear filters</Button>
       </aside>
 
-      <div>
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <section aria-label="Therapists">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Therapist Name or Title"
-              className="h-11 pl-10"
-            />
+            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by therapist, language or speciality" className="h-12 rounded-xl pl-10" />
           </div>
           <Select value={sort} onValueChange={(value) => setSort(value as SortKey)}>
-            <SelectTrigger className="h-11 w-full sm:w-52">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
+            <SelectTrigger className="h-12 w-full rounded-xl sm:w-48"><SelectValue placeholder="Sort by" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="rating">Rating</SelectItem>
-              <SelectItem value="price">Price (low to high)</SelectItem>
-              <SelectItem value="sessions">Sessions</SelectItem>
+              <SelectItem value="recommended">Recommended</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
             </SelectContent>
           </Select>
         </div>
-
-        {therapists.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-[#F9F6FF] p-10 text-center">
-            <p className="font-semibold">No therapists match these filters</p>
-            <p className="mt-1 text-sm text-[#6B7280]">
-              Try clearing a filter or searching another name.
-            </p>
-            <Button className="mt-4" size="sm" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {therapists.map((therapist) => (
-              <TherapistCard key={therapist.id} therapist={therapist} />
-            ))}
-          </div>
-        )}
-      </div>
+        {isLoading ? <div className="space-y-4" aria-label="Loading therapists"><div className="h-44 animate-pulse rounded-2xl bg-mindora-purple-bg" /><div className="h-44 animate-pulse rounded-2xl bg-mindora-purple-bg" /></div> : null}
+        {isError ? <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6"><p className="font-semibold text-red-800">We could not load therapists right now.</p><p className="mt-1 text-sm text-red-700">{error instanceof Error ? error.message : "Please try again shortly."}</p><Button className="mt-4" onClick={() => void refetch()}>Try again</Button></div> : null}
+        {!isLoading && !isError && therapists.length === 0 ? <div className="rounded-2xl border border-dashed border-border bg-mindora-purple-bg p-10 text-center"><p className="font-semibold">No approved therapists match these filters yet.</p><p className="mt-1 text-sm text-muted-foreground">Try another search or clear your filters.</p><Button className="mt-4" size="sm" onClick={clearFilters}>Clear filters</Button></div> : null}
+        {!isLoading && !isError && therapists.length > 0 ? <div className="space-y-4">{therapists.map((therapist) => <TherapistCard key={therapist.id} therapist={therapist} />)}</div> : null}
+        {data ? <p className="mt-5 text-xs text-muted-foreground">Showing {therapists.length} of {data.total} approved therapists accepting patients.</p> : null}
+      </section>
     </div>
   );
 }

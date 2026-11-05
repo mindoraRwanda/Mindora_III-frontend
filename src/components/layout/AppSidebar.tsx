@@ -108,14 +108,17 @@ export function AppSidebar() {
         <div className="rounded-[22px] bg-mindora-sidebar p-4.5 shadow-[6px_6px_14px_#171320,-6px_-6px_14px_#2b2638]">
           <div className="flex items-center gap-2 text-[13.5px] font-bold text-white">
             <AlertTriangle className="h-4 w-4 shrink-0 text-[#e9b8f5]" />
-            Need someone now?
+            Contact MINDORA
           </div>
           <p className="mt-2 text-[12px] leading-relaxed text-[#a29ab6]">
-            24/7 crisis line - always answered.
+            Monday to Friday, 9am to 5pm.
           </p>
           <Button asChild className="mt-2.5 h-9 w-full text-xs" size="sm">
-            <a href="tel:0783974066">Call 0 783 974 066</a>
+            <a href="tel:+250783974066">+250 783 974-066</a>
           </Button>
+          <a href="mailto:info@mindora.rw" className="mt-2 block text-center text-xs text-[#a29ab6] underline">
+            info@mindora.rw
+          </a>
         </div>
 
         <div className="flex items-center gap-2.5 rounded-2xl px-2 py-2 transition-shadow hover:shadow-[5px_5px_12px_#171320,-5px_-5px_12px_#2b2638]">
