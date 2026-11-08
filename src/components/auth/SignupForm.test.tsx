@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,17 +56,20 @@ describe("SignupForm", () => {
 
     await user.type(screen.getByLabelText(/what should we call you/i), "Theodora");
     await user.type(screen.getByLabelText("Email"), "theodora@example.com");
-    await user.type(screen.getByLabelText("Password"), "a-valid-password");
+    await user.type(screen.getByLabelText("Password"), "a-valid-password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "a-valid-password123");
     await user.click(screen.getByRole("checkbox", { name: /i agree to mindora/i }));
     await user.click(screen.getByRole("button", { name: /create my space/i }));
 
-    expect(register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        email: "theodora@example.com",
-        password: "a-valid-password",
-        role: "PATIENT",
-        userName: "Theodora",
-      })
+    await waitFor(() =>
+      expect(register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: "theodora@example.com",
+          password: "a-valid-password123",
+          role: "PATIENT",
+          userName: "Theodora",
+        })
+      )
     );
   });
 });
