@@ -67,12 +67,12 @@ jobs:
             "src/lib/therapist-view.ts" \
             "tsconfig.json"
 
-      - name: Verify Prettier
+      - name: Format the temporary workflow and verify Prettier
         run: |
+          npx prettier --write ".github/workflows/temporary-format-and-verify.yml"
           npm run format:check
           git diff --check
-          echo "FORMATTED_MAIN_YML_BASE64=$(base64 -w0 .github/workflows/main.yml)" >> "$GITHUB_OUTPUT"
-        id: format
+          echo "FORMATTED_MAIN_YML_BASE64=$(base64 -w0 .github/workflows/main.yml)"
 
       - name: Commit code formatting and signup fix
         run: |
