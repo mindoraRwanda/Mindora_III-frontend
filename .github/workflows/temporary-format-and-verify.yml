@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/frontend-prettier-signup-20261108
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
