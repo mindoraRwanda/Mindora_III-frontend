@@ -1,0 +1,95 @@
+name: Temporary frontend Prettier autofix
+
+on:
+  push:
+    branches:
+      - fix/frontend-prettier-format-20261108
+
+permissions:
+  contents: write
+
+jobs:
+  prettier-autofix:
+    name: Format frontend and verify Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          ref: fix/frontend-prettier-format-20261108
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply Prettier to files reported by CI
+        run: |
+          npx prettier --write \
+            ".github/workflows/main.yml" \
+            "FRONTEND_PAGE_MAPPING.md" \
+            "FRONTEND_VISUAL_REGRESSION_REPORT.md" \
+            "src/app/(app)/appointments/book/[id]/page.tsx" \
+            "src/app/(public)/therapists/[id]/page.tsx" \
+            "src/app/(public)/therapists/page.tsx" \
+            "src/app/forgot-password/page.tsx" \
+            "src/app/reset-password/page.tsx" \
+            "src/app/therapist/login/page.tsx" \
+            "src/app/therapist/signup/page.tsx" \
+            "src/app/welcome/page.tsx" \
+            "src/components/auth/LoginForm.tsx" \
+            "src/components/auth/SignupForm.tsx" \
+            "src/components/home/NextSessionCard.tsx" \
+            "src/components/layout/AppSidebar.tsx" \
+            "src/components/layout/PublicNavbar.tsx" \
+            "src/components/layout/Sidebar.tsx" \
+            "src/components/matching/GetMatchedFlow.tsx" \
+            "src/components/therapists/TherapistCard.tsx" \
+            "src/contexts/AuthContext.tsx" \
+            "src/lib/auth-api.ts" \
+            "src/lib/therapist-view.ts" \
+            "tsconfig.json"
+
+      - name: Verify formatting
+        run: |
+          npm run format:check
+          git diff --check
+
+      - name: Commit formatting-only changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            ".github/workflows/main.yml" \
+            "FRONTEND_PAGE_MAPPING.md" \
+            "FRONTEND_VISUAL_REGRESSION_REPORT.md" \
+            "src/app/(app)/appointments/book/[id]/page.tsx" \
+            "src/app/(public)/therapists/[id]/page.tsx" \
+            "src/app/(public)/therapists/page.tsx" \
+            "src/app/forgot-password/page.tsx" \
+            "src/app/reset-password/page.tsx" \
+            "src/app/therapist/login/page.tsx" \
+            "src/app/therapist/signup/page.tsx" \
+            "src/app/welcome/page.tsx" \
+            "src/components/auth/LoginForm.tsx" \
+            "src/components/auth/SignupForm.tsx" \
+            "src/components/home/NextSessionCard.tsx" \
+            "src/components/layout/AppSidebar.tsx" \
+            "src/components/layout/PublicNavbar.tsx" \
+            "src/components/layout/Sidebar.tsx" \
+            "src/components/matching/GetMatchedFlow.tsx" \
+            "src/components/therapists/TherapistCard.tsx" \
+            "src/contexts/AuthContext.tsx" \
+            "src/lib/auth-api.ts" \
+            "src/lib/therapist-view.ts" \
+            "tsconfig.json"
+          if git diff --cached --quiet; then
+            echo "No formatting changes were necessary."
+          else
+            git commit -m "style(frontend): fix Prettier formatting"
+            git push origin HEAD:fix/frontend-prettier-format-20261108
+          fi
