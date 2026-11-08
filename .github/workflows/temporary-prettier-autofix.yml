@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/frontend-prettier-format-20261108
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
