@@ -69,7 +69,10 @@ export function Sidebar() {
             <Phone size={12} />
             +250 783 974-066
           </a>
-          <a href="mailto:info@mindora.rw" className="mt-2 block text-center text-xs text-text-muted underline">
+          <a
+            href="mailto:info@mindora.rw"
+            className="mt-2 block text-center text-xs text-text-muted underline"
+          >
             info@mindora.rw
           </a>
         </div>

@@ -116,7 +116,10 @@ export function AppSidebar() {
           <Button asChild className="mt-2.5 h-9 w-full text-xs" size="sm">
             <a href="tel:+250783974066">+250 783 974-066</a>
           </Button>
-          <a href="mailto:info@mindora.rw" className="mt-2 block text-center text-xs text-[#a29ab6] underline">
+          <a
+            href="mailto:info@mindora.rw"
+            className="mt-2 block text-center text-xs text-[#a29ab6] underline"
+          >
             info@mindora.rw
           </a>
         </div>

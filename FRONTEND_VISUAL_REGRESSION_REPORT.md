@@ -6,7 +6,6 @@ The source package includes the previous Shezlong-inspired MINDORA UI implementa
 
 Before production, run the frontend on the declared Node.js runtime (24.16.0), execute the project test/build scripts, and capture comparable screenshots at desktop, tablet and mobile viewports for the routes listed in `FRONTEND_PAGE_MAPPING.md`.
 
-
 ## Updated contact interaction check — 1 November 2026
 
 - The official website Contact page now renders the public phone card as `tel:+250783974066` and the email card as `mailto:info@mindora.rw`.

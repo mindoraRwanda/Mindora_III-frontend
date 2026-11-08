@@ -29,13 +29,18 @@ export function logout(): Promise<void> {
   return apiFetch("/api/v1/auth/logout", { method: "POST" });
 }
 
-
 // POST /api/v1/auth/forgot-password — response intentionally avoids account enumeration.
 export function forgotPassword(email: string): Promise<{ message: string }> {
-  return apiFetch("/api/v1/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+  return apiFetch("/api/v1/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
 
 // POST /api/v1/auth/reset-password — server validates a single-use 15-minute token.
 export function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-  return apiFetch("/api/v1/auth/reset-password", { method: "POST", body: JSON.stringify({ token, newPassword }) });
+  return apiFetch("/api/v1/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, newPassword }),
+  });
 }
