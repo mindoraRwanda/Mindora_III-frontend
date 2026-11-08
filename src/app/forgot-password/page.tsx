@@ -48,8 +48,8 @@ export default function ForgotPasswordPage() {
       <MindoraLogo />
       <h1 className="mt-8 text-3xl font-bold">Reset your password</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Enter the email address associated with your account. If an account
-        exists, MINDORA will request a secure, time-limited reset email.
+        Enter the email address associated with your account. If an account exists, MINDORA will
+        request a secure, time-limited reset email.
       </p>
 
       {submitted ? (
@@ -57,9 +57,8 @@ export default function ForgotPasswordPage() {
           role="status"
           className="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-5 text-sm text-teal-900"
         >
-          If an account matches this address, a reset message may be sent. This
-          page cannot confirm delivery. Check your inbox and spam folder, and
-          contact MINDORA support if you need help.
+          If an account matches this address, a reset message may be sent. This page cannot confirm
+          delivery. Check your inbox and spam folder, and contact MINDORA support if you need help.
         </div>
       ) : (
         <form onSubmit={submit} className="mt-6 space-y-4">

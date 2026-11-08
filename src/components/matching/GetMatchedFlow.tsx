@@ -85,7 +85,11 @@ export function GetMatchedFlow() {
   const [availability, setAvailability] = useState("");
   const [specificDate, setSpecificDate] = useState("");
   const [errors, setErrors] = useState<Record<number, string>>({});
-  const { data: therapistData, isLoading: therapistsLoading, isError: therapistsError } = useTherapists({});
+  const {
+    data: therapistData,
+    isLoading: therapistsLoading,
+    isError: therapistsError,
+  } = useTherapists({});
 
   const firstReason = MATCH_REASONS.find((item) => item.id === reasons[0]);
   const matched = useMemo(() => {
@@ -327,21 +331,40 @@ export function GetMatchedFlow() {
                 </p>
                 {gender === "male" || gender === "female" ? (
                   <p className="mt-3 text-sm text-[#6B7280]">
-                    Gender preference is noted. MINDORA therapist profiles do not currently expose a verified gender field, so recommendations are based on approved specialisations only.
+                    Gender preference is noted. MINDORA therapist profiles do not currently expose a
+                    verified gender field, so recommendations are based on approved specialisations
+                    only.
                   </p>
                 ) : null}
                 <div className="mt-8 space-y-4">
                   {therapistsLoading ? (
-                    <p role="status" className="rounded-xl border border-border p-5 text-sm text-[#6B7280]">Loading approved therapists…</p>
+                    <p
+                      role="status"
+                      className="rounded-xl border border-border p-5 text-sm text-[#6B7280]"
+                    >
+                      Loading approved therapists…
+                    </p>
                   ) : null}
                   {therapistsError ? (
-                    <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">We could not load therapists right now. Please try again or browse the therapist directory.</p>
+                    <p
+                      role="alert"
+                      className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800"
+                    >
+                      We could not load therapists right now. Please try again or browse the
+                      therapist directory.
+                    </p>
                   ) : null}
                   {!therapistsLoading && !therapistsError && matched.length === 0 ? (
                     <div className="rounded-xl border border-border p-6 text-center">
-                      <p className="font-semibold">No approved therapist matches this selection yet.</p>
-                      <p className="mt-2 text-sm text-[#6B7280]">You can browse all currently available therapists instead.</p>
-                      <Button className="mt-4" onClick={() => router.push("/therapists")}>Browse therapists</Button>
+                      <p className="font-semibold">
+                        No approved therapist matches this selection yet.
+                      </p>
+                      <p className="mt-2 text-sm text-[#6B7280]">
+                        You can browse all currently available therapists instead.
+                      </p>
+                      <Button className="mt-4" onClick={() => router.push("/therapists")}>
+                        Browse therapists
+                      </Button>
                     </div>
                   ) : null}
                   {matched.map((therapist) => (

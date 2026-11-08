@@ -89,9 +89,13 @@ export default function LandingPage() {
             Call +250 783 974-066
           </a>{" "}
           Monday to Friday, 9am to 5pm. Email{" "}
-          <a href="mailto:info@mindora.rw" className="font-semibold text-mindora-purple hover:underline">
+          <a
+            href="mailto:info@mindora.rw"
+            className="font-semibold text-mindora-purple hover:underline"
+          >
             info@mindora.rw
-          </a>.
+          </a>
+          .
         </p>
         <p className="mt-3 text-xs text-muted-foreground/70">
           &copy; {new Date().getFullYear()} Mindora. Mindora is not a crisis service.

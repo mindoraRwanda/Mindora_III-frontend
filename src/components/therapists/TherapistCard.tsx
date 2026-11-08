@@ -150,7 +150,10 @@ export function TherapistCard({
                 <Link href={`/therapists/${therapist.id}`}>View Profile</Link>
               </Button>
             )}
-            <BookNowButton therapistId={therapist.userId ?? therapist.id} className="h-10 sm:flex-1" />
+            <BookNowButton
+              therapistId={therapist.userId ?? therapist.id}
+              className="h-10 sm:flex-1"
+            />
           </div>
         </div>
       </div>

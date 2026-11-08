@@ -13,7 +13,9 @@ export default function TherapistsPage() {
               <p className="text-lg font-semibold">
                 If you need support now, we are here to help you
               </p>
-              <p className="mt-2 text-sm text-white/80">Browse approved professionals and choose a therapist who fits your needs.</p>
+              <p className="mt-2 text-sm text-white/80">
+                Browse approved professionals and choose a therapist who fits your needs.
+              </p>
             </div>
             <a
               href="#directory"

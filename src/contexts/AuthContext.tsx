@@ -134,17 +134,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated || isLoading) return;
     const configured = Number(process.env.NEXT_PUBLIC_SESSION_IDLE_TIMEOUT_MS);
-    const idleTimeoutMs = Number.isFinite(configured) && configured >= 60_000 ? configured : 30 * 60 * 1000;
+    const idleTimeoutMs =
+      Number.isFinite(configured) && configured >= 60_000 ? configured : 30 * 60 * 1000;
     let timer: ReturnType<typeof setTimeout>;
     let lastActivity = Date.now();
-    const schedule = () => { clearTimeout(timer); timer = setTimeout(() => { void logout(); }, Math.max(0, idleTimeoutMs - (Date.now() - lastActivity))); };
-    const onActivity = () => { lastActivity = Date.now(); schedule(); };
-    const events: (keyof WindowEventMap)[] = ["pointerdown", "keydown", "touchstart", "scroll", "click"];
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(
+        () => {
+          void logout();
+        },
+        Math.max(0, idleTimeoutMs - (Date.now() - lastActivity))
+      );
+    };
+    const onActivity = () => {
+      lastActivity = Date.now();
+      schedule();
+    };
+    const events: (keyof WindowEventMap)[] = [
+      "pointerdown",
+      "keydown",
+      "touchstart",
+      "scroll",
+      "click",
+    ];
     events.forEach((name) => window.addEventListener(name, onActivity, { passive: true }));
-    const onVisibility = () => { if (document.visibilityState === "visible") { if (Date.now() - lastActivity >= idleTimeoutMs) void logout(); else schedule(); } };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        if (Date.now() - lastActivity >= idleTimeoutMs) void logout();
+        else schedule();
+      }
+    };
     document.addEventListener("visibilitychange", onVisibility);
     schedule();
-    return () => { clearTimeout(timer); events.forEach((name) => window.removeEventListener(name, onActivity)); document.removeEventListener("visibilitychange", onVisibility); };
+    return () => {
+      clearTimeout(timer);
+      events.forEach((name) => window.removeEventListener(name, onActivity));
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [isAuthenticated, isLoading, logout]);
 
   return (

@@ -15,10 +15,7 @@ const passwordSchema = z
   .string()
   .min(8, "Use at least 8 characters.")
   .max(128, "Use no more than 128 characters.")
-  .regex(
-    /^(?=.*[A-Za-z])(?=.*\d).{8,128}$/,
-    "Use at least one letter and one number."
-  );
+  .regex(/^(?=.*[A-Za-z])(?=.*\d).{8,128}$/, "Use at least one letter and one number.");
 
 function ResetPasswordForm() {
   const params = useSearchParams();
@@ -69,20 +66,22 @@ function ResetPasswordForm() {
 
       {!token ? (
         <div role="alert" className="mt-5 rounded-xl bg-red-50 p-5 text-sm text-red-800">
-          This reset link is missing its token. {" "}
+          This reset link is missing its token.{" "}
           <Link href="/forgot-password" className="font-semibold underline">
             Request a new link
-          </Link>.
+          </Link>
+          .
         </div>
       ) : done ? (
         <div
           role="status"
           className="mt-5 rounded-xl border border-teal-200 bg-teal-50 p-5 text-sm text-teal-900"
         >
-          Your password has been reset successfully. {" "}
+          Your password has been reset successfully.{" "}
           <Link href="/login" className="font-semibold underline">
             Sign in
-          </Link>.
+          </Link>
+          .
         </div>
       ) : (
         <form onSubmit={submit} className="mt-6 space-y-4">
@@ -104,8 +103,8 @@ function ResetPasswordForm() {
             onChange={(event) => setConfirm(event.target.value)}
           />
           <p className="text-xs text-muted-foreground">
-            Use at least 8 characters, including letters and numbers. Reset
-            links are single-use and expire after 15 minutes.
+            Use at least 8 characters, including letters and numbers. Reset links are single-use and
+            expire after 15 minutes.
           </p>
           {error ? (
             <p role="alert" className="text-sm text-red-600">
