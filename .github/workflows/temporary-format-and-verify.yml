@@ -1,0 +1,144 @@
+name: Temporary frontend formatting and verification
+
+on:
+  push:
+    branches:
+      - fix/frontend-prettier-signup-20261108
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/frontend-prettier-signup-20261108
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Fix signup password digit validation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("src/components/auth/SignupForm.tsx")
+          source = path.read_text()
+          wrong = r"(?=.*\\d)"
+          correct = r"(?=.*\d)"
+          if wrong not in source:
+              raise SystemExit("Expected double-escaped digit matcher was not found; refusing an unsafe replacement.")
+          path.write_text(source.replace(wrong, correct, 1))
+          print("Corrected signup password digit matcher.")
+          PY
+
+      - name: Format all files reported by CI
+        run: |
+          npx prettier --write \
+            ".github/workflows/main.yml" \
+            "FRONTEND_PAGE_MAPPING.md" \
+            "FRONTEND_VISUAL_REGRESSION_REPORT.md" \
+            "src/app/(app)/appointments/book/[id]/page.tsx" \
+            "src/app/(public)/therapists/[id]/page.tsx" \
+            "src/app/(public)/therapists/page.tsx" \
+            "src/app/forgot-password/page.tsx" \
+            "src/app/reset-password/page.tsx" \
+            "src/app/therapist/login/page.tsx" \
+            "src/app/therapist/signup/page.tsx" \
+            "src/app/welcome/page.tsx" \
+            "src/components/auth/LoginForm.tsx" \
+            "src/components/auth/SignupForm.tsx" \
+            "src/components/home/NextSessionCard.tsx" \
+            "src/components/layout/AppSidebar.tsx" \
+            "src/components/layout/PublicNavbar.tsx" \
+            "src/components/layout/Sidebar.tsx" \
+            "src/components/matching/GetMatchedFlow.tsx" \
+            "src/components/therapists/TherapistCard.tsx" \
+            "src/contexts/AuthContext.tsx" \
+            "src/lib/auth-api.ts" \
+            "src/lib/therapist-view.ts" \
+            "tsconfig.json"
+
+      - name: Verify Prettier
+        run: |
+          npm run format:check
+          git diff --check
+          echo "FORMATTED_MAIN_YML_BASE64=$(base64 -w0 .github/workflows/main.yml)" >> "$GITHUB_OUTPUT"
+        id: format
+
+      - name: Commit code formatting and signup fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            "FRONTEND_PAGE_MAPPING.md" \
+            "FRONTEND_VISUAL_REGRESSION_REPORT.md" \
+            "src/app/(app)/appointments/book/[id]/page.tsx" \
+            "src/app/(public)/therapists/[id]/page.tsx" \
+            "src/app/(public)/therapists/page.tsx" \
+            "src/app/forgot-password/page.tsx" \
+            "src/app/reset-password/page.tsx" \
+            "src/app/therapist/login/page.tsx" \
+            "src/app/therapist/signup/page.tsx" \
+            "src/app/welcome/page.tsx" \
+            "src/components/auth/LoginForm.tsx" \
+            "src/components/auth/SignupForm.tsx" \
+            "src/components/home/NextSessionCard.tsx" \
+            "src/components/layout/AppSidebar.tsx" \
+            "src/components/layout/PublicNavbar.tsx" \
+            "src/components/layout/Sidebar.tsx" \
+            "src/components/matching/GetMatchedFlow.tsx" \
+            "src/components/therapists/TherapistCard.tsx" \
+            "src/contexts/AuthContext.tsx" \
+            "src/lib/auth-api.ts" \
+            "src/lib/therapist-view.ts" \
+            "tsconfig.json"
+          git commit -m "fix(frontend): format source and repair signup password validation"
+          git push origin HEAD:fix/frontend-prettier-signup-20261108
+
+      - name: Verify type checking
+        run: npm run type-check
+
+      - name: Verify lint
+        run: npm run lint
+
+      - name: Run frontend tests
+        run: npm run test:coverage
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Package complete frontend source
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path
+          root = Path.cwd()
+          output = Path("/tmp/Mindora_III-frontend-fixed.zip")
+          ignored = {".git", "node_modules", ".next", "coverage"}
+          with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+              for path in root.rglob("*"):
+                  if any(part in ignored for part in path.relative_to(root).parts):
+                      continue
+                  if path.is_file():
+                      archive.write(path, Path("Mindora_III-frontend-main") / path.relative_to(root))
+          print(f"Created {output} ({output.stat().st_size} bytes)")
+          PY
+
+      - name: Upload formatted frontend ZIP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindora-frontend-format-fixed
+          path: /tmp/Mindora_III-frontend-fixed.zip
+          retention-days: 14
