@@ -1,0 +1,35 @@
+name: Temporary Prettier format diagnosis
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/app/therapist/[workspace]/page.tsx"
+      - ".github/workflows/debug-prettier.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Show Prettier formatting differences
+        shell: bash
+        run: |
+          npx prettier "src/app/therapist/[workspace]/page.tsx" > /tmp/page.formatted.tsx
+          diff -u --label current --label prettier /dev/stdin /tmp/page.formatted.tsx < "src/app/therapist/[workspace]/page.tsx" || true
+          echo "::group::Prettier formatted page"
+          cat /tmp/page.formatted.tsx
+          echo "::endgroup::"
