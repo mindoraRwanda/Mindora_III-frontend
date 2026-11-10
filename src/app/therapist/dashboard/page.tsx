@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarClock, CalendarX, ClipboardList, Users } from "lucide-react";
+import { Activity, CalendarClock, CalendarX, ClipboardList, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useTherapistDashboard } from "@/hooks/useAppointments";
 import type { BookedAppointment } from "@/types/domain";
@@ -12,6 +12,39 @@ const STATUS_VARIANT = {
   COMPLETED: "secondary",
   CANCELLED: "destructive",
 } as const;
+
+const WORKSPACE_LINKS = [
+  {
+    href: "/therapist/treatment-plans",
+    title: "Treatment plans",
+    note: "Plan workflow preview",
+  },
+  {
+    href: "/therapist/medication",
+    title: "Medication",
+    note: "Clinical API not connected",
+  },
+  {
+    href: "/therapist/prescriptions",
+    title: "Prescriptions",
+    note: "Prescribing workflow not connected",
+  },
+  {
+    href: "/therapist/reports",
+    title: "Reports",
+    note: "Live dashboard metrics",
+  },
+  {
+    href: "/therapist/communities",
+    title: "Communities",
+    note: "Community service unavailable",
+  },
+  {
+    href: "/therapist/video-sessions",
+    title: "Video sessions",
+    note: "Video provider not connected",
+  },
+];
 
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -78,9 +111,10 @@ export default function TherapistDashboardPage() {
         </div>
       )}
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {isLoading ? (
           <>
+            <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
@@ -98,6 +132,11 @@ export default function TherapistDashboardPage() {
               icon={CalendarClock}
             />
             <StatCard label="Patients" value={data?.patientCount ?? 0} icon={Users} />
+            <StatCard
+              label="Today's sessions"
+              value={data?.todaysSessions?.length ?? 0}
+              icon={Activity}
+            />
           </>
         )}
       </div>
@@ -144,6 +183,25 @@ export default function TherapistDashboardPage() {
           </div>
         )}
       </div>
+
+      <section className="mt-8">
+        <h2 className="mb-1 text-[16px] font-bold text-foreground">Practice workspace</h2>
+        <p className="mb-3 text-[12.5px] text-muted-foreground">
+          All additional sections from the MINDORA product prototype.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {WORKSPACE_LINKS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-2xl border border-border bg-white p-4 transition hover:border-mindora-purple/40 hover:shadow-sm"
+            >
+              <span className="text-[14px] font-semibold text-foreground">{item.title}</span>
+              <span className="mt-1 block text-[11px] text-muted-foreground">{item.note}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
