@@ -26,8 +26,7 @@ const SUPPORT_PATHS = [
   },
   {
     title: "Track your wellbeing",
-    description:
-      "Check in with yourself and notice patterns in your mood over time.",
+    description: "Check in with yourself and notice patterns in your mood over time.",
     href: "/check-in",
     action: "Try a check-in",
     icon: Activity,
@@ -103,10 +102,7 @@ function Hero() {
         </div>
 
         <div className="relative">
-          <div
-            aria-hidden
-            className="absolute -inset-4 rounded-[2rem] bg-[#E8F5F4] sm:-inset-6"
-          />
+          <div aria-hidden className="absolute -inset-4 rounded-[2rem] bg-[#E8F5F4] sm:-inset-6" />
           <div className="relative overflow-hidden rounded-[1.6rem] bg-[#F1F9F8] shadow-sm">
             <Image
               src={HERO_IMAGE}
