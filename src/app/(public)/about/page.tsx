@@ -45,8 +45,8 @@ export default function AboutPage() {
                   Mental wellbeing resources
                 </span>
                 <p className="mt-2 text-sm leading-relaxed text-[#1A1A1A]">
-                  Explore helpful tools and information as you consider the support that feels
-                  right for you.
+                  Explore helpful tools and information as you consider the support that feels right
+                  for you.
                 </p>
               </article>
               <article className="rounded-2xl border border-[#D4EBE9] bg-[#F7FBFA] p-5">
