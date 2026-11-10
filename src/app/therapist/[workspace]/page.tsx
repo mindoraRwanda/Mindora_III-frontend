@@ -12,7 +12,8 @@ import {
   Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useTherapistDashboard } from "@/hooks/useAppointments";
+import { useTherapistDashboard, useTherapistPatients } from "@/hooks/useAppointments";
+import { useCreateCarePlan, useTherapistCarePlans } from "@/hooks/useCarePlans";
 import {
   useCommunityGroups,
   useCommunityMembership,
@@ -34,9 +35,9 @@ const modules: Record<string, ModuleInfo> = {
   "treatment-plans": {
     title: "Treatment plans",
     subtitle: "Create structured care plans and review agreed patient goals.",
-    status: "Plan storage API not connected",
+    status: "Encrypted care-plan drafts connected",
     warning:
-      "The supplied MINDORA V3 frontend API does not expose a treatment-plan endpoint. This screen is a workflow preview; it does not create or save clinical plans.",
+      "This workspace stores agreed goals and review milestones only. It does not create diagnoses, medication instructions or prescriptions.",
     icon: ClipboardList,
     points: [
       "Agree goals collaboratively with the patient",
@@ -121,6 +122,13 @@ export default function TherapistWorkspaceModulePage() {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [communityDraft, setCommunityDraft] = useState("");
   const [anonymousPost, setAnonymousPost] = useState(false);
+  const [carePlanPatientId, setCarePlanPatientId] = useState("");
+  const [carePlanTitle, setCarePlanTitle] = useState("");
+  const [carePlanGoals, setCarePlanGoals] = useState("");
+  const [carePlanReviewDate, setCarePlanReviewDate] = useState("");
+  const carePlanPatients = useTherapistPatients(1, 50);
+  const carePlans = useTherapistCarePlans();
+  const createCarePlan = useCreateCarePlan();
   const communityGroups = useCommunityGroups();
   const activeCommunityId = selectedCommunityId ?? communityGroups.data?.groups[0]?._id ?? null;
   const communityPosts = useCommunityPosts(activeCommunityId);
@@ -172,6 +180,182 @@ export default function TherapistWorkspaceModulePage() {
           The current API provides these live totals only. Monthly trends and clinical outcome
           charts from the prototype are not fabricated or presented as real patient data.
         </p>
+      </main>
+    );
+  }
+
+  if (workspaceKey === "treatment-plans") {
+    const patients = carePlanPatients.data?.patients ?? [];
+    const plans = carePlans.data?.carePlans ?? [];
+    return (
+      <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
+        <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Therapist workspace</p>
+        <h1 className="mt-2 text-[27px] font-extrabold text-[#28243a]">Treatment plans</h1>
+        <p className="mt-1 text-sm text-[#77758a]">
+          Create encrypted goal-setting drafts for patients with an established appointment relationship.
+        </p>
+
+        <div className="mt-5 flex gap-3 rounded-2xl border border-[#d9eadf] bg-[#f1faf4] p-4 text-xs leading-5 text-[#39765e]">
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          Goals and milestones are encrypted at rest. Patients can see a plan after it is shared with their account and acknowledge it before it becomes active.
+        </div>
+
+        {carePlans.isError && (
+          <div role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+            Care plans could not be loaded. The secure encryption key may need to be configured on the backend.
+            <button type="button" onClick={() => carePlans.refetch()} className="ml-3 underline">Retry</button>
+          </div>
+        )}
+
+        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const goals = carePlanGoals.split(/\r?\n/).map((goal) => goal.trim()).filter(Boolean).slice(0, 20);
+              if (!carePlanPatientId || !carePlanTitle.trim() || goals.length === 0) return;
+              createCarePlan.mutate(
+                {
+                  patientId: carePlanPatientId,
+                  title: carePlanTitle.trim(),
+                  goals,
+                  milestones: [],
+                  ...(carePlanReviewDate
+                    ? { reviewDate: new Date(carePlanReviewDate + "T00:00:00+02:00").toISOString() }
+                    : {}),
+                },
+                {
+                  onSuccess: () => {
+                    setCarePlanTitle("");
+                    setCarePlanGoals("");
+                    setCarePlanReviewDate("");
+                  },
+                }
+              );
+            }}
+            className="rounded-2xl border border-[#ebe8f1] bg-white p-5"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#28243a]">New care-plan draft</h2>
+                <p className="mt-1 text-xs text-[#77758a]">Agree goals with the patient during care.</p>
+              </div>
+              <ClipboardList className="h-5 w-5 text-[#7350a0]" />
+            </div>
+
+            {carePlanPatients.isError ? (
+              <p role="alert" className="mt-4 text-xs text-red-700">Patient list could not be loaded. Retry the Patients page.</p>
+            ) : patients.length === 0 && !carePlanPatients.isLoading ? (
+              <p className="mt-4 rounded-xl bg-[#fff8eb] p-3 text-xs leading-5 text-[#795b2b]">
+                No patient relationship is available yet. A care plan can only be created for someone who has an appointment history with you.
+              </p>
+            ) : (
+              <>
+                <label htmlFor="care-plan-patient" className="mt-4 block text-xs font-semibold text-[#625d70]">Patient</label>
+                <select
+                  id="care-plan-patient"
+                  required
+                  value={carePlanPatientId}
+                  onChange={(event) => setCarePlanPatientId(event.target.value)}
+                  disabled={carePlanPatients.isLoading}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] bg-white px-3 py-2.5 text-sm text-[#28243a]"
+                >
+                  <option value="">Select a patient…</option>
+                  {patients.map((patient) => (
+                    <option key={patient.patientId} value={patient.patientId}>
+                      {patient.userName || "Patient"} · {patient.patientId.slice(0, 8)}
+                    </option>
+                  ))}
+                </select>
+
+                <label htmlFor="care-plan-title" className="mt-4 block text-xs font-semibold text-[#625d70]">Plan title</label>
+                <input
+                  id="care-plan-title"
+                  required
+                  maxLength={120}
+                  value={carePlanTitle}
+                  onChange={(event) => setCarePlanTitle(event.target.value)}
+                  placeholder="e.g. Building a steady sleep routine"
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-2.5 text-sm text-[#28243a]"
+                />
+
+                <label htmlFor="care-plan-goals" className="mt-4 block text-xs font-semibold text-[#625d70]">Agreed goals · one per line</label>
+                <textarea
+                  id="care-plan-goals"
+                  required
+                  rows={5}
+                  value={carePlanGoals}
+                  onChange={(event) => setCarePlanGoals(event.target.value)}
+                  placeholder={"Establish a regular evening routine\nPractise a short daily reflection"}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm leading-5 text-[#28243a]"
+                />
+
+                <label htmlFor="care-plan-review" className="mt-4 block text-xs font-semibold text-[#625d70]">Review date (optional)</label>
+                <input
+                  id="care-plan-review"
+                  type="date"
+                  value={carePlanReviewDate}
+                  onChange={(event) => setCarePlanReviewDate(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-2.5 text-sm text-[#28243a]"
+                />
+
+                <button
+                  type="submit"
+                  disabled={!carePlanPatientId || !carePlanTitle.trim() || !carePlanGoals.trim() || createCarePlan.isPending}
+                  className="mt-5 w-full rounded-xl bg-[#7350a0] px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
+                >
+                  {createCarePlan.isPending ? "Saving encrypted draft…" : "Save care-plan draft"}
+                </button>
+              </>
+            )}
+          </form>
+
+          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#28243a]">Your saved plans</h2>
+                <p className="mt-1 text-xs text-[#77758a]">Only records from your own patient relationships.</p>
+              </div>
+              <span className="rounded-full bg-[#f1ecf7] px-3 py-1.5 text-[10px] font-bold text-[#7350a0]">{plans.length} plans</span>
+            </div>
+            {carePlans.isLoading ? (
+              <div className="mt-4 space-y-3">{[1, 2, 3].map((n) => <div key={n} className="h-24 animate-pulse rounded-xl bg-[#f5f3f8]" />)}</div>
+            ) : plans.length === 0 ? (
+              <p className="mt-5 rounded-xl bg-[#faf9fc] p-6 text-center text-xs text-[#77758a]">No care plans have been saved yet.</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {plans.map((plan) => {
+                  const patient = patients.find((item) => item.patientId === plan.patientId);
+                  return (
+                    <article key={plan.id} className="rounded-xl border border-[#f0edf3] p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <h3 className="text-sm font-bold text-[#28243a]">{plan.title}</h3>
+                          <p className="mt-1 text-[11px] text-[#77758a]">{patient?.userName ?? "Patient"} · {plan.patientId.slice(0, 8)}</p>
+                        </div>
+                        <span className={[
+                          "rounded-full px-2.5 py-1 text-[10px] font-bold",
+                          plan.status === "ACTIVE" ? "bg-[#e8f5ef] text-[#39765e]" : "bg-[#fff5e5] text-[#8d641f]",
+                        ].join(" ")}>
+                          {plan.status === "DRAFT" ? "Awaiting patient acknowledgement" : plan.status}
+                        </span>
+                      </div>
+                      <ul className="mt-3 space-y-1.5">
+                        {plan.goals.map((goal, index) => (
+                          <li key={index} className="flex gap-2 text-xs leading-5 text-[#625d70]">
+                            <span className="text-[#9072b2]">•</span>{goal}
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 text-[10px] text-[#9993a2]">
+                        {plan.reviewDate ? "Review " + new Date(plan.reviewDate).toLocaleDateString() : "No review date set"} · Updated {new Date(plan.updatedAt).toLocaleDateString()}
+                      </p>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     );
   }
