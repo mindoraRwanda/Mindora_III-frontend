@@ -275,7 +275,7 @@ export default function TherapistDashboardPage() {
         <article className="rounded-[18px] border border-[#ebe8f1] bg-white p-5 shadow-[0_12px_34px_rgba(45,32,65,.055)]">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <h2 className="text-[16px] font-extrabold text-[#28243a]">Today's schedule</h2>
+              <h2 className="text-[16px] font-extrabold text-[#28243a]">Today&apos;s schedule</h2>
               <p className="mt-1 text-[11px] text-[#77758a]">
                 {new Intl.DateTimeFormat("en-GB", {
                   timeZone: "Africa/Kigali",
