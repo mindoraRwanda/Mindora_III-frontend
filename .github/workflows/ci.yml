@@ -28,6 +28,21 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Canonical-format prototype integration files
+        run: |
+          npx prettier --write "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/lib/community-api.ts"
+
+      - name: Upload formatted source for patching the PR branch
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindora-prettier-source
+          path: |
+            src/app/(app)/today/page.tsx
+            src/app/admin/[section]/page.tsx
+            src/app/therapist/[workspace]/page.tsx
+            src/lib/community-api.ts
+          if-no-files-found: error
+
       - name: Format check
         run: npm run format:check
 
