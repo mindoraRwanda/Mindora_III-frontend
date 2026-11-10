@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Check } from "lucide-react";
 import { useMoodHistory } from "@/hooks/useMood";
 
@@ -18,8 +19,7 @@ function localDateKey(d: Date): string {
 }
 
 // This week's day-by-day mood, derived client-side from raw history entries
-// rather than a server date-range filter - same defensive pattern already used
-// by TodaysCheckIns (fetch a generous recent page, filter by local calendar date).
+// rather than a server date-range filter.
 export function WeeklyMoodCard() {
   const { data: history, isLoading, isError } = useMoodHistory({ limit: 50 });
 
@@ -42,7 +42,10 @@ export function WeeklyMoodCard() {
 
   if (isLoading) {
     return (
-      <div className="h-[180px] animate-pulse rounded-[34px] bg-white/60 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]" />
+      <div
+        role="status"
+        className="h-[180px] animate-pulse rounded-[34px] bg-white/60 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]"
+      />
     );
   }
 
@@ -53,12 +56,13 @@ export function WeeklyMoodCard() {
       <div className="flex flex-col gap-3 rounded-[34px] bg-white p-6 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
         <h3 className="text-[16.5px] font-bold tracking-tight text-foreground">This week</h3>
         <p className="text-[13.5px] text-muted-foreground">
-          Could not load this week&apos;s check-ins right now. Your history is safe - try
-          refreshing.
+          Could not load this week&apos;s check-ins right now. Your history is safe - try refreshing.
         </p>
       </div>
     );
   }
+
+  const hasCheckIns = days.some((day) => day.done);
 
   return (
     <div className="flex flex-col justify-center gap-5 rounded-[34px] bg-white p-6 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
@@ -88,6 +92,21 @@ export function WeeklyMoodCard() {
           </div>
         ))}
       </div>
+
+      {!hasCheckIns && (
+        <div className="rounded-2xl bg-mindora-purple-bg/60 px-4 py-3 text-center">
+          <p className="text-[12.5px] leading-5 text-muted-foreground">
+            No check-ins have been saved this week yet. Your completed days will appear here as you
+            check in.
+          </p>
+          <Link
+            href="/check-in"
+            className="mt-2 inline-flex text-[12.5px] font-bold text-mindora-purple hover:underline"
+          >
+            Log your first check-in
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
