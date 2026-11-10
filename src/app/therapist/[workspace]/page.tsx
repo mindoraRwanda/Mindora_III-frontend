@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
@@ -268,9 +269,9 @@ export default function TherapistWorkspaceModulePage() {
             <h1 className="text-[27px] font-extrabold text-[#28243a]">Medication management</h1>
             <p className="mt-1 text-sm text-[#77758a]">Review medication-related tasks and patient follow-up workflows.</p>
           </div>
-          <a href="/therapist/prescriptions" className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white">
+          <Link href="/therapist/prescriptions" className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white">
             Open prescriptions
-          </a>
+          </Link>
         </div>
 
         <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
@@ -297,7 +298,7 @@ export default function TherapistWorkspaceModulePage() {
                 There are no verified medication-review records available through the current MINDORA V3 API. No sample patients or medication details are shown.
               </p>
             </div>
-            <a href="/therapist/patients" className="mt-4 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
+            <Link href="/therapist/patients" className="mt-4 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
               View patient references
             </a>
           </section>
