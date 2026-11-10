@@ -13,6 +13,39 @@ const STATUS_VARIANT = {
   CANCELLED: "destructive",
 } as const;
 
+const WORKSPACE_LINKS = [
+  {
+    href: "/therapist/treatment-plans",
+    title: "Treatment plans",
+    note: "Plan workflow preview",
+  },
+  {
+    href: "/therapist/medication",
+    title: "Medication",
+    note: "Clinical API not connected",
+  },
+  {
+    href: "/therapist/prescriptions",
+    title: "Prescriptions",
+    note: "Prescribing workflow not connected",
+  },
+  {
+    href: "/therapist/reports",
+    title: "Reports",
+    note: "Live dashboard metrics",
+  },
+  {
+    href: "/therapist/communities",
+    title: "Communities",
+    note: "Community service unavailable",
+  },
+  {
+    href: "/therapist/video-sessions",
+    title: "Video sessions",
+    note: "Video provider not connected",
+  },
+];
+
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
@@ -22,7 +55,7 @@ function formatSessionType(type: BookedAppointment["sessionType"]): string {
 }
 
 function patientLabel(patientId: string): string {
-  return `Patient ${patientId.slice(0, 8)}`;
+  return \`Patient \${patientId.slice(0, 8)}\`;
 }
 
 interface StatCardProps {
@@ -150,44 +183,14 @@ export default function TherapistDashboardPage() {
           </div>
         )}
       </div>
+
       <section className="mt-8">
         <h2 className="mb-1 text-[16px] font-bold text-foreground">Practice workspace</h2>
         <p className="mb-3 text-[12.5px] text-muted-foreground">
           All additional sections from the MINDORA product prototype.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {[
-                        {
-              href: "/therapist/treatment-plans",
-              title: "Treatment plans",
-              note: "Plan workflow preview",
-            },
-                        {
-              href: "/therapist/medication",
-              title: "Medication",
-              note: "Clinical API not connected",
-            },
-                        {
-              href: "/therapist/prescriptions",
-              title: "Prescriptions",
-              note: "Prescribing workflow not connected",
-            },
-                        {
-              href: "/therapist/reports",
-              title: "Reports",
-              note: "Live dashboard metrics",
-            },
-                        {
-              href: "/therapist/communities",
-              title: "Communities",
-              note: "Community service unavailable",
-            },
-                        {
-              href: "/therapist/video-sessions",
-              title: "Video sessions",
-              note: "Video provider not connected",
-            },
-          ].map((item) => (
+          {WORKSPACE_LINKS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
