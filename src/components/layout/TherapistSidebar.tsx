@@ -16,14 +16,15 @@ import {
   Video,
 } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
+import { WorkspaceSupportCard } from "@/components/layout/WorkspaceSupportCard";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/therapist", label: "Schedule", icon: CalendarClock },
   { href: "/therapist/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/therapist", label: "Schedule", icon: CalendarClock },
   { href: "/therapist/availability", label: "Availability", icon: Clock },
   { href: "/therapist/patients", label: "Patients", icon: Users },
   { href: "/therapist/treatment-plans", label: "Treatment plans", icon: ClipboardList },
@@ -55,7 +56,7 @@ export function TherapistSidebar() {
   }
 
   return (
-    <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch bg-mindora-sidebar text-white">
+    <aside className="flex h-full min-h-0 w-full flex-col bg-mindora-sidebar text-white">
       <div className="flex items-center justify-between px-5 py-5">
         <MindoraLogo variant="light" size="md" />
         <NotificationBell />
@@ -88,7 +89,8 @@ export function TherapistSidebar() {
         })}
       </nav>
 
-      <div className="space-y-3 px-3 pb-4">
+      <div className="mt-auto space-y-3 px-3 pb-4">
+        <WorkspaceSupportCard />
         <div className="flex items-center gap-2.5 rounded-lg px-1 py-1">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mindora-purple text-xs font-semibold">
             {displayName.slice(0, 2).toUpperCase()}
