@@ -69,11 +69,7 @@ const modules: Record<string, ModuleInfo> = {
     warning:
       "The supplied frontend API notes that Community Service is not deployed in V1. These are planned areas, not active groups; no membership or posts are created.",
     icon: Users,
-    points: [
-      "Clinical practice circle",
-      "Wellbeing at work",
-      "Trauma-informed care",
-    ],
+    points: ["Clinical practice circle", "Wellbeing at work", "Trauma-informed care"],
   },
   "video-sessions": {
     title: "Video sessions",
