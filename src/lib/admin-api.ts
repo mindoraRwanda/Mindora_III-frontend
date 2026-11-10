@@ -253,3 +253,31 @@ export function reactivateTherapist(id: string, reason: string): Promise<Therapi
     body: JSON.stringify({ reason }),
   });
 }
+
+
+export interface AdminAppointmentRecord {
+  id: string;
+  patientId: string;
+  therapistId: string;
+  slotStart: string;
+  slotEnd: string;
+  sessionType: "VIDEO" | "IN_PERSON" | "CHAT";
+  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+  createdAt: string;
+}
+
+export interface AdminAppointmentListResponse {
+  appointments: AdminAppointmentRecord[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// GET /api/v1/admin/appointments — protected, paginated platform-wide register.
+export function fetchAdminAppointments(params: {
+  page?: number;
+  limit?: number;
+  status?: AdminAppointmentRecord["status"];
+}): Promise<AdminAppointmentListResponse> {
+  return apiFetch(`/api/v1/admin/appointments${toQueryString(params)}`);
+}
