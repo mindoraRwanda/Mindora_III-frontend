@@ -51,13 +51,15 @@ export function useCreateCommunityPost() {
   return useMutation({
     mutationFn: ({
       groupId,
+      title,
       message,
       isAnonymous,
     }: {
       groupId: string;
+      title: string;
       message: string;
       isAnonymous: boolean;
-    }) => createCommunityPost(groupId, message, isAnonymous),
+    }) => createCommunityPost(groupId, title, message, isAnonymous),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["community", "posts", variables.groupId] });
       toast.success("Your post was published.");
