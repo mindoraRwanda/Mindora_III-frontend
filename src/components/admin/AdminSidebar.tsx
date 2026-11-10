@@ -17,21 +17,23 @@ import {
   Users,
 } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
+import { WorkspaceSupportCard } from "@/components/layout/WorkspaceSupportCard";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/therapist-applications", label: "Therapist applications", icon: Briefcase },
+  { href: "/admin/alerts", label: "System alerts", icon: AlertTriangle },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/therapist-applications", label: "Therapist Applications", icon: Briefcase },
-  { href: "/admin/moderation", label: "Moderation", icon: ListChecks },
-  { href: "/admin/alerts", label: "Alerts", icon: AlertTriangle },
   { href: "/admin/appointments", label: "Appointments", icon: CalendarDays },
-  { href: "/admin/notifications", label: "Notification delivery", icon: Mail },
+  { href: "/admin/audit-log", label: "Audit log", icon: ScrollText },
+  { href: "/admin/notifications", label: "Notifications", icon: Mail },
   { href: "/admin/release-readiness", label: "Release readiness", icon: Rocket },
-  { href: "/admin/audit-log", label: "Audit Log", icon: ScrollText },
+  // Additional production sections are retained after the prototype's core nav.
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/moderation", label: "Moderation", icon: ListChecks },
 ];
 
 export function AdminSidebar() {
@@ -51,7 +53,7 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="flex h-full w-[220px] shrink-0 flex-col self-stretch gap-6 bg-mindora-sidebar px-3.5 pb-5 pt-6 text-white shadow-[10px_0_26px_rgba(33,29,44,0.22)]">
+    <aside className="flex h-full min-h-0 w-full flex-col gap-5 bg-mindora-sidebar px-3.5 pb-4 pt-5 text-white shadow-[10px_0_26px_rgba(33,29,44,0.22)]">
       <div className="flex items-center justify-between px-1.5">
         <MindoraLogo variant="light" size="md" />
         <NotificationBell />
@@ -90,7 +92,8 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="flex flex-col gap-3.5">
+      <div className="mt-auto flex flex-col gap-3 px-1">
+        <WorkspaceSupportCard />
         <div className="flex items-center gap-2.5 rounded-2xl px-2 py-2 transition-shadow hover:shadow-[5px_5px_12px_#171320,-5px_-5px_12px_#2b2638]">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mindora-sidebar-elevated text-xs font-bold text-[#c4b5fd] shadow-[inset_3px_3px_7px_#16131e,inset_-3px_-3px_7px_#302a41]">
             {user?.email.slice(0, 2).toUpperCase() ?? "AD"}
