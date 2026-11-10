@@ -121,11 +121,15 @@ export default function TherapistWorkspaceModulePage() {
   const params = useParams<{ workspace: string }>();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [communityDraft, setCommunityDraft] = useState("");
+  const [communityDraftTitle, setCommunityDraftTitle] = useState("");
   const [anonymousPost, setAnonymousPost] = useState(false);
   const [carePlanPatientId, setCarePlanPatientId] = useState("");
   const [carePlanTitle, setCarePlanTitle] = useState("");
   const [carePlanGoals, setCarePlanGoals] = useState("");
   const [carePlanReviewDate, setCarePlanReviewDate] = useState("");
+  const [prescriptionDrafts, setPrescriptionDrafts] = useState<Array<{ id: string; createdAt: string }>>([]);
+  const [prescriptionNote, setPrescriptionNote] = useState("");
+  const [showPrescriptionDraftForm, setShowPrescriptionDraftForm] = useState(false);
   const carePlanPatients = useTherapistPatients(1, 50);
   const carePlans = useTherapistCarePlans();
   const createCarePlan = useCreateCarePlan();
@@ -251,6 +255,167 @@ export default function TherapistWorkspaceModulePage() {
         <p className="mt-4 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">
           Reports only summarize scheduling activity. They do not score clinical outcomes or infer patient progress from appointment counts.
         </p>
+      </main>
+    );
+  }
+
+  if (workspaceKey === "medication") {
+    return (
+      <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
+        <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Clinical tools</p>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[27px] font-extrabold text-[#28243a]">Medication management</h1>
+            <p className="mt-1 text-sm text-[#77758a]">Review medication-related tasks and patient follow-up workflows.</p>
+          </div>
+          <a href="/therapist/prescriptions" className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white">
+            Open prescriptions
+          </a>
+        </div>
+
+        <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <div>
+            <strong className="block">Medication safety notice</strong>
+            This workspace does not display real medication names, dosages or prescription records. Clinical decisions must be recorded only in MINDORA&apos;s authorised clinical system.
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-2">
+          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#28243a]">Medication review queue</h2>
+                <p className="mt-1 text-xs text-[#77758a]">Assigned tasks from the authorised clinical record.</p>
+              </div>
+              <span className="rounded-full bg-[#f1ecf7] px-3 py-1.5 text-[10px] font-bold text-[#7350a0]">Live records only</span>
+            </div>
+            <div className="mt-5 rounded-xl bg-[#faf9fc] p-6 text-center">
+              <Pill className="mx-auto h-6 w-6 text-[#9a86b3]" />
+              <h3 className="mt-3 text-sm font-bold text-[#28243a]">No medication review tasks are connected</h3>
+              <p className="mt-2 text-xs leading-5 text-[#77758a]">
+                There are no verified medication-review records available through the current MINDORA V3 API. No sample patients or medication details are shown.
+              </p>
+            </div>
+            <a href="/therapist/patients" className="mt-4 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
+              View patient references
+            </a>
+          </section>
+
+          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
+            <h2 className="text-sm font-bold text-[#28243a]">Medication review workflow</h2>
+            <p className="mt-1 text-xs text-[#77758a]">Use the authorised clinical record for all patient-specific decisions.</p>
+            <ol className="mt-4 space-y-3">
+              {[
+                "Open the authorised patient record.",
+                "Verify the patient's identity and current medication record.",
+                "Document the medication review and clinical decision in the approved system.",
+                "Use an approved prescription workflow only when appropriately authorised.",
+                "Record the follow-up and patient communication.",
+              ].map((item, index) => (
+                <li key={item} className="flex items-start gap-3 text-xs leading-5 text-[#625d70]">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#f1ecf7] text-[10px] font-bold text-[#7350a0]">{index + 1}</span>
+                  {item}
+                </li>
+              ))}
+            </ol>
+            <a href="/therapist/prescriptions" className="mt-5 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
+              Review prescription workflow
+            </a>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  if (workspaceKey === "prescriptions") {
+    return (
+      <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
+        <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Clinical tools</p>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[27px] font-extrabold text-[#28243a]">Prescriptions</h1>
+            <p className="mt-1 text-sm text-[#77758a]">Prescription workflow preview — no real prescriptions are issued.</p>
+          </div>
+          <button type="button" onClick={() => setShowPrescriptionDraftForm((open) => !open)} className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white">
+            {showPrescriptionDraftForm ? "Close draft form" : "New prescription draft"}
+          </button>
+        </div>
+
+        <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <div>
+            <strong className="block">Clinical safety</strong>
+            Drafts on this page are stored only in this browser session. They are not sent to a pharmacy, patient or clinical record and must not be used as medical instructions. Do not enter real patient or medication information.
+          </div>
+        </div>
+
+        {showPrescriptionDraftForm && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!prescriptionNote.trim()) return;
+              setPrescriptionDrafts((items) => [
+                { id: "RX-DRAFT-" + String(items.length + 1).padStart(3, "0"), createdAt: new Date().toISOString() },
+                ...items,
+              ]);
+              setPrescriptionNote("");
+              setShowPrescriptionDraftForm(false);
+            }}
+            className="mt-5 rounded-2xl border border-[#ebe8f1] bg-white p-5"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#28243a]">Non-clinical workflow draft</h2>
+                <p className="mt-1 text-xs text-[#77758a]">For interface review only. Do not enter patient-specific details.</p>
+              </div>
+              <FileText className="h-5 w-5 text-[#7350a0]" />
+            </div>
+            <label htmlFor="prescription-preview-note" className="mt-4 block text-xs font-semibold text-[#625d70]">Preview note</label>
+            <textarea
+              id="prescription-preview-note"
+              rows={4}
+              maxLength={1000}
+              required
+              value={prescriptionNote}
+              onChange={(event) => setPrescriptionNote(event.target.value)}
+              placeholder="Add a non-prescriptive workflow note only — no medicine, dosage or patient information."
+              className="mt-2 w-full rounded-xl border border-[#e4deeb] p-3 text-sm text-[#28243a]"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => { setShowPrescriptionDraftForm(false); setPrescriptionNote(""); }} className="rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#625d70]">Cancel</button>
+              <button type="submit" disabled={!prescriptionNote.trim()} className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50">Save local draft</button>
+            </div>
+          </form>
+        )}
+
+        <section className="mt-5 overflow-hidden rounded-2xl border border-[#ebe8f1] bg-white">
+          <div className="border-b border-[#f0edf3] px-5 py-4">
+            <h2 className="text-sm font-bold text-[#28243a]">Recent prescription activity</h2>
+            <p className="mt-1 text-xs text-[#77758a]">Local preview drafts only · {prescriptionDrafts.length} drafts in this session</p>
+          </div>
+          {prescriptionDrafts.length === 0 ? (
+            <p className="p-8 text-center text-xs text-[#77758a]">No prescription drafts created in this preview.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px] text-left text-xs">
+                <thead className="bg-[#faf9fc] text-[10px] uppercase tracking-wide text-[#8a789d]">
+                  <tr><th className="px-5 py-3">Reference</th><th className="px-5 py-3">Created</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Action</th></tr>
+                </thead>
+                <tbody>
+                  {prescriptionDrafts.map((draft) => (
+                    <tr key={draft.id} className="border-t border-[#f0edf3] text-[#625d70]">
+                      <td className="px-5 py-4 font-semibold text-[#28243a]">{draft.id}</td>
+                      <td className="px-5 py-4">{new Date(draft.createdAt).toLocaleString()}</td>
+                      <td className="px-5 py-4"><span className="rounded-full bg-[#fff5e5] px-2.5 py-1 text-[10px] font-bold text-[#8d641f]">Draft</span></td>
+                      <td className="px-5 py-4">Preview only — not a valid prescription</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </main>
     );
   }
@@ -522,15 +687,24 @@ export default function TherapistWorkspaceModulePage() {
                     <form
                       onSubmit={(event) => {
                         event.preventDefault();
-                        if (!communityDraft.trim()) return;
+                        if (!communityDraftTitle.trim() || !communityDraft.trim()) return;
                         createPost.mutate(
-                          { groupId: activeGroup._id, message: communityDraft, isAnonymous: anonymousPost },
+                          { groupId: activeGroup._id, title: communityDraftTitle, message: communityDraft, isAnonymous: anonymousPost },
                           { onSuccess: () => setCommunityDraft("") }
                         );
                       }}
                       className="rounded-2xl border border-[#ebe8f1] bg-white p-5"
                     >
                       <label htmlFor="community-post" className="text-sm font-bold text-[#28243a]">Share with this community</label>
+                      <label htmlFor="community-post-title" className="mt-3 block text-xs font-semibold text-[#625d70]">Post title</label>
+                      <input
+                        id="community-post-title"
+                        maxLength={160}
+                        value={communityDraftTitle}
+                        onChange={(event) => setCommunityDraftTitle(event.target.value)}
+                        placeholder="Start a discussion"
+                        className="mt-2 w-full rounded-xl border border-[#e4deeb] bg-[#fcfbfd] p-3 text-sm text-[#28243a] outline-none focus:border-[#9072b2]"
+                      />
                       <textarea
                         id="community-post"
                         value={communityDraft}
@@ -545,7 +719,7 @@ export default function TherapistWorkspaceModulePage() {
                           <input type="checkbox" checked={anonymousPost} onChange={(event) => setAnonymousPost(event.target.checked)} />
                           Post anonymously
                         </label>
-                        <button type="submit" disabled={!communityDraft.trim() || createPost.isPending} className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50">
+                        <button type="submit" disabled={!communityDraftTitle.trim() || !communityDraft.trim() || createPost.isPending} className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50">
                           {createPost.isPending ? "Publishing…" : "Publish post"}
                         </button>
                       </div>
