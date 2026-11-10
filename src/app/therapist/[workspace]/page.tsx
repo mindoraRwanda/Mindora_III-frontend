@@ -46,13 +46,13 @@ function Metric({ label, value }: { label: string; value: number }) {
 
 export default function TherapistWorkspaceModulePage() {
   const params = useParams<{ workspace: string }>();
-  const module = params.workspace;
-  const info = modules[module];
+  const workspaceKey = params.workspace;
+  const info = modules[workspaceKey];
   const { data, isLoading, isError } = useTherapistDashboard();
 
-  if (!info && module !== "reports") return <main className="min-h-full bg-[#f7f6fa] p-8"><h1 className="text-2xl font-bold text-[#28243a]">Page not found</h1></main>;
+  if (!info && workspaceKey !== "reports") return <main className="min-h-full bg-[#f7f6fa] p-8"><h1 className="text-2xl font-bold text-[#28243a]">Page not found</h1></main>;
 
-  if (module === "reports") {
+  if (workspaceKey === "reports") {
     return <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
       <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Therapist workspace</p>
       <h1 className="mt-2 text-[27px] font-extrabold text-[#28243a]">Practice reports</h1>
