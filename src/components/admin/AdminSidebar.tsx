@@ -61,7 +61,7 @@ export function AdminSidebar() {
 
       <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pb-3">
         <p className="mb-1 flex items-center gap-1.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d6588]">
-          <Shield className="h-3 w-3" /> Admin
+          <Shield className="h-3 w-3" /> Platform management
         </p>
         {navItems.map((item) => {
           const Icon = item.icon;
