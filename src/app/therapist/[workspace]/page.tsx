@@ -142,7 +142,9 @@ export default function TherapistWorkspaceModulePage() {
             <Metric label="Today's sessions" value={data?.todaysSessions?.length ?? 0} />
           </div>
         )}
-        <p className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">
+        <p
+          className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]"
+        >
           The current API provides these live totals only. Monthly trends and clinical outcome
           charts from the prototype are not fabricated or presented as real patient data.
         </p>
@@ -170,17 +172,23 @@ export default function TherapistWorkspaceModulePage() {
           <h1 className="text-[27px] font-extrabold text-[#28243a]">{info.title}</h1>
           <p className="mt-1 text-sm text-[#77758a]">{info.subtitle}</p>
         </div>
-        <span className="rounded-full bg-[#fff5e5] px-3 py-2 text-[10px] font-extrabold text-[#8d641f]">
+        <span
+          className="rounded-full bg-[#fff5e5] px-3 py-2 text-[10px] font-extrabold text-[#8d641f]"
+        >
           {info.status}
         </span>
       </div>
-      <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
+      <div
+        className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]"
+      >
         <AlertTriangle className="h-4 w-4 shrink-0" />
         {info.warning}
       </div>
       <section className="mt-5 rounded-2xl border border-[#ebe8f1] bg-white p-5 shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f1ecf7] text-[#7350a0]">
+          <span
+            className="grid h-10 w-10 place-items-center rounded-xl bg-[#f1ecf7] text-[#7350a0]"
+          >
             <Icon className="h-5 w-5" />
           </span>
           <div>
