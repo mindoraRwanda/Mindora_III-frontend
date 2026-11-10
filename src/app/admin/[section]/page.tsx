@@ -1,13 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
-import { usePlatformAnalytics } from "@/hooks/useAdmin";
+import { useAdminAppointments, usePlatformAnalytics } from "@/hooks/useAdmin";
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotifications,
 } from "@/hooks/useNotifications";
 import { formatRelativeTime } from "@/lib/format-relative-time";
+import type { AppointmentStatus } from "@/types/domain";
 
 function Stat({ title, value }: { title: string; value: number | null | undefined }) {
   return (
@@ -24,33 +26,134 @@ export default function AdminPrototypeSectionPage() {
   const params = useParams<{ section: string }>();
   const section = params.section;
   const analytics = usePlatformAnalytics();
+  const [appointmentStatus, setAppointmentStatus] = useState<AppointmentStatus | "ALL">("ALL");
+  const [appointmentPage, setAppointmentPage] = useState(1);
+  const appointmentQuery = useAdminAppointments({
+    page: appointmentPage,
+    limit: 20,
+    ...(appointmentStatus === "ALL" ? {} : { status: appointmentStatus }),
+  });
   const notifications = useNotifications(1, 50);
   const markAll = useMarkAllNotificationsRead();
   const markOne = useMarkNotificationRead();
   const items = notifications.data?.notifications ?? [];
 
   if (section === "appointments") {
+    const rows = appointmentQuery.data?.appointments ?? [];
+    const totalPages = Math.max(1, Math.ceil((appointmentQuery.data?.total ?? 0) / 20));
     return (
       <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
-        <h1 className="text-[27px] font-extrabold text-[#28243a]">Appointments</h1>
-        <p className="mt-1 text-sm text-[#77758a]">
-          Platform-wide appointment totals from the connected analytics API.
-        </p>
-        {analytics.isError && (
-          <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            Could not load appointment totals.
-          </p>
-        )}
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <Stat title="Total appointments" value={analytics.data?.totalAppointments} />
-          <Stat title="Completed appointments" value={analytics.data?.completedAppointments} />
-          <Stat title="Total users" value={analytics.data?.totalUsers} />
-          <Stat title="Total crisis events" value={analytics.data?.totalCrisisEvents} />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[27px] font-extrabold text-[#28243a]">All appointments</h1>
+            <p className="mt-1 text-sm text-[#77758a]">
+              Live booking records from the Appointment Service. This register is read-only.
+            </p>
+          </div>
+          <label className="flex items-center gap-2 text-xs font-semibold text-[#625d70]">
+            Status
+            <select
+              value={appointmentStatus}
+              onChange={(event) => {
+                setAppointmentStatus(event.target.value as AppointmentStatus | "ALL");
+                setAppointmentPage(1);
+              }}
+              className="rounded-xl border border-[#e4deeb] bg-white px-3 py-2 text-sm"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="PENDING">Pending</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </label>
         </div>
-        <p className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">
-          The admin API currently exposes aggregate appointment analytics, not an
-          administrator-facing list of individual bookings. Individual patient/therapist booking
-          records and per-booking actions are therefore not shown here.
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <Stat title="All-time bookings" value={analytics.data?.totalAppointments} />
+          <Stat title="Completed bookings" value={analytics.data?.completedAppointments} />
+          <Stat title="Records in this view" value={appointmentQuery.data?.total} />
+        </div>
+
+        {appointmentQuery.isError && (
+          <div role="alert" className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+            <span>Could not load the appointment register. Check the connection and retry.</span>
+            <button
+              type="button"
+              onClick={() => appointmentQuery.refetch()}
+              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        <section className="mt-5 overflow-hidden rounded-2xl border border-[#ebe8f1] bg-white">
+          {appointmentQuery.isLoading ? (
+            <div className="space-y-3 p-6">
+              {[1, 2, 3, 4].map((n) => <div key={n} className="h-12 animate-pulse rounded-lg bg-[#f5f3f8]" />)}
+            </div>
+          ) : rows.length === 0 ? (
+            <p className="p-8 text-center text-sm text-[#77758a]">
+              No appointments match this status filter.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-xs">
+                <thead className="bg-[#faf9fc] text-[10px] uppercase tracking-wide text-[#8a789d]">
+                  <tr>
+                    <th className="px-5 py-4">Booking</th>
+                    <th className="px-5 py-4">Patient reference</th>
+                    <th className="px-5 py-4">Therapist reference</th>
+                    <th className="px-5 py-4">Session</th>
+                    <th className="px-5 py-4">Date & time</th>
+                    <th className="px-5 py-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((item) => (
+                    <tr key={item.id} className="border-t border-[#f0edf3] text-[#625d70]">
+                      <td className="px-5 py-4 font-semibold text-[#28243a]">{item.id.slice(0, 8)}</td>
+                      <td className="px-5 py-4">{item.patientId.slice(0, 8)}</td>
+                      <td className="px-5 py-4">{item.therapistId.slice(0, 8)}</td>
+                      <td className="px-5 py-4">{item.sessionType.replace("_", " ")}</td>
+                      <td className="px-5 py-4">{new Date(item.slotStart).toLocaleString()}</td>
+                      <td className="px-5 py-4">
+                        <span className="rounded-full bg-[#f1ecf7] px-2.5 py-1 text-[10px] font-bold text-[#7350a0]">
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="flex items-center justify-between border-t border-[#f0edf3] px-5 py-3 text-xs text-[#77758a]">
+            <span>{appointmentQuery.data?.total ?? 0} total bookings · Page {appointmentPage} of {totalPages}</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={appointmentPage <= 1 || appointmentQuery.isFetching}
+                onClick={() => setAppointmentPage((page) => Math.max(1, page - 1))}
+                className="rounded-lg border border-[#e4deeb] px-3 py-2 font-semibold disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={appointmentPage >= totalPages || appointmentQuery.isFetching}
+                onClick={() => setAppointmentPage((page) => page + 1)}
+                className="rounded-lg border border-[#e4deeb] px-3 py-2 font-semibold disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </section>
+        <p className="mt-4 rounded-xl bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
+          Patient and therapist identifiers are shortened in this register. Detailed clinical notes,
+          treatment content and private profile documents are intentionally excluded.
         </p>
       </main>
     );
