@@ -31,7 +31,7 @@ const navItems = [
   { href: "/check-in", label: "Check-in", icon: Heart },
   { href: "/therapy", label: "Therapy", icon: Calendar },
   { href: "/messages", label: "Messages", icon: MessageCircle },
-  { href: "/reflect", label: "Reflect", icon: PenLine },
+  { href: "/reflect", label: "Reflect with AI", icon: PenLine },
   { href: "/therapist-application", label: "Become a Therapist", icon: Briefcase },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
