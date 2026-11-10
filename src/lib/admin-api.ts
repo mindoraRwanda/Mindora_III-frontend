@@ -20,6 +20,27 @@ interface AdminAppointmentListResponse {
   limit: number;
 }
 
+export interface NotificationDeliveryLog {
+  id: string;
+  userId: string;
+  eventType: string;
+  channel: string;
+  status: string;
+  attempts: number;
+  deliveredAt: string | null;
+  failureReason: string | null;
+  createdAt: string;
+  createdAtKigali: string;
+  deliveredAtKigali: string | null;
+}
+
+interface NotificationDeliveryLogResponse {
+  logs: NotificationDeliveryLog[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 interface UserListResponse {
   users: AdminUserRecord[];
   total: number;
@@ -70,6 +91,18 @@ export function fetchAdminAppointments(params: {
   status?: AppointmentStatus;
 }): Promise<AdminAppointmentListResponse> {
   return apiFetch(`/api/v1/admin/appointments${toQueryString(params)}`);
+}
+
+// GET /api/v1/notifications/logs — admin-only delivery attempts across channels.
+export function fetchNotificationDeliveryLogs(params: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  channel?: string;
+  eventType?: string;
+  userId?: string;
+}): Promise<NotificationDeliveryLogResponse> {
+  return apiFetch(`/api/v1/notifications/logs${toQueryString(params)}`);
 }
 
 // GET /api/v1/admin/users - proxies through User Service to Auth Service.
