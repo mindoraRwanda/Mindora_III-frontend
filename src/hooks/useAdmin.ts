@@ -10,6 +10,7 @@ import {
   fetchAuditLog,
   fetchDetailedAnalytics,
   fetchModerationQueue,
+  fetchNotificationDeliveryLogs,
   fetchTherapistApplication,
   fetchTherapistApplications,
   fetchUsers,
@@ -37,6 +38,20 @@ export function useAdminAppointments(params: {
   return useQuery({
     queryKey: ["admin", "appointments", params],
     queryFn: () => fetchAdminAppointments(params),
+  });
+}
+
+export function useAdminNotificationLogs(params: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  channel?: string;
+  eventType?: string;
+  userId?: string;
+}) {
+  return useQuery({
+    queryKey: ["admin", "notification-logs", params],
+    queryFn: () => fetchNotificationDeliveryLogs(params),
   });
 }
 
