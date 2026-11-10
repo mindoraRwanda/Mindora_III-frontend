@@ -55,7 +55,7 @@ function formatSessionType(type: BookedAppointment["sessionType"]): string {
 }
 
 function patientLabel(patientId: string): string {
-  return \`Patient \${patientId.slice(0, 8)}\`;
+  return `Patient ${patientId.slice(0, 8)}`;
 }
 
 interface StatCardProps {
