@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, CalendarClock, ClipboardList, FileText, LayoutDashboard, LogOut, Pill, Users, Clock, Settings, Video } from "lucide-react";
+import {
+  Activity,
+  CalendarClock,
+  ClipboardList,
+  Clock,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Pill,
+  Settings,
+  Users,
+  Video,
+} from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,7 +67,9 @@ export function TherapistSidebar() {
         </p>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== "/therapist" && pathname.startsWith(`${item.href}/`));
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/therapist" && pathname.startsWith(`${item.href}/`));
           return (
             <Link
               key={item.href}
