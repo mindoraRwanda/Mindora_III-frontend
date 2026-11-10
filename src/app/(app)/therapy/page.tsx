@@ -42,6 +42,7 @@ export default function TherapyPage() {
     isLoading: therapistsLoading,
     isError: therapistsErrored,
     error: therapistsError,
+    refetch: refetchTherapists,
   } = useTherapists({});
   const therapists = useMemo(() => therapistData?.therapists ?? [], [therapistData]);
 
@@ -197,8 +198,18 @@ export default function TherapyPage() {
           </div>
 
           {therapistsErrored && (
-            <div className="mb-5 rounded-2xl bg-red-50 px-4 py-3 text-[13px] font-semibold text-red-700 shadow-[inset_3px_3px_7px_#f3d9d9,inset_-3px_-3px_7px_#ffffff]">
-              {therapistsError?.message ?? "Could not load therapists."}
+            <div
+              role="alert"
+              className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-red-50 px-4 py-3 text-[13px] font-semibold text-red-700 shadow-[inset_3px_3px_7px_#f3d9d9,inset_-3px_-3px_7px_#ffffff]"
+            >
+              <span>{therapistsError?.message ?? "Could not load therapists."}</span>
+              <button
+                type="button"
+                onClick={() => void refetchTherapists()}
+                className="shrink-0 font-bold underline"
+              >
+                Try again
+              </button>
             </div>
           )}
 
@@ -228,10 +239,24 @@ export default function TherapyPage() {
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full text-mindora-purple shadow-[inset_4px_4px_9px_#cdc6e0,inset_-4px_-4px_9px_#fdfbff]">
                     <Search className="h-6 w-6" />
                   </div>
-                  <p className="mb-1 text-[15px] font-bold text-foreground">No therapists found</p>
-                  <p className="text-[13.5px] text-muted-foreground">
-                    Try adjusting your search or filters.
+                  <p className="mb-1 text-[15px] font-bold text-foreground">
+                    No therapists match this search
                   </p>
+                  <p className="max-w-sm text-[13.5px] text-muted-foreground">
+                    Clear the search and filters to see all therapists currently available for
+                    booking.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("");
+                      setFilterSpecialty("all");
+                      setFilterLanguage("all");
+                    }}
+                    className="mt-4 rounded-full bg-mindora-purple px-5 py-2.5 text-[12.5px] font-bold text-white hover:bg-mindora-purple-dark"
+                  >
+                    Clear search and filters
+                  </button>
                 </div>
               )}
             </>
