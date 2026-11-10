@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -298,7 +299,9 @@ export function MessagesView() {
               <MessageCircle className="mb-3 h-10 w-10 text-mindora-lavender" />
               {conversations.length === 0 && !conversationsLoading && !conversationsError ? (
                 <>
-                  <p className="text-[15px] font-semibold text-foreground">Your message space is ready</p>
+                  <p className="text-[15px] font-semibold text-foreground">
+                    Your message space is ready
+                  </p>
                   <p className="mt-1 max-w-sm text-[13px] leading-5 text-muted-foreground">
                     Choose a therapist first. After you start a conversation, your messages and
                     replies will appear here.
@@ -311,7 +314,9 @@ export function MessagesView() {
                   </Link>
                 </>
               ) : conversationsError ? (
-                <p className="text-[14px]">Your conversations could not be loaded. Please try refreshing.</p>
+                <p className="text-[14px]">
+                  Your conversations could not be loaded. Please try refreshing.
+                </p>
               ) : (
                 <p className="text-[14px]">Select a conversation to start chatting.</p>
               )}
