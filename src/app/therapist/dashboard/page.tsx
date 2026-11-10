@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  Activity,
   CalendarClock,
   CalendarDays,
   CalendarX,
@@ -26,7 +25,7 @@ const STATUS_VARIANT = {
 
 const QUICK_ACTIONS = [
   {
-    href: "/therapist/schedule",
+    href: "/therapist",
     title: "Review appointments",
     description: "Confirm or decline patient requests.",
     icon: CalendarDays,
@@ -179,7 +178,6 @@ export default function TherapistDashboardPage() {
     .slice(0, 4);
 
   const recentAppointments = schedule.data?.appointments ?? [];
-  const todayKey = kigaliDateKey(new Date());
   const lastSevenDays = Array.from({ length: 7 }, (_, index) => {
     const day = new Date();
     day.setDate(day.getDate() - (6 - index));
@@ -349,7 +347,6 @@ export default function TherapistDashboardPage() {
               {schedule.data.total.toLocaleString()} schedule records available to this view.
             </p>
           )}
-          {todayKey && null}
         </article>
       </section>
 
