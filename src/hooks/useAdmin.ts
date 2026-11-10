@@ -5,6 +5,7 @@ import {
   approveTherapistApplication,
   decryptPostAuthor,
   fetchAlerts,
+  fetchAdminAppointments,
   fetchAnalytics,
   fetchAuditLog,
   fetchDetailedAnalytics,
@@ -250,5 +251,17 @@ export function useReactivateTherapist() {
       toast.success("Therapist reactivated.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not reactivate this therapist.")),
+  });
+}
+
+
+export function useAdminAppointments(params: {
+  page?: number;
+  limit?: number;
+  status?: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+}) {
+  return useQuery({
+    queryKey: ["admin", "appointments", params],
+    queryFn: () => fetchAdminAppointments(params),
   });
 }
