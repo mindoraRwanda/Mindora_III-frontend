@@ -12,7 +12,7 @@ import {
   Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useTherapistDashboard, useTherapistPatients } from "@/hooks/useAppointments";
+import { useTherapistDashboard, useTherapistPatients, useTherapistSchedule } from "@/hooks/useAppointments";
 import { useCreateCarePlan, useTherapistCarePlans } from "@/hooks/useCarePlans";
 import {
   useCommunityGroups,
@@ -138,6 +138,8 @@ export default function TherapistWorkspaceModulePage() {
   const workspaceKey = params.workspace;
   const info = modules[workspaceKey];
   const { data, isLoading, isError } = useTherapistDashboard();
+  const scheduleQuery = useTherapistSchedule();
+  const [reportNow] = useState(() => Date.now());
 
   if (!info && workspaceKey !== "reports") {
     return (
@@ -148,37 +150,106 @@ export default function TherapistWorkspaceModulePage() {
   }
 
   if (workspaceKey === "reports") {
+    const appointments = scheduleQuery.data?.appointments ?? [];
+    const completedCount = appointments.filter((item) => item.status === "COMPLETED").length;
+    const cancelledCount = appointments.filter((item) => item.status === "CANCELLED").length;
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(reportNow);
+      date.setDate(date.getDate() - (6 - index));
+      const dateKey = date.toISOString().slice(0, 10);
+      const completed = appointments.filter(
+        (item) => item.status === "COMPLETED" && new Date(item.slotStart).toISOString().slice(0, 10) === dateKey
+      ).length;
+      return { key: dateKey, label: date.toLocaleDateString("en", { weekday: "short" }), completed };
+    });
+    const maxCompleted = Math.max(1, ...days.map((day) => day.completed));
+
     return (
       <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
         <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">
           Therapist workspace
         </p>
-        <h1 className="mt-2 text-[27px] font-extrabold text-[#28243a]">Practice reports</h1>
-        <p className="mt-1 text-sm text-[#77758a]">
-          Live summary from the connected MINDORA V3 therapist dashboard.
-        </p>
-        {isError && (
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[27px] font-extrabold text-[#28243a]">Practice reports</h1>
+            <p className="mt-1 text-sm text-[#77758a]">
+              Live appointment activity from your own MINDORA schedule.
+            </p>
+          </div>
+          <button type="button" onClick={() => { void scheduleQuery.refetch(); }} className="rounded-xl border border-[#ebe8f1] bg-white px-4 py-2 text-xs font-bold text-[#7350a0]">
+            Refresh report
+          </button>
+        </div>
+        {(isError || scheduleQuery.isError) && (
           <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            Could not load live therapist metrics.
+            Could not load the complete live practice report. Retry before using these figures.
           </p>
         )}
-        {isLoading ? (
+        {isLoading || scheduleQuery.isLoading ? (
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="h-24 animate-pulse rounded-2xl bg-white" />
-            ))}
+            {[1, 2, 3, 4].map((n) => <div key={n} className="h-24 animate-pulse rounded-2xl bg-white" />)}
           </div>
         ) : (
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Metric label="Pending requests" value={data?.pendingCount ?? 0} />
             <Metric label="Upcoming sessions" value={data?.upcomingCount ?? 0} />
             <Metric label="Patients" value={data?.patientCount ?? 0} />
-            <Metric label="Today's sessions" value={data?.todaysSessions?.length ?? 0} />
+            <Metric label="Completed in loaded records" value={completedCount} />
           </div>
         )}
-        <p className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">
-          The current API provides these live totals only. Monthly trends and clinical outcome
-          charts from the prototype are not fabricated or presented as real patient data.
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#28243a]">Completed sessions · last 7 days</h2>
+                <p className="mt-1 text-xs text-[#77758a]">Calculated from your loaded appointment records.</p>
+              </div>
+              <span className="rounded-full bg-[#f1ecf7] px-2.5 py-1 text-[10px] font-bold text-[#7350a0]">
+                {scheduleQuery.data?.total ?? 0} total records
+              </span>
+            </div>
+            <div className="mt-6 grid grid-cols-7 items-end gap-2">
+              {days.map((day) => (
+                <div key={day.key} className="flex flex-col items-center gap-2">
+                  <span className="text-[10px] font-bold text-[#625d70]">{day.completed}</span>
+                  <div className="flex h-36 w-full items-end rounded-t-lg bg-[#f5f2f8]">
+                    <div
+                      className="w-full rounded-t-lg bg-[#8061a8]"
+                      style={{ height: `${Math.max(6, (day.completed / maxCompleted) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-[#8a789d]">{day.label}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
+            <h2 className="text-sm font-bold text-[#28243a]">Schedule summary</h2>
+            <div className="mt-4 space-y-4">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#77758a]">Completed records</span>
+                <strong className="text-[#28243a]">{completedCount}</strong>
+              </div>
+              <div className="h-2 rounded-full bg-[#f1ecf7]">
+                <div className="h-2 rounded-full bg-[#5d9b7c]" style={{ width: `${appointments.length ? (completedCount / appointments.length) * 100 : 0}%` }} />
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[#77758a]">Cancelled records</span>
+                <strong className="text-[#28243a]">{cancelledCount}</strong>
+              </div>
+              <div className="h-2 rounded-full bg-[#f1ecf7]">
+                <div className="h-2 rounded-full bg-[#d39a63]" style={{ width: `${appointments.length ? (cancelledCount / appointments.length) * 100 : 0}%` }} />
+              </div>
+              <p className="text-[11px] leading-5 text-[#8a789d]">
+                These percentages use the currently loaded schedule page, not a complete clinical outcome measure.
+              </p>
+            </div>
+          </section>
+        </div>
+        <p className="mt-4 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">
+          Reports only summarize scheduling activity. They do not score clinical outcomes or infer patient progress from appointment counts.
         </p>
       </main>
     );
