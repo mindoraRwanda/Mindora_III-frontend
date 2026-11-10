@@ -10,7 +10,7 @@ export function WorkspaceSupportCard() {
         Contact MINDORA
       </h2>
       <p className="mt-2 text-[10px] leading-relaxed text-white/55">
-        Monday to Friday, 9am to 5pm.
+        Monday to Friday, 9am to 5pm. This is general support, not a 24/7 emergency hotline.
       </p>
       <a
         href="tel:+250783974066"
