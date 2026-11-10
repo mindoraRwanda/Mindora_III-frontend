@@ -109,6 +109,32 @@ function postText(content: Record<string, unknown>): string {
   return parts.join(" ").trim() || "This post has no text content.";
 }
 
+function parseMilestoneLines(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 20)
+    .flatMap((line) => {
+      const [rawTitle, ...dateParts] = line.split("|");
+      const title = rawTitle.trim();
+      if (!title) return [];
+      const date = dateParts.join("|").trim();
+      if (!date) return [{ title }];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return [{ title }];
+      return [{ title, dueDate: new Date(date + "T00:00:00+02:00").toISOString() }];
+    });
+}
+
+function formatMilestoneLines(milestones: Array<{ title: string; dueDate?: string }>) {
+  return milestones
+    .map((milestone) => {
+      const date = milestone.dueDate ? new Date(milestone.dueDate).toISOString().slice(0, 10) : "";
+      return milestone.title + (date ? " | " + date : "");
+    })
+    .join("\n");
+}
+
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
@@ -462,7 +488,7 @@ export default function TherapistWorkspaceModulePage() {
                   patientId: carePlanPatientId,
                   title: carePlanTitle.trim(),
                   goals,
-                  milestones: carePlanMilestones.split(/\r?\n/).map((title) => title.trim()).filter(Boolean).slice(0, 20).map((title) => ({ title })),
+                  milestones: parseMilestoneLines(carePlanMilestones),
                   ...(carePlanReviewDate
                     ? { reviewDate: new Date(carePlanReviewDate + "T00:00:00+02:00").toISOString() }
                     : {}),
@@ -534,13 +560,13 @@ export default function TherapistWorkspaceModulePage() {
                   className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm leading-5 text-[#28243a]"
                 />
 
-                <label htmlFor="care-plan-milestones" className="mt-4 block text-xs font-semibold text-[#625d70]">Milestones · one per line (optional)</label>
+                <label htmlFor="care-plan-milestones" className="mt-4 block text-xs font-semibold text-[#625d70]">Milestones · one per line; add | YYYY-MM-DD for a due date (optional)</label>
                 <textarea
                   id="care-plan-milestones"
                   rows={3}
                   value={carePlanMilestones}
                   onChange={(event) => setCarePlanMilestones(event.target.value)}
-                  placeholder={"Agree first coping strategy\nReview progress together"}
+                  placeholder={"Agree first coping strategy | 2026-11-17\nReview progress together"}
                   className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm text-[#28243a]"
                 />
 
@@ -623,7 +649,7 @@ export default function TherapistWorkspaceModulePage() {
                             setEditingCarePlanId(plan.id);
                             setEditCarePlanTitle(plan.title);
                             setEditCarePlanGoals(plan.goals.join("\n"));
-                            setEditCarePlanMilestones(plan.milestones.map((milestone) => milestone.title).join("\n"));
+                            setEditCarePlanMilestones(formatMilestoneLines(plan.milestones));
                             setEditCarePlanReviewDate(plan.reviewDate ? new Date(plan.reviewDate).toISOString().slice(0, 10) : "");
                           }}
                           className="mt-3 rounded-lg border border-[#e4deeb] px-3 py-2 text-[11px] font-bold text-[#7350a0]"
@@ -643,7 +669,7 @@ export default function TherapistWorkspaceModulePage() {
                                 input: {
                                   title: editCarePlanTitle.trim(),
                                   goals,
-                                  milestones: editCarePlanMilestones.split(/\r?\n/).map((title) => title.trim()).filter(Boolean).slice(0, 20).map((title) => ({ title })),
+                                  milestones: parseMilestoneLines(editCarePlanMilestones),
                                   ...(editCarePlanReviewDate
                                     ? { reviewDate: new Date(editCarePlanReviewDate + "T00:00:00+02:00").toISOString() }
                                     : {}),
@@ -805,7 +831,7 @@ export default function TherapistWorkspaceModulePage() {
                         if (!communityDraftTitle.trim() || !communityDraft.trim()) return;
                         createPost.mutate(
                           { groupId: activeGroup._id, title: communityDraftTitle, message: communityDraft, isAnonymous: anonymousPost },
-                          { onSuccess: () => setCommunityDraft("") }
+                          { onSuccess: () => { setCommunityDraft(""); setCommunityDraftTitle(""); } }
                         );
                       }}
                       className="rounded-2xl border border-[#ebe8f1] bg-white p-5"
