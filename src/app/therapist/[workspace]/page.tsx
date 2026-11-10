@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Activity, AlertTriangle, CalendarCheck, ClipboardList, FileText, HeartPulse, Pill, ShieldCheck, Users, Video } from "lucide-react";
+import { AlertTriangle, ClipboardList, FileText, Pill, ShieldCheck, Users, Video } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTherapistDashboard } from "@/hooks/useAppointments";
 
@@ -68,6 +68,8 @@ export default function TherapistWorkspaceModulePage() {
       <p className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">The current API provides these live totals only. Monthly trends and clinical outcome charts from the prototype are not fabricated or presented as real patient data.</p>
     </main>;
   }
+
+  if (!info) return <main className="min-h-full bg-[#f7f6fa] p-8"><h1 className="text-2xl font-bold text-[#28243a]">Page not found</h1></main>;
 
   const Icon = info.icon;
   return <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
