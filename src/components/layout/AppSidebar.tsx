@@ -67,7 +67,7 @@ export function AppSidebar() {
 
       <nav className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
         <p className="mb-1 px-2.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d6588]">
-          Your day
+          Your space
         </p>
         {navItems.map((item) => {
           const Icon = item.icon;
