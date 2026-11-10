@@ -300,7 +300,7 @@ export default function TherapistWorkspaceModulePage() {
             </div>
             <Link href="/therapist/patients" className="mt-4 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
               View patient references
-            </a>
+            </Link>
           </section>
 
           <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
@@ -320,9 +320,9 @@ export default function TherapistWorkspaceModulePage() {
                 </li>
               ))}
             </ol>
-            <a href="/therapist/prescriptions" className="mt-5 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
+            <Link href="/therapist/prescriptions" className="mt-5 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
               Review prescription workflow
-            </a>
+            </Link>
           </section>
         </div>
       </main>
