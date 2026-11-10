@@ -105,7 +105,7 @@ export function WorkspaceShell({ sidebar, workspace, children }: WorkspaceShellP
               <p className="truncate text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">
                 MINDORA · {workspace} workspace
               </p>
-              <h1 className="truncate text-[15px] font-bold text-[#28243a]">{pageTitle}</h1>
+              <p className="truncate text-[15px] font-bold text-[#28243a]">{pageTitle}</p>
             </div>
           </div>
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#e4eee8] bg-[#f3faf6] px-3 py-2 text-[10px] font-bold text-[#39765e]">
