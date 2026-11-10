@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, RefreshCw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMoodHistory, useMoodToday } from "@/hooks/useMood";
 import { DeleteMoodEntryDialog } from "@/components/check-in/DeleteMoodEntryDialog";
@@ -14,24 +14,77 @@ interface TodaysCheckInsProps {
 
 // GET /today only returns the single most recent entry - to list every entry
 // logged for today (for edit/delete), pull the recent page from /history and
-// keep only the ones whose recordedAt falls on today's *local* calendar date,
-// per the server-computed localDate (avoids re-deriving timezone math here).
+// keep only the ones whose recordedAt falls on today's local calendar date.
 function isOnLocalDate(iso: string, localDate: string, timezone: string): boolean {
   return new Date(iso).toLocaleDateString("en-CA", { timeZone: timezone }) === localDate;
 }
 
 export function TodaysCheckIns({ editingId, onEdit }: TodaysCheckInsProps) {
-  const { data: today } = useMoodToday();
-  const { data: history } = useMoodHistory({ limit: 10 });
+  const {
+    data: today,
+    isLoading: todayLoading,
+    isError: todayError,
+    refetch: refetchToday,
+  } = useMoodToday();
+  const {
+    data: history,
+    isLoading: historyLoading,
+    isError: historyError,
+    refetch: refetchHistory,
+  } = useMoodHistory({ limit: 10 });
   const [deleteTarget, setDeleteTarget] = useState<MoodEntry | null>(null);
 
-  if (!today) return null;
+  if (todayLoading || historyLoading) {
+    return (
+      <div
+        role="status"
+        className="rounded-[24px] bg-white px-5 py-5 text-[13px] text-muted-foreground shadow-[10px_10px_22px_#cbc4de,-10px_-10px_22px_#fdfbff]"
+      >
+        Loading today&apos;s saved check-ins…
+      </div>
+    );
+  }
+
+  if (todayError || historyError || !today) {
+    return (
+      <div className="rounded-[24px] bg-white p-5 shadow-[10px_10px_22px_#cbc4de,-10px_-10px_22px_#fdfbff]">
+        <h2 className="text-[15px] font-bold text-foreground">Today&apos;s check-ins</h2>
+        <p className="mt-2 text-[13px] leading-5 text-muted-foreground">
+          We couldn&apos;t load your saved check-ins just now. Your entries have not been deleted.
+          Please try again.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            void Promise.all([refetchToday(), refetchHistory()]);
+          }}
+          className="mt-3 inline-flex items-center gap-2 rounded-full bg-mindora-purple px-4 py-2 text-[12px] font-semibold text-white hover:bg-mindora-purple-dark"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   const todaysEntries = (history?.entries ?? []).filter((entry) =>
     isOnLocalDate(entry.recordedAt, today.localDate, today.timezone)
   );
 
-  if (todaysEntries.length === 0) return null;
+  if (todaysEntries.length === 0) {
+    return (
+      <section
+        aria-live="polite"
+        className="rounded-[24px] bg-white p-5 shadow-[10px_10px_22px_#cbc4de,-10px_-10px_22px_#fdfbff]"
+      >
+        <h2 className="text-[15px] font-bold text-foreground">Today&apos;s check-ins</h2>
+        <p className="mt-2 text-[13px] leading-5 text-muted-foreground">
+          You haven&apos;t saved a check-in today yet. Once you save your mood above, it will appear
+          here so you can review, edit or delete it.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <div className="space-y-3">
