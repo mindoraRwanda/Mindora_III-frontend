@@ -6,9 +6,12 @@ import {
   AlertTriangle,
   BarChart3,
   Briefcase,
+  CalendarDays,
   LayoutDashboard,
   ListChecks,
   LogOut,
+  Mail,
+  Rocket,
   ScrollText,
   Shield,
   Users,
@@ -25,6 +28,9 @@ const navItems = [
   { href: "/admin/therapist-applications", label: "Therapist Applications", icon: Briefcase },
   { href: "/admin/moderation", label: "Moderation", icon: ListChecks },
   { href: "/admin/alerts", label: "Alerts", icon: AlertTriangle },
+  { href: "/admin/appointments", label: "Appointments", icon: CalendarDays },
+  { href: "/admin/notifications", label: "Notification delivery", icon: Mail },
+  { href: "/admin/release-readiness", label: "Release readiness", icon: Rocket },
   { href: "/admin/audit-log", label: "Audit Log", icon: ScrollText },
 ];
 
@@ -51,13 +57,13 @@ export function AdminSidebar() {
         <NotificationBell />
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1.5">
+      <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pb-3">
         <p className="mb-1 flex items-center gap-1.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d6588]">
           <Shield className="h-3 w-3" /> Admin
         </p>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = item.href === "/admin" ? pathname === "/admin" : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
               key={item.href}
