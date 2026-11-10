@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -56,7 +57,8 @@ export function WeeklyMoodCard() {
       <div className="flex flex-col gap-3 rounded-[34px] bg-white p-6 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
         <h3 className="text-[16.5px] font-bold tracking-tight text-foreground">This week</h3>
         <p className="text-[13.5px] text-muted-foreground">
-          Could not load this week&apos;s check-ins right now. Your history is safe - try refreshing.
+          Could not load this week&apos;s check-ins right now. Your history is safe - try
+          refreshing.
         </p>
       </div>
     );
