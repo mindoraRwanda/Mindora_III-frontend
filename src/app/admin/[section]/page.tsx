@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { useAdminAppointments, usePlatformAnalytics } from "@/hooks/useAdmin";
+import { useAdminAppointments, useAdminNotificationLogs, usePlatformAnalytics } from "@/hooks/useAdmin";
 import type { AppointmentStatus } from "@/types/domain";
 
 function Stat({ title, value }: { title: string; value: number | null | undefined }) {
