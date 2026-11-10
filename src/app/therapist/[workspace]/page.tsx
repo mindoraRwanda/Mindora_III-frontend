@@ -27,7 +27,8 @@ const modules: Record<string, ModuleInfo> = {
     title: "Treatment plans",
     subtitle: "Create structured care plans and review agreed patient goals.",
     status: "Plan storage API not connected",
-    warning: "The supplied MINDORA V3 frontend API does not expose a treatment-plan endpoint. This screen is a workflow preview; it does not create or save clinical plans.",
+    warning:
+      "The supplied MINDORA V3 frontend API does not expose a treatment-plan endpoint. This screen is a workflow preview; it does not create or save clinical plans.",
     icon: ClipboardList,
     points: [
       "Agree goals collaboratively with the patient",
@@ -39,7 +40,8 @@ const modules: Record<string, ModuleInfo> = {
     title: "Medication overview",
     subtitle: "A protected workspace for authorised medication review.",
     status: "Clinical workflow not connected",
-    warning: "No verified V3 medication endpoint is available. No sample medication records are shown and no medication instructions can be changed here.",
+    warning:
+      "No verified V3 medication endpoint is available. No sample medication records are shown and no medication instructions can be changed here.",
     icon: Pill,
     points: [
       "Medication review queue is unavailable",
@@ -51,7 +53,8 @@ const modules: Record<string, ModuleInfo> = {
     title: "Prescriptions",
     subtitle: "A protected prescription workflow for authorised clinical staff.",
     status: "Prescription service not connected",
-    warning: "The current V3 API does not expose a verified prescription workflow. No prescription is issued, signed, saved or sent to a pharmacy from this page.",
+    warning:
+      "The current V3 API does not expose a verified prescription workflow. No prescription is issued, signed, saved or sent to a pharmacy from this page.",
     icon: FileText,
     points: [
       "Verify clinician permissions and patient identity",
@@ -63,7 +66,8 @@ const modules: Record<string, ModuleInfo> = {
     title: "Professional communities",
     subtitle: "Connect with peers around clinical practice and learning.",
     status: "Community Service unavailable",
-    warning: "The supplied frontend API notes that Community Service is not deployed in V1. These are planned areas, not active groups; no membership or posts are created.",
+    warning:
+      "The supplied frontend API notes that Community Service is not deployed in V1. These are planned areas, not active groups; no membership or posts are created.",
     icon: Users,
     points: ["Clinical practice circle", "Wellbeing at work", "Trauma-informed care"],
   },
@@ -71,7 +75,8 @@ const modules: Record<string, ModuleInfo> = {
     title: "Video sessions",
     subtitle: "Review scheduled teletherapy sessions and session-readiness checks.",
     status: "Video provider not connected",
-    warning: "The video room in the HTML prototype was a visual preview only. No camera, microphone, meeting link or recording is started here.",
+    warning:
+      "The video room in the HTML prototype was a visual preview only. No camera, microphone, meeting link or recording is started here.",
     icon: Video,
     points: [
       "Connect an approved video provider",
@@ -133,9 +138,7 @@ export default function TherapistWorkspaceModulePage() {
             <Metric label="Today's sessions" value={data?.todaysSessions?.length ?? 0} />
           </div>
         )}
-        <p
-          className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]"
-        >
+        <p className="mt-5 rounded-xl border border-[#ebe8f1] bg-white p-4 text-xs leading-5 text-[#77758a]">
           The current API provides these live totals only. Monthly trends and clinical outcome
           charts from the prototype are not fabricated or presented as real patient data.
         </p>
@@ -163,23 +166,17 @@ export default function TherapistWorkspaceModulePage() {
           <h1 className="text-[27px] font-extrabold text-[#28243a]">{info.title}</h1>
           <p className="mt-1 text-sm text-[#77758a]">{info.subtitle}</p>
         </div>
-        <span
-          className="rounded-full bg-[#fff5e5] px-3 py-2 text-[10px] font-extrabold text-[#8d641f]"
-        >
+        <span className="rounded-full bg-[#fff5e5] px-3 py-2 text-[10px] font-extrabold text-[#8d641f]">
           {info.status}
         </span>
       </div>
-      <div
-        className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]"
-      >
+      <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
         <AlertTriangle className="h-4 w-4 shrink-0" />
         {info.warning}
       </div>
       <section className="mt-5 rounded-2xl border border-[#ebe8f1] bg-white p-5 shadow-sm">
         <div className="flex items-center gap-3">
-          <span
-            className="grid h-10 w-10 place-items-center rounded-xl bg-[#f1ecf7] text-[#7350a0]"
-          >
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f1ecf7] text-[#7350a0]">
             <Icon className="h-5 w-5" />
           </span>
           <div>
