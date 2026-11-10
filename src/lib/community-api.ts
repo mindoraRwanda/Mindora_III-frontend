@@ -46,8 +46,14 @@ export function fetchCommunityGroups(page = 1, limit = 50): Promise<CommunityGro
   return apiFetch(`/api/v1/community/groups?page=${page}&limit=${limit}`);
 }
 
-export function fetchCommunityPosts(groupId: string, page = 1, limit = 20): Promise<CommunityPostListResponse> {
-  return apiFetch(`/api/v1/community/groups/${encodeURIComponent(groupId)}/posts?page=${page}&limit=${limit}`);
+export function fetchCommunityPosts(
+  groupId: string,
+  page = 1,
+  limit = 20
+): Promise<CommunityPostListResponse> {
+  return apiFetch(
+    `/api/v1/community/groups/${encodeURIComponent(groupId)}/posts?page=${page}&limit=${limit}`
+  );
 }
 
 export function fetchCommunityMembership(groupId: string): Promise<CommunityMembershipResponse> {
@@ -55,11 +61,15 @@ export function fetchCommunityMembership(groupId: string): Promise<CommunityMemb
 }
 
 export function joinCommunity(groupId: string): Promise<CommunityMembershipResponse> {
-  return apiFetch(`/api/v1/community/groups/${encodeURIComponent(groupId)}/join`, { method: "POST" });
+  return apiFetch(`/api/v1/community/groups/${encodeURIComponent(groupId)}/join`, {
+    method: "POST",
+  });
 }
 
 export function leaveCommunity(groupId: string): Promise<CommunityMembershipResponse> {
-  return apiFetch(`/api/v1/community/groups/${encodeURIComponent(groupId)}/join`, { method: "DELETE" });
+  return apiFetch(`/api/v1/community/groups/${encodeURIComponent(groupId)}/join`, {
+    method: "DELETE",
+  });
 }
 
 export function createCommunityPost(
