@@ -28,7 +28,9 @@ export function FeaturedTherapistsPreview() {
           <Button asChild variant="outline" className="h-11 shrink-0 rounded-xl px-5">
             <Link href="/therapists">
               View all therapists
-              <span aria-hidden="true" className="ml-2">→</span>
+              <span aria-hidden="true" className="ml-2">
+                →
+              </span>
             </Link>
           </Button>
         </div>
