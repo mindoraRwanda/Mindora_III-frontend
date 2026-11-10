@@ -99,7 +99,11 @@ export default function TherapistDashboardPage() {
               icon={CalendarClock}
             />
             <StatCard label="Patients" value={data?.patientCount ?? 0} icon={Users} />
-            <StatCard label="Today's sessions" value={data?.todaysSessions?.length ?? 0} icon={Activity} />
+            <StatCard
+              label="Today's sessions"
+              value={data?.todaysSessions?.length ?? 0}
+              icon={Activity}
+            />
           </>
         )}
       </div>
@@ -148,17 +152,47 @@ export default function TherapistDashboardPage() {
       </div>
       <section className="mt-8">
         <h2 className="mb-1 text-[16px] font-bold text-foreground">Practice workspace</h2>
-        <p className="mb-3 text-[12.5px] text-muted-foreground">All additional sections from the MINDORA product prototype.</p>
+        <p className="mb-3 text-[12.5px] text-muted-foreground">
+          All additional sections from the MINDORA product prototype.
+        </p>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {[
-            { href: "/therapist/treatment-plans", title: "Treatment plans", note: "Plan workflow preview" },
-            { href: "/therapist/medication", title: "Medication", note: "Clinical API not connected" },
-            { href: "/therapist/prescriptions", title: "Prescriptions", note: "Prescribing workflow not connected" },
-            { href: "/therapist/reports", title: "Reports", note: "Live dashboard metrics" },
-            { href: "/therapist/communities", title: "Communities", note: "Community service unavailable" },
-            { href: "/therapist/video-sessions", title: "Video sessions", note: "Video provider not connected" },
+                        {
+              href: "/therapist/treatment-plans",
+              title: "Treatment plans",
+              note: "Plan workflow preview",
+            },
+                        {
+              href: "/therapist/medication",
+              title: "Medication",
+              note: "Clinical API not connected",
+            },
+                        {
+              href: "/therapist/prescriptions",
+              title: "Prescriptions",
+              note: "Prescribing workflow not connected",
+            },
+                        {
+              href: "/therapist/reports",
+              title: "Reports",
+              note: "Live dashboard metrics",
+            },
+                        {
+              href: "/therapist/communities",
+              title: "Communities",
+              note: "Community service unavailable",
+            },
+                        {
+              href: "/therapist/video-sessions",
+              title: "Video sessions",
+              note: "Video provider not connected",
+            },
           ].map((item) => (
-            <Link key={item.href} href={item.href} className="rounded-2xl border border-border bg-white p-4 transition hover:border-mindora-purple/40 hover:shadow-sm">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-2xl border border-border bg-white p-4 transition hover:border-mindora-purple/40 hover:shadow-sm"
+            >
               <span className="text-[14px] font-semibold text-foreground">{item.title}</span>
               <span className="mt-1 block text-[11px] text-muted-foreground">{item.note}</span>
             </Link>
