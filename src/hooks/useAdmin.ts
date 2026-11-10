@@ -4,6 +4,7 @@ import {
   addTherapistApplicationNote,
   approveTherapistApplication,
   decryptPostAuthor,
+  fetchAdminAppointments,
   fetchAlerts,
   fetchAnalytics,
   fetchAuditLog,
@@ -26,6 +27,17 @@ import type { TherapistApplicationStatus } from "@/types/domain";
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback;
+}
+
+export function useAdminAppointments(params: {
+  page?: number;
+  limit?: number;
+  status?: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+}) {
+  return useQuery({
+    queryKey: ["admin", "appointments", params],
+    queryFn: () => fetchAdminAppointments(params),
+  });
 }
 
 export function useAdminUsers(params: {
