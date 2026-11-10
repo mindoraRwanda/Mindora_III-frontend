@@ -74,6 +74,7 @@ export function leaveCommunity(groupId: string): Promise<CommunityMembershipResp
 
 export function createCommunityPost(
   groupId: string,
+  title: string,
   message: string,
   isAnonymous: boolean
 ): Promise<CommunityPost> {
@@ -83,7 +84,10 @@ export function createCommunityPost(
     body: JSON.stringify({
       content: {
         type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: title.trim() }] },
+          { type: "paragraph", content: [{ type: "text", text }] },
+        ],
       },
       isAnonymous,
     }),
