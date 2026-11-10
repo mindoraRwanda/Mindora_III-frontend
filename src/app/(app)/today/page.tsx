@@ -159,13 +159,17 @@ export default function TodayPage() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-extrabold text-[#2c1c55]">Your care plan</h2>
-            <p className="mt-1 text-xs text-[#6a6383]">Goals shared by your therapist for you to review.</p>
+            <p className="mt-1 text-xs text-[#6a6383]">
+              Goals shared by your therapist for you to review.
+            </p>
           </div>
         </div>
         {carePlans.isError ? (
           <div role="alert" className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">
             Care plans could not be loaded.
-            <button type="button" onClick={() => carePlans.refetch()} className="ml-3 underline">Retry</button>
+            <button type="button" onClick={() => carePlans.refetch()} className="ml-3 underline">
+              Retry
+            </button>
           </div>
         ) : carePlans.isLoading ? (
           <div className="h-24 animate-pulse rounded-2xl bg-white/70" />
@@ -176,20 +180,28 @@ export default function TodayPage() {
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {carePlans.data?.carePlans.map((plan) => (
-              <article key={plan.id} className="rounded-2xl border border-[#dcd5ea] bg-white/80 p-5">
+              <article
+                key={plan.id}
+                className="rounded-2xl border border-[#dcd5ea] bg-white/80 p-5"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-bold text-[#2c1c55]">{plan.title}</h3>
-                  <span className={[
-                    "rounded-full px-2.5 py-1 text-[10px] font-bold",
-                    plan.status === "ACTIVE" ? "bg-[#e8f5ef] text-[#39765e]" : "bg-[#fff5e5] text-[#8d641f]",
-                  ].join(" ")}>
+                  <span
+                    className={[
+                      "rounded-full px-2.5 py-1 text-[10px] font-bold",
+                      plan.status === "ACTIVE"
+                        ? "bg-[#e8f5ef] text-[#39765e]"
+                        : "bg-[#fff5e5] text-[#8d641f]",
+                    ].join(" ")}
+                  >
                     {plan.status === "DRAFT" ? "Review requested" : plan.status}
                   </span>
                 </div>
                 <ul className="mt-3 space-y-2">
                   {plan.goals.map((goal, index) => (
                     <li key={index} className="flex gap-2 text-xs leading-5 text-[#5d4d85]">
-                      <span className="text-mindora-purple">•</span>{goal}
+                      <span className="text-mindora-purple">•</span>
+                      {goal}
                     </li>
                   ))}
                 </ul>
@@ -201,7 +213,8 @@ export default function TodayPage() {
                 {plan.status === "DRAFT" && (
                   <div className="mt-4 border-t border-[#eee9f6] pt-3">
                     <p className="text-[11px] leading-5 text-[#6a6383]">
-                      Acknowledge this plan only after you have reviewed and discussed these goals with your therapist.
+                      Acknowledge this plan only after you have reviewed and discussed these goals
+                      with your therapist.
                     </p>
                     <button
                       type="button"
