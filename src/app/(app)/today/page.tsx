@@ -205,6 +205,18 @@ export default function TodayPage() {
                     </li>
                   ))}
                 </ul>
+                {plan.milestones.length > 0 && (
+                  <div className="mt-3 rounded-lg bg-[#faf9fc] p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#8f87a4]">Milestones</p>
+                    <ul className="mt-2 space-y-1">
+                      {plan.milestones.map((milestone, index) => (
+                        <li key={index} className="text-xs text-[#5d4d85]">
+                          • {milestone.title}{milestone.dueDate ? " · " + new Date(milestone.dueDate).toLocaleDateString() : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {plan.reviewDate && (
                   <p className="mt-3 text-[11px] text-[#8f87a4]">
                     Review date: {new Date(plan.reviewDate).toLocaleDateString()}
