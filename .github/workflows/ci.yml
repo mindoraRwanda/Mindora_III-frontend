@@ -30,7 +30,7 @@ jobs:
 
       - name: Canonical-format prototype integration files
         run: |
-          npx prettier --write "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/lib/community-api.ts"
+          npx prettier --write "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/lib/community-api.ts" "src/app/(public)/about/page.tsx" "src/app/(public)/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx"
 
       - name: Upload formatted source for patching the PR branch
         uses: actions/upload-artifact@v4
@@ -41,6 +41,9 @@ jobs:
             src/app/admin/[section]/page.tsx
             src/app/therapist/[workspace]/page.tsx
             src/lib/community-api.ts
+            src/app/(public)/about/page.tsx
+            src/app/(public)/page.tsx
+            src/components/landing/FeaturedTherapistsPreview.tsx
           if-no-files-found: error
 
       - name: Format check
