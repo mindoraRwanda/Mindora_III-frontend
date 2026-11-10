@@ -27,8 +27,7 @@ const modules: Record<string, ModuleInfo> = {
     title: "Treatment plans",
     subtitle: "Create structured care plans and review agreed patient goals.",
     status: "Plan storage API not connected",
-    warning:
-      "The supplied MINDORA V3 frontend API does not expose a treatment-plan endpoint. This screen is a workflow preview; it does not create or save clinical plans.",
+    warning: "The supplied MINDORA V3 frontend API does not expose a treatment-plan endpoint. This screen is a workflow preview; it does not create or save clinical plans.",
     icon: ClipboardList,
     points: [
       "Agree goals collaboratively with the patient",
@@ -40,8 +39,7 @@ const modules: Record<string, ModuleInfo> = {
     title: "Medication overview",
     subtitle: "A protected workspace for authorised medication review.",
     status: "Clinical workflow not connected",
-    warning:
-      "No verified V3 medication endpoint is available. No sample medication records are shown and no medication instructions can be changed here.",
+    warning: "No verified V3 medication endpoint is available. No sample medication records are shown and no medication instructions can be changed here.",
     icon: Pill,
     points: [
       "Medication review queue is unavailable",
@@ -53,8 +51,7 @@ const modules: Record<string, ModuleInfo> = {
     title: "Prescriptions",
     subtitle: "A protected prescription workflow for authorised clinical staff.",
     status: "Prescription service not connected",
-    warning:
-      "The current V3 API does not expose a verified prescription workflow. No prescription is issued, signed, saved or sent to a pharmacy from this page.",
+    warning: "The current V3 API does not expose a verified prescription workflow. No prescription is issued, signed, saved or sent to a pharmacy from this page.",
     icon: FileText,
     points: [
       "Verify clinician permissions and patient identity",
@@ -66,8 +63,7 @@ const modules: Record<string, ModuleInfo> = {
     title: "Professional communities",
     subtitle: "Connect with peers around clinical practice and learning.",
     status: "Community Service unavailable",
-    warning:
-      "The supplied frontend API notes that Community Service is not deployed in V1. These are planned areas, not active groups; no membership or posts are created.",
+    warning: "The supplied frontend API notes that Community Service is not deployed in V1. These are planned areas, not active groups; no membership or posts are created.",
     icon: Users,
     points: ["Clinical practice circle", "Wellbeing at work", "Trauma-informed care"],
   },
@@ -75,8 +71,7 @@ const modules: Record<string, ModuleInfo> = {
     title: "Video sessions",
     subtitle: "Review scheduled teletherapy sessions and session-readiness checks.",
     status: "Video provider not connected",
-    warning:
-      "The video room in the HTML prototype was a visual preview only. No camera, microphone, meeting link or recording is started here.",
+    warning: "The video room in the HTML prototype was a visual preview only. No camera, microphone, meeting link or recording is started here.",
     icon: Video,
     points: [
       "Connect an approved video provider",
