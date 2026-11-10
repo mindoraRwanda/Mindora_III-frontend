@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTherapistDashboard, useTherapistPatients, useTherapistSchedule } from "@/hooks/useAppointments";
-import { useCreateCarePlan, useTherapistCarePlans } from "@/hooks/useCarePlans";
+import { useCreateCarePlan, useTherapistCarePlans, useUpdateCarePlan } from "@/hooks/useCarePlans";
 import {
   useCommunityGroups,
   useCommunityMembership,
@@ -75,9 +75,9 @@ const modules: Record<string, ModuleInfo> = {
   communities: {
     title: "Professional communities",
     subtitle: "Connect with peers around clinical practice and learning.",
-    status: "Community Service unavailable",
+    status: "Connected to Community Service",
     warning:
-      "The supplied frontend API notes that Community Service is not deployed in V1. These are planned areas, not active groups; no membership or posts are created.",
+      "Groups, memberships and discussions are loaded from live Community Service records. New groups are created by authorised administrators.",
     icon: Users,
     points: ["Clinical practice circle", "Wellbeing at work", "Trauma-informed care"],
   },
@@ -128,12 +128,19 @@ export default function TherapistWorkspaceModulePage() {
   const [carePlanTitle, setCarePlanTitle] = useState("");
   const [carePlanGoals, setCarePlanGoals] = useState("");
   const [carePlanReviewDate, setCarePlanReviewDate] = useState("");
+  const [carePlanMilestones, setCarePlanMilestones] = useState("");
+  const [editingCarePlanId, setEditingCarePlanId] = useState<string | null>(null);
+  const [editCarePlanTitle, setEditCarePlanTitle] = useState("");
+  const [editCarePlanGoals, setEditCarePlanGoals] = useState("");
+  const [editCarePlanMilestones, setEditCarePlanMilestones] = useState("");
+  const [editCarePlanReviewDate, setEditCarePlanReviewDate] = useState("");
   const [prescriptionDrafts, setPrescriptionDrafts] = useState<Array<{ id: string; createdAt: string }>>([]);
   const [prescriptionNote, setPrescriptionNote] = useState("");
   const [showPrescriptionDraftForm, setShowPrescriptionDraftForm] = useState(false);
   const carePlanPatients = useTherapistPatients(1, 50);
   const carePlans = useTherapistCarePlans();
   const createCarePlan = useCreateCarePlan();
+  const updateCarePlan = useUpdateCarePlan();
   const communityGroups = useCommunityGroups();
   const activeCommunityId = selectedCommunityId ?? communityGroups.data?.groups[0]?._id ?? null;
   const communityPosts = useCommunityPosts(activeCommunityId);
@@ -434,7 +441,7 @@ export default function TherapistWorkspaceModulePage() {
 
         <div className="mt-5 flex gap-3 rounded-2xl border border-[#d9eadf] bg-[#f1faf4] p-4 text-xs leading-5 text-[#39765e]">
           <ShieldCheck className="h-4 w-4 shrink-0" />
-          Goals and milestones are encrypted at rest. Patients can see a plan after it is shared with their account and acknowledge it before it becomes active.
+          Goals and milestones are encrypted at rest. The assigned patient can review a draft from their Today dashboard; it becomes active only after the patient acknowledges it.
         </div>
 
         {carePlans.isError && (
@@ -455,7 +462,7 @@ export default function TherapistWorkspaceModulePage() {
                   patientId: carePlanPatientId,
                   title: carePlanTitle.trim(),
                   goals,
-                  milestones: [],
+                  milestones: carePlanMilestones.split(/\r?\n/).map((title) => title.trim()).filter(Boolean).slice(0, 20).map((title) => ({ title })),
                   ...(carePlanReviewDate
                     ? { reviewDate: new Date(carePlanReviewDate + "T00:00:00+02:00").toISOString() }
                     : {}),
@@ -465,6 +472,7 @@ export default function TherapistWorkspaceModulePage() {
                     setCarePlanTitle("");
                     setCarePlanGoals("");
                     setCarePlanReviewDate("");
+                    setCarePlanMilestones("");
                   },
                 }
               );
@@ -526,6 +534,16 @@ export default function TherapistWorkspaceModulePage() {
                   className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm leading-5 text-[#28243a]"
                 />
 
+                <label htmlFor="care-plan-milestones" className="mt-4 block text-xs font-semibold text-[#625d70]">Milestones · one per line (optional)</label>
+                <textarea
+                  id="care-plan-milestones"
+                  rows={3}
+                  value={carePlanMilestones}
+                  onChange={(event) => setCarePlanMilestones(event.target.value)}
+                  placeholder={"Agree first coping strategy\nReview progress together"}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm text-[#28243a]"
+                />
+
                 <label htmlFor="care-plan-review" className="mt-4 block text-xs font-semibold text-[#625d70]">Review date (optional)</label>
                 <input
                   id="care-plan-review"
@@ -583,9 +601,105 @@ export default function TherapistWorkspaceModulePage() {
                           </li>
                         ))}
                       </ul>
+                      {plan.milestones.length > 0 && (
+                        <div className="mt-3 rounded-lg bg-[#faf9fc] p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a789d]">Milestones</p>
+                          <ul className="mt-2 space-y-1">
+                            {plan.milestones.map((milestone, index) => (
+                              <li key={index} className="text-xs text-[#625d70]">
+                                • {milestone.title}{milestone.dueDate ? " · " + new Date(milestone.dueDate).toLocaleDateString() : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       <p className="mt-3 text-[10px] text-[#9993a2]">
                         {plan.reviewDate ? "Review " + new Date(plan.reviewDate).toLocaleDateString() : "No review date set"} · Updated {new Date(plan.updatedAt).toLocaleDateString()}
                       </p>
+                      {plan.status !== "ARCHIVED" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCarePlanId(plan.id);
+                            setEditCarePlanTitle(plan.title);
+                            setEditCarePlanGoals(plan.goals.join("\n"));
+                            setEditCarePlanMilestones(plan.milestones.map((milestone) => milestone.title).join("\n"));
+                            setEditCarePlanReviewDate(plan.reviewDate ? new Date(plan.reviewDate).toISOString().slice(0, 10) : "");
+                          }}
+                          className="mt-3 rounded-lg border border-[#e4deeb] px-3 py-2 text-[11px] font-bold text-[#7350a0]"
+                        >
+                          Edit goals and milestones
+                        </button>
+                      )}
+                      {editingCarePlanId === plan.id && (
+                        <form
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            const goals = editCarePlanGoals.split(/\r?\n/).map((goal) => goal.trim()).filter(Boolean).slice(0, 20);
+                            if (!editCarePlanTitle.trim() || goals.length === 0) return;
+                            updateCarePlan.mutate(
+                              {
+                                id: plan.id,
+                                input: {
+                                  title: editCarePlanTitle.trim(),
+                                  goals,
+                                  milestones: editCarePlanMilestones.split(/\r?\n/).map((title) => title.trim()).filter(Boolean).slice(0, 20).map((title) => ({ title })),
+                                  ...(editCarePlanReviewDate
+                                    ? { reviewDate: new Date(editCarePlanReviewDate + "T00:00:00+02:00").toISOString() }
+                                    : {}),
+                                },
+                              },
+                              { onSuccess: () => setEditingCarePlanId(null) }
+                            );
+                          }}
+                          className="mt-4 space-y-3 rounded-xl border border-[#e4deeb] bg-[#faf9fc] p-4"
+                        >
+                          <label className="block text-[11px] font-semibold text-[#625d70]">
+                            Plan title
+                            <input
+                              required
+                              maxLength={120}
+                              value={editCarePlanTitle}
+                              onChange={(event) => setEditCarePlanTitle(event.target.value)}
+                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
+                            />
+                          </label>
+                          <label className="block text-[11px] font-semibold text-[#625d70]">
+                            Agreed goals · one per line
+                            <textarea
+                              required
+                              rows={4}
+                              value={editCarePlanGoals}
+                              onChange={(event) => setEditCarePlanGoals(event.target.value)}
+                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
+                            />
+                          </label>
+                          <label className="block text-[11px] font-semibold text-[#625d70]">
+                            Milestones · one per line
+                            <textarea
+                              rows={3}
+                              value={editCarePlanMilestones}
+                              onChange={(event) => setEditCarePlanMilestones(event.target.value)}
+                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
+                            />
+                          </label>
+                          <label className="block text-[11px] font-semibold text-[#625d70]">
+                            Review date (leave blank to keep current)
+                            <input
+                              type="date"
+                              value={editCarePlanReviewDate}
+                              onChange={(event) => setEditCarePlanReviewDate(event.target.value)}
+                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
+                            />
+                          </label>
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setEditingCarePlanId(null)} className="rounded-lg border border-[#e4deeb] px-3 py-2 text-[11px] font-bold text-[#625d70]">Cancel</button>
+                            <button type="submit" disabled={!editCarePlanTitle.trim() || !editCarePlanGoals.trim() || updateCarePlan.isPending} className="rounded-lg bg-[#7350a0] px-3 py-2 text-[11px] font-bold text-white disabled:opacity-50">
+                              {updateCarePlan.isPending ? "Updating…" : "Save changes"}
+                            </button>
+                          </div>
+                        </form>
+                      )}
                     </article>
                   );
                 })}
