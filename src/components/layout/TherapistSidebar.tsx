@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarClock, LayoutDashboard, LogOut, Users, Clock, Settings } from "lucide-react";
+import { Activity, CalendarClock, ClipboardList, FileText, LayoutDashboard, LogOut, Pill, Users, Clock, Settings, Video } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,12 @@ const navItems = [
   { href: "/therapist/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/therapist/availability", label: "Availability", icon: Clock },
   { href: "/therapist/patients", label: "Patients", icon: Users },
+  { href: "/therapist/treatment-plans", label: "Treatment plans", icon: ClipboardList },
+  { href: "/therapist/medication", label: "Medication", icon: Pill },
+  { href: "/therapist/prescriptions", label: "Prescriptions", icon: FileText },
+  { href: "/therapist/reports", label: "Reports", icon: Activity },
+  { href: "/therapist/communities", label: "Communities", icon: Users },
+  { href: "/therapist/video-sessions", label: "Video sessions", icon: Video },
   { href: "/therapist/settings", label: "Settings", icon: Settings },
 ];
 
@@ -43,13 +49,13 @@ export function TherapistSidebar() {
         <NotificationBell />
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3">
+      <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 pb-4">
         <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/35">
           Your practice
         </p>
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || (item.href !== "/therapist" && pathname.startsWith(`${item.href}/`));
           return (
             <Link
               key={item.href}
