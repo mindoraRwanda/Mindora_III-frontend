@@ -154,20 +154,12 @@ export function TherapistDirectory() {
           </div>
         ) : null}
         {isError ? (
-          <div
-            role="status"
-            className="mb-4 rounded-xl border border-[#E8E4F0] bg-[#FAF8FC] p-4"
-          >
+          <div role="status" className="mb-4 rounded-xl border border-[#E8E4F0] bg-[#FAF8FC] p-4">
             <p className="text-sm text-[#5B536B]">
               The live directory could not be refreshed. MINDORA-listed professionals are shown
               below; please contact the team to confirm current availability.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              onClick={() => void refetch()}
-            >
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => void refetch()}>
               Refresh directory
             </Button>
           </div>
@@ -201,8 +193,7 @@ export function TherapistDirectory() {
           </p>
         ) : data ? (
           <p className="mt-5 text-xs text-muted-foreground">
-            Showing {therapists.length} of {data.total} therapists listed as accepting
-            patients.
+            Showing {therapists.length} of {data.total} therapists listed as accepting patients.
           </p>
         ) : null}
       </section>

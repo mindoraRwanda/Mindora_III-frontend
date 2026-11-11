@@ -41,10 +41,7 @@ export function FeaturedTherapistsPreview() {
         </div>
 
         {isLoading ? (
-          <div
-            className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-            aria-label="Loading therapists"
-          >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading therapists">
             {[0, 1, 2].map((item) => (
               <div key={item} className="h-56 animate-pulse rounded-2xl bg-white" />
             ))}
@@ -52,20 +49,12 @@ export function FeaturedTherapistsPreview() {
         ) : null}
 
         {isError ? (
-          <div
-            role="status"
-            className="mb-4 rounded-xl border border-[#E8E4F0] bg-white p-4"
-          >
+          <div role="status" className="mb-4 rounded-xl border border-[#E8E4F0] bg-white p-4">
             <p className="text-sm text-[#5B536B]">
-              The live directory could not be refreshed. MINDORA-listed professionals are shown below;
-              contact the team to confirm current availability.
+              The live directory could not be refreshed. MINDORA-listed professionals are shown
+              below; contact the team to confirm current availability.
             </p>
-            <Button
-              variant="outline"
-              className="mt-3"
-              size="sm"
-              onClick={() => void refetch()}
-            >
+            <Button variant="outline" className="mt-3" size="sm" onClick={() => void refetch()}>
               Refresh directory
             </Button>
           </div>
@@ -95,8 +84,7 @@ export function FeaturedTherapistsPreview() {
 
         {!isLoading && isUsingListedFallback ? (
           <p className="mt-4 text-sm text-[#6B7280]">
-            Contact MINDORA to confirm current booking availability for these listed
-            professionals.
+            Contact MINDORA to confirm current booking availability for these listed professionals.
           </p>
         ) : null}
       </div>
