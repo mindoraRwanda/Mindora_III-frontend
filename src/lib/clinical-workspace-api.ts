@@ -95,10 +95,9 @@ export function updatePrescriptionDraft(
 }
 
 export function archivePrescriptionDraft(id: string): Promise<PrescriptionDraftResponse> {
-  return apiFetch(
-    `/api/v1/users/prescription-drafts/${encodeURIComponent(id)}/archive`,
-    { method: "POST" }
-  );
+  return apiFetch(`/api/v1/users/prescription-drafts/${encodeURIComponent(id)}/archive`, {
+    method: "POST",
+  });
 }
 
 export function fetchMedicationReviews(
@@ -112,13 +111,10 @@ export function reviewMedicationUpdate(
   id: string,
   input: ReviewMedicationUpdateInput
 ): Promise<MedicationUpdateResponse> {
-  return apiFetch(
-    `/api/v1/users/medication-reviews/${encodeURIComponent(id)}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    }
-  );
+  return apiFetch(`/api/v1/users/medication-reviews/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
 }
 
 export function submitMedicationUpdate(input: {
