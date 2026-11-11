@@ -73,7 +73,10 @@ export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }
     <div className="flex flex-1 flex-col p-8 lg:p-14">
       <div className="mb-6 flex items-center justify-between gap-3">
         <BackLink fallback="/" />
-        <Link href="/tests" className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-mindora-purple transition-colors hover:bg-mindora-purple-pale">
+        <Link
+          href="/tests"
+          className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-mindora-purple transition-colors hover:bg-mindora-purple-pale"
+        >
           Tests
         </Link>
       </div>
