@@ -35,8 +35,7 @@ export function useCreatePrescriptionDraft() {
       queryClient.invalidateQueries({ queryKey: ["clinical-workspace", "prescription-drafts"] });
       toast.success("Encrypted prescription draft saved.");
     },
-    onError: (error) =>
-      toast.error(errorText(error, "Could not save the prescription draft.")),
+    onError: (error) => toast.error(errorText(error, "Could not save the prescription draft.")),
   });
 }
 
@@ -49,8 +48,7 @@ export function useUpdatePrescriptionDraft() {
       queryClient.invalidateQueries({ queryKey: ["clinical-workspace", "prescription-drafts"] });
       toast.success("Prescription draft updated.");
     },
-    onError: (error) =>
-      toast.error(errorText(error, "Could not update the prescription draft.")),
+    onError: (error) => toast.error(errorText(error, "Could not update the prescription draft.")),
   });
 }
 
@@ -62,8 +60,7 @@ export function useArchivePrescriptionDraft() {
       queryClient.invalidateQueries({ queryKey: ["clinical-workspace", "prescription-drafts"] });
       toast.success("Prescription draft archived.");
     },
-    onError: (error) =>
-      toast.error(errorText(error, "Could not archive the prescription draft.")),
+    onError: (error) => toast.error(errorText(error, "Could not archive the prescription draft.")),
   });
 }
 
@@ -84,7 +81,6 @@ export function useReviewMedicationUpdate() {
       queryClient.invalidateQueries({ queryKey: ["clinical-workspace", "medication-reviews"] });
       toast.success("Medication update review recorded.");
     },
-    onError: (error) =>
-      toast.error(errorText(error, "Could not record the medication review.")),
+    onError: (error) => toast.error(errorText(error, "Could not record the medication review.")),
   });
 }
