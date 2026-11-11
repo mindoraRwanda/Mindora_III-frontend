@@ -16,6 +16,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/therapy": "Therapy & appointments",
   "/messages": "Messages",
   "/reflect": "Reflect with MINDORA AI",
+  "/tests": "Wellbeing tests",
   "/therapist-application": "Become a therapist",
   "/settings": "Settings",
   "/therapist": "Your schedule",

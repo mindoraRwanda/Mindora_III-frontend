@@ -96,7 +96,7 @@ export const PUBLIC_NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/therapists", label: "Find a therapist" },
   { href: "/tests", label: "Tests" },
-  { href: "/about", label: "About MINDORA" },
+  { href: "/therapist-application", label: "Become a therapist" },
   { href: "/business", label: "Business" },
   { href: "/contact", label: "Contact" },
 ] as const;
