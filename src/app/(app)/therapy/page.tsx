@@ -47,8 +47,9 @@ export default function TherapyPage() {
   const [bookingTherapist, setBookingTherapist] = useState<TherapistProfile | null>(null);
   const [cancelTarget, setCancelTarget] = useState<BookedAppointment | null>(null);
   const [rateTarget, setRateTarget] = useState<BookedAppointment | null>(null);
-  const [medicationUpdateTarget, setMedicationUpdateTarget] =
-    useState<BookedAppointment | null>(null);
+  const [medicationUpdateTarget, setMedicationUpdateTarget] = useState<BookedAppointment | null>(
+    null
+  );
   const [medicationUpdateForm, setMedicationUpdateForm] = useState({
     medicationName: "",
     updateType: "QUESTION" as MedicationUpdateType,
@@ -412,15 +413,19 @@ export default function TherapyPage() {
           <DialogHeader>
             <DialogTitle>Report a medication update</DialogTitle>
             <DialogDescription>
-              Send a private report to {medicationUpdateTarget
+              Send a private report to{" "}
+              {medicationUpdateTarget
                 ? therapistNameFor(medicationUpdateTarget.therapistId)
-                : "your therapist"}.
-              This does not change your medication list or create a prescription.
+                : "your therapist"}
+              . This does not change your medication list or create a prescription.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleMedicationUpdateSubmit} className="space-y-4">
             <div>
-              <label htmlFor="medication-update-name" className="mb-1.5 block text-xs font-semibold text-foreground">
+              <label
+                htmlFor="medication-update-name"
+                className="mb-1.5 block text-xs font-semibold text-foreground"
+              >
                 Medication name
               </label>
               <Input
@@ -438,7 +443,10 @@ export default function TherapyPage() {
               />
             </div>
             <div>
-              <label htmlFor="medication-update-type" className="mb-1.5 block text-xs font-semibold text-foreground">
+              <label
+                htmlFor="medication-update-type"
+                className="mb-1.5 block text-xs font-semibold text-foreground"
+              >
                 What changed?
               </label>
               <select
@@ -460,7 +468,10 @@ export default function TherapyPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="medication-update-note" className="mb-1.5 block text-xs font-semibold text-foreground">
+              <label
+                htmlFor="medication-update-note"
+                className="mb-1.5 block text-xs font-semibold text-foreground"
+              >
                 Additional details (optional)
               </label>
               <textarea
@@ -479,7 +490,8 @@ export default function TherapyPage() {
               />
             </div>
             <div className="rounded-xl border border-[#f0dfbd] bg-[#fff8eb] p-3 text-[11px] leading-5 text-[#795b2b]">
-              Your report is stored securely for therapist review. Do not stop or change prescribed medication based only on this form; contact your clinician for medical advice.
+              Your report is stored securely for therapist review. Do not stop or change prescribed
+              medication based only on this form; contact your clinician for medical advice.
             </div>
             {submitMedicationUpdate.isError && (
               <p role="alert" className="text-xs font-medium text-red-700">
@@ -489,18 +501,13 @@ export default function TherapyPage() {
               </p>
             )}
             <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => closeMedicationUpdate(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => closeMedicationUpdate(false)}>
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={
-                  !medicationUpdateForm.medicationName.trim() ||
-                  submitMedicationUpdate.isPending
+                  !medicationUpdateForm.medicationName.trim() || submitMedicationUpdate.isPending
                 }
               >
                 {submitMedicationUpdate.isPending ? "Sending…" : "Send update"}
