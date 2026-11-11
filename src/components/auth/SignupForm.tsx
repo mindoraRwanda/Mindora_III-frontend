@@ -125,19 +125,19 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
             Tests
           </Link>
           <p className="text-[13px] text-muted-foreground">
-          Have an account?{" "}
-          <Link
-            href={
-              therapistFlow
-                ? "/therapist/login"
-                : returnUrl
-                  ? `/login?returnUrl=${encodeURIComponent(returnUrl)}`
-                  : "/login"
-            }
-            className="font-semibold text-mindora-purple hover:underline"
-          >
-            Sign in
-          </Link>
+            Have an account?{" "}
+            <Link
+              href={
+                therapistFlow
+                  ? "/therapist/login"
+                  : returnUrl
+                    ? `/login?returnUrl=${encodeURIComponent(returnUrl)}`
+                    : "/login"
+              }
+              className="font-semibold text-mindora-purple hover:underline"
+            >
+              Sign in
+            </Link>
           </p>
         </div>
       </div>
