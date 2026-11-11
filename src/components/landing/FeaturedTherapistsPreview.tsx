@@ -3,12 +3,18 @@
 import Link from "next/link";
 import { useTherapists } from "@/hooks/useTherapists";
 import { toTherapistCard } from "@/lib/therapist-view";
+import { THERAPISTS } from "@/lib/mock-data/therapists";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
 import { Button } from "@/components/ui/button";
 
 export function FeaturedTherapistsPreview() {
   const { data, isLoading, isError, error, refetch } = useTherapists({});
-  const therapists = (data?.therapists ?? []).slice(0, 3).map(toTherapistCard);
+  const isUsingListedFallback = Boolean(data && data.therapists.length === 0);
+  const therapists = data?.therapists.length
+    ? data.therapists.slice(0, 3).map(toTherapistCard)
+    : data
+      ? THERAPISTS.slice(0, 3)
+      : [];
 
   return (
     <section className="bg-[#F9FAFB] px-4 py-16 sm:px-6 lg:py-20">
@@ -75,6 +81,12 @@ export function FeaturedTherapistsPreview() {
               <TherapistCard key={therapist.id} therapist={therapist} />
             ))}
           </div>
+        ) : null}
+
+        {!isLoading && !isError && isUsingListedFallback ? (
+          <p className="mt-4 text-sm text-[#6B7280]">
+            Contact MINDORA to confirm current booking availability for these listed professionals.
+          </p>
         ) : null}
       </div>
     </section>
