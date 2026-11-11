@@ -82,9 +82,15 @@ export function TherapistSidebar() {
                   : "text-[#c6c0d8] hover:text-white hover:shadow-[5px_5px_12px_#171320,-5px_-5px_12px_#2b2638]"
               )}
             >
-              <Icon className="h-4.5 w-4.5 shrink-0" strokeWidth={2.25} style={{ color: isActive ? "#a78bfa" : undefined }} />
+              <Icon
+                className="h-4.5 w-4.5 shrink-0"
+                strokeWidth={2.25}
+                style={{ color: isActive ? "#a78bfa" : undefined }}
+              />
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
-              {isActive && <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-[#a78bfa]" />}
+              {isActive && (
+                <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-[#a78bfa]" />
+              )}
             </Link>
           );
         })}
