@@ -1,8 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarX, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -19,6 +28,8 @@ import { RateDialog } from "@/components/therapy/RateDialog";
 import { GetStartedDialog } from "@/components/therapy/GetStartedDialog";
 import { useTherapists } from "@/hooks/useTherapists";
 import { useMyAppointments } from "@/hooks/useAppointments";
+import { useSubmitMedicationUpdate } from "@/hooks/useClinicalWorkspace";
+import type { MedicationUpdateType } from "@/lib/clinical-workspace-api";
 import { filterAppointmentsByTab, type AppointmentTab } from "@/lib/appointments";
 import type { BookedAppointment, TherapistProfile } from "@/types/domain";
 import { cn } from "@/lib/utils";
@@ -36,6 +47,14 @@ export default function TherapyPage() {
   const [bookingTherapist, setBookingTherapist] = useState<TherapistProfile | null>(null);
   const [cancelTarget, setCancelTarget] = useState<BookedAppointment | null>(null);
   const [rateTarget, setRateTarget] = useState<BookedAppointment | null>(null);
+  const [medicationUpdateTarget, setMedicationUpdateTarget] =
+    useState<BookedAppointment | null>(null);
+  const [medicationUpdateForm, setMedicationUpdateForm] = useState({
+    medicationName: "",
+    updateType: "QUESTION" as MedicationUpdateType,
+    note: "",
+  });
+  const submitMedicationUpdate = useSubmitMedicationUpdate();
 
   const {
     data: therapistData,
@@ -101,6 +120,40 @@ export default function TherapyPage() {
 
   function therapistPhotoFor(therapistId: string): string | null {
     return therapistByUserId.get(therapistId)?.photoUrl ?? null;
+  }
+
+  function openMedicationUpdate(appointment: BookedAppointment) {
+    setMedicationUpdateTarget(appointment);
+    setMedicationUpdateForm({ medicationName: "", updateType: "QUESTION", note: "" });
+    submitMedicationUpdate.reset();
+  }
+
+  function handleMedicationUpdateSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!medicationUpdateTarget || !medicationUpdateForm.medicationName.trim()) return;
+
+    submitMedicationUpdate.mutate(
+      {
+        therapistId: medicationUpdateTarget.therapistId,
+        medicationName: medicationUpdateForm.medicationName.trim(),
+        updateType: medicationUpdateForm.updateType,
+        note: medicationUpdateForm.note.trim(),
+      },
+      {
+        onSuccess: () => {
+          setMedicationUpdateTarget(null);
+          setMedicationUpdateForm({ medicationName: "", updateType: "QUESTION", note: "" });
+        },
+      }
+    );
+  }
+
+  function closeMedicationUpdate(open: boolean) {
+    if (!open) {
+      setMedicationUpdateTarget(null);
+      setMedicationUpdateForm({ medicationName: "", updateType: "QUESTION", note: "" });
+      submitMedicationUpdate.reset();
+    }
   }
 
   const emptyMineCopy: Record<MineStatus, { title: string; subtitle: string }> = {
@@ -306,6 +359,7 @@ export default function TherapyPage() {
                       therapistPhotoUrl={therapistPhotoFor(a.therapistId)}
                       onCancel={() => setCancelTarget(a)}
                       onRate={() => setRateTarget(a)}
+                      onMedicationUpdate={() => openMedicationUpdate(a)}
                     />
                   ))}
                 </div>
@@ -353,6 +407,108 @@ export default function TherapyPage() {
         therapistName={rateTarget ? therapistNameFor(rateTarget.therapistId) : ""}
         onOpenChange={(open) => !open && setRateTarget(null)}
       />
+      <Dialog open={!!medicationUpdateTarget} onOpenChange={closeMedicationUpdate}>
+        <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-[470px]">
+          <DialogHeader>
+            <DialogTitle>Report a medication update</DialogTitle>
+            <DialogDescription>
+              Send a private report to {medicationUpdateTarget
+                ? therapistNameFor(medicationUpdateTarget.therapistId)
+                : "your therapist"}.
+              This does not change your medication list or create a prescription.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleMedicationUpdateSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="medication-update-name" className="mb-1.5 block text-xs font-semibold text-foreground">
+                Medication name
+              </label>
+              <Input
+                id="medication-update-name"
+                required
+                maxLength={160}
+                value={medicationUpdateForm.medicationName}
+                onChange={(event) =>
+                  setMedicationUpdateForm((current) => ({
+                    ...current,
+                    medicationName: event.target.value,
+                  }))
+                }
+                placeholder="Enter the medication name"
+              />
+            </div>
+            <div>
+              <label htmlFor="medication-update-type" className="mb-1.5 block text-xs font-semibold text-foreground">
+                What changed?
+              </label>
+              <select
+                id="medication-update-type"
+                value={medicationUpdateForm.updateType}
+                onChange={(event) =>
+                  setMedicationUpdateForm((current) => ({
+                    ...current,
+                    updateType: event.target.value as MedicationUpdateType,
+                  }))
+                }
+                className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+              >
+                <option value="STARTED">I started taking it</option>
+                <option value="STOPPED">I stopped taking it</option>
+                <option value="CHANGED">The dose or routine changed</option>
+                <option value="SIDE_EFFECT">I noticed a side effect</option>
+                <option value="QUESTION">I have a question</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="medication-update-note" className="mb-1.5 block text-xs font-semibold text-foreground">
+                Additional details (optional)
+              </label>
+              <textarea
+                id="medication-update-note"
+                rows={4}
+                maxLength={2000}
+                value={medicationUpdateForm.note}
+                onChange={(event) =>
+                  setMedicationUpdateForm((current) => ({
+                    ...current,
+                    note: event.target.value,
+                  }))
+                }
+                placeholder="Share details you want your therapist to review."
+                className="w-full rounded-xl border border-input bg-background p-3 text-sm"
+              />
+            </div>
+            <div className="rounded-xl border border-[#f0dfbd] bg-[#fff8eb] p-3 text-[11px] leading-5 text-[#795b2b]">
+              Your report is stored securely for therapist review. Do not stop or change prescribed medication based only on this form; contact your clinician for medical advice.
+            </div>
+            {submitMedicationUpdate.isError && (
+              <p role="alert" className="text-xs font-medium text-red-700">
+                {submitMedicationUpdate.error instanceof Error
+                  ? submitMedicationUpdate.error.message
+                  : "Your update could not be sent."}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => closeMedicationUpdate(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  !medicationUpdateForm.medicationName.trim() ||
+                  submitMedicationUpdate.isPending
+                }
+              >
+                {submitMedicationUpdate.isPending ? "Sending…" : "Send update"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
