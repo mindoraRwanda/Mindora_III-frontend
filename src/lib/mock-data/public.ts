@@ -95,6 +95,7 @@ export const MATCH_REASONS = [
 export const PUBLIC_NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/therapists", label: "Find a therapist" },
+  { href: "/tests", label: "Tests" },
   { href: "/about", label: "About MINDORA" },
   { href: "/business", label: "Business" },
   { href: "/contact", label: "Contact" },
