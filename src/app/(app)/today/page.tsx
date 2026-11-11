@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Flame } from "lucide-react";
+import { ArrowRight, Flame, Heart, Sparkles, ClipboardList, Briefcase } from "lucide-react";
 import { HomeHeroPortrait } from "@/components/home/HomeSections";
 import { WeeklyMoodCard } from "@/components/home/WeeklyMoodCard";
 import { NextSessionCard } from "@/components/home/NextSessionCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
-import { useMoodStreak } from "@/hooks/useMood";
+import { useMoodStreak, useMoodToday } from "@/hooks/useMood";
 import { useMyAppointments } from "@/hooks/useAppointments";
 import { useTherapists } from "@/hooks/useTherapists";
 import { useAcknowledgeCarePlan, useMyCarePlans } from "@/hooks/useCarePlans";
@@ -32,6 +32,7 @@ export default function TodayPage() {
   const { user } = useAuth();
   const { data: profile } = useMyProfile();
   const { data: streak, isLoading: streakLoading, isError: streakErrored } = useMoodStreak();
+  const { data: moodToday, isLoading: moodTodayLoading, isError: moodTodayErrored } = useMoodToday();
   const {
     data: appointmentData,
     isLoading: appointmentsLoading,
@@ -119,6 +120,35 @@ export default function TodayPage() {
           </div>
         </div>
       </header>
+
+      <section aria-label="Your wellbeing summary" className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard label="Daily check-in" value={moodTodayLoading ? "Loading…" : moodTodayErrored ? "Unavailable" : moodToday?.hasCheckedIn ? "Completed" : "Not yet"} note="Your latest check-in status" icon={<Heart className="h-4 w-4" />} />
+        <SummaryCard label="Upcoming session" value={appointmentsLoading ? "Loading…" : appointmentsErrored ? "Unavailable" : nextSession ? "Scheduled" : "None yet"} note="Your next appointment" icon={<ClipboardList className="h-4 w-4" />} />
+        <SummaryCard label="Reflection streak" value={streakLoading ? "Loading…" : streakErrored ? "Unavailable" : streakLabel ?? "0 days"} note="Keep your gentle rhythm" icon={<Sparkles className="h-4 w-4" />} />
+        <SummaryCard label="Care plans" value={carePlans.isLoading ? "Loading…" : carePlans.isError ? "Unavailable" : String(carePlans.data?.carePlans.length ?? 0)} note="Plans shared by your therapist" icon={<Briefcase className="h-4 w-4" />} />
+      </section>
+
+      <section className="mb-6 rounded-[28px] bg-white p-5 shadow-[8px_8px_18px_#cbc4de,-8px_-8px_18px_#fdfbff] sm:p-6">
+        <div className="mb-4">
+          <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Quick support</p>
+          <h2 className="mt-1 text-lg font-extrabold tracking-tight text-[#2c1c55]">Choose what feels useful now</h2>
+          <p className="mt-1 text-xs text-[#6a6383]">Take a small next step whenever you feel ready.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link href="/reflect" className="group rounded-2xl border border-[#e8e1f1] bg-[#faf8fd] p-4 transition hover:border-mindora-purple hover:bg-[#f4effb]">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eee7f8] text-mindora-purple"><Sparkles className="h-5 w-5" /></span>
+            <h3 className="mt-3 text-sm font-bold text-[#2c1c55]">Reflect with AI</h3>
+            <p className="mt-1 text-xs leading-5 text-[#6a6383]">Talk through what is on your mind in a private reflection space.</p>
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-mindora-purple">Open reflection <ArrowRight className="h-3.5 w-3.5" /></span>
+          </Link>
+          <Link href="/therapy" className="group rounded-2xl border border-[#e8e1f1] bg-[#faf8fd] p-4 transition hover:border-mindora-purple hover:bg-[#f4effb]">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#e6f5f2] text-[#16877e]"><Heart className="h-5 w-5" /></span>
+            <h3 className="mt-3 text-sm font-bold text-[#2c1c55]">Find a therapist</h3>
+            <p className="mt-1 text-xs leading-5 text-[#6a6383]">Explore professional support and available appointments.</p>
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-mindora-purple">Browse therapists <ArrowRight className="h-3.5 w-3.5" /></span>
+          </Link>
+        </div>
+      </section>
 
       <section className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(330px,1fr))]">
         <div className="relative flex min-h-[420px] flex-col overflow-hidden rounded-[34px] bg-gradient-to-br from-[#efeafa] via-[#e6dff6] to-[#ded4f4] shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
@@ -253,5 +283,19 @@ export default function TodayPage() {
         />
       </section>
     </div>
+  );
+}
+
+
+function SummaryCard({ label, value, note, icon }: { label: string; value: string; note: string; icon: React.ReactNode }) {
+  return (
+    <article className="rounded-2xl bg-white p-4 shadow-[7px_7px_16px_#cbc4de,-7px_-7px_16px_#fdfbff]">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[#8f87a4]">{label}</p>
+        <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#f2eef8] text-mindora-purple">{icon}</span>
+      </div>
+      <p className="mt-2 text-xl font-extrabold tracking-tight text-[#2c1c55]">{value}</p>
+      <p className="mt-1 text-[11px] text-[#8f87a4]">{note}</p>
+    </article>
   );
 }
