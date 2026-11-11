@@ -117,6 +117,8 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
           <BackLink fallback="/" />
           <MindoraLogo />
         </div>
+        <div className="flex items-center gap-4">
+          <Link href="/tests" className="text-sm font-semibold text-mindora-purple hover:underline">Tests</Link>
         <p className="text-[13px] text-muted-foreground">
           Have an account?{" "}
           <Link
@@ -132,6 +134,7 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
             Sign in
           </Link>
         </p>
+        </div>
       </div>
 
       <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center py-8">
