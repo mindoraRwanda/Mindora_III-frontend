@@ -50,14 +50,14 @@ interface TherapistPatientListResponse {
   limit: number;
 }
 
-// GET /api/v1/users/therapists - User Service. Only returns isAcceptingPatients: true.
+// GET /api/v1/users/therapists/public - safe, unauthenticated public DTO.
 export function fetchTherapists(params: {
   page?: number;
   limit?: number;
   specialisation?: string;
   language?: string;
 }): Promise<TherapistListResponse> {
-  return apiFetch(`/api/v1/users/therapists${toQueryString(params)}`);
+  return apiFetch(`/api/v1/users/therapists/public${toQueryString(params)}`);
 }
 
 // GET /api/v1/appointments/availability/:therapistId - Appointment Service.

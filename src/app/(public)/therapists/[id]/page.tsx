@@ -5,21 +5,21 @@ import { BackLink } from "@/components/public/BackLink";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
 import { useTherapists } from "@/hooks/useTherapists";
 import { toTherapistCard } from "@/lib/therapist-view";
+import { THERAPISTS } from "@/lib/mock-data/therapists";
 export default function TherapistProfilePage() {
   const params = useParams<{ id: string }>();
   const { data, isLoading, isError } = useTherapists({});
-  const therapist = useMemo(
-    () =>
-      data?.therapists
-        .map(toTherapistCard)
-        .find((t) => t.id === params.id || t.userId === params.id),
-    [data, params.id]
-  );
+  const therapist = useMemo(() => {
+    const liveProfile = data?.therapists
+      .map(toTherapistCard)
+      .find((item) => item.id === params.id || item.userId === params.id);
+    return liveProfile ?? THERAPISTS.find((item) => item.id === params.id);
+  }, [data, params.id]);
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <BackLink fallback="/therapists" className="mb-6" />
       {isLoading ? <div className="h-64 animate-pulse rounded-2xl bg-mindora-purple-bg" /> : null}
-      {isError ? (
+      {isError && !therapist ? (
         <div
           role="alert"
           className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800"
@@ -27,7 +27,7 @@ export default function TherapistProfilePage() {
           Could not load this therapist profile. Please try again later.
         </div>
       ) : null}
-      {!isLoading && !isError && therapist ? (
+      {!isLoading && therapist ? (
         <>
           <h1 className="sr-only">{therapist.name}</h1>
           <TherapistCard therapist={therapist} onProfilePage />
@@ -54,7 +54,7 @@ export default function TherapistProfilePage() {
           </section>
         </>
       ) : null}
-      {!isLoading && !isError && !therapist ? (
+      {!isLoading && !therapist ? (
         <div className="rounded-xl border border-border p-8 text-center">
           <p className="font-semibold">Therapist not found</p>
           <p className="mt-1 text-sm text-muted-foreground">

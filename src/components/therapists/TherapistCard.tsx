@@ -150,10 +150,13 @@ export function TherapistCard({
                 <Link href={`/therapists/${therapist.id}`}>View Profile</Link>
               </Button>
             )}
-            <BookNowButton
-              therapistId={therapist.userId ?? therapist.id}
-              className="h-10 sm:flex-1"
-            />
+            {therapist.userId ? (
+              <BookNowButton therapistId={therapist.userId} className="h-10 sm:flex-1" />
+            ) : (
+              <Button asChild size="sm" className="h-10 sm:flex-1">
+                <Link href="/contact">Enquire about availability</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

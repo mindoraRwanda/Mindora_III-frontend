@@ -23,11 +23,19 @@ import { useMyProfile } from "@/hooks/useMyProfile";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/therapist/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  {
+    href: "/therapist/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+  },
   { href: "/therapist", label: "Schedule", icon: CalendarClock },
   { href: "/therapist/availability", label: "Availability", icon: Clock },
   { href: "/therapist/patients", label: "Patients", icon: Users },
-  { href: "/therapist/treatment-plans", label: "Treatment plans", icon: ClipboardList },
+  {
+    href: "/therapist/treatment-plans",
+    label: "Treatment plans",
+    icon: ClipboardList,
+  },
   { href: "/therapist/medication", label: "Medication", icon: Pill },
   { href: "/therapist/prescriptions", label: "Prescriptions", icon: FileText },
   { href: "/therapist/reports", label: "Reports", icon: Activity },
@@ -76,14 +84,19 @@ export function TherapistSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
+                "flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[14px] font-medium transition-shadow",
                 isActive
-                  ? "bg-white/10 text-white"
-                  : "text-white/55 hover:bg-white/5 hover:text-white"
+                  ? "font-bold text-white shadow-[inset_5px_5px_11px_#16131e,inset_-5px_-5px_11px_#2c273a]"
+                  : "text-[#c6c0d8] hover:text-white hover:shadow-[5px_5px_12px_#171320,-5px_-5px_12px_#2b2638]"
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />
-              {item.label}
+              <Icon
+                className="h-4.5 w-4.5 shrink-0"
+                strokeWidth={2.25}
+                style={{ color: isActive ? "#a78bfa" : undefined }}
+              />
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {isActive && <span className="ml-auto h-2 w-2 shrink-0 rounded-full bg-[#a78bfa]" />}
             </Link>
           );
         })}
