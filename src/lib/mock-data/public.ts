@@ -93,10 +93,10 @@ export const MATCH_REASONS = [
 ] as const;
 
 export const PUBLIC_NAV_LINKS = [
+  { href: "/login?returnUrl=%2Ftherapist-application", label: "Become a Therapist" },
   { href: "/", label: "Home" },
   { href: "/therapists", label: "Find a therapist" },
   { href: "/tests", label: "Tests" },
-  { href: "/about", label: "About MINDORA" },
   { href: "/business", label: "Business" },
   { href: "/contact", label: "Contact" },
 ] as const;
@@ -104,7 +104,6 @@ export const PUBLIC_NAV_LINKS = [
 export const FOOTER_LINKS = [
   { href: "/therapists", label: "Find a therapist" },
   { href: "/get-matched", label: "Get matched" },
-  { href: "/about", label: "About MINDORA" },
   { href: "/business", label: "Business" },
   { href: "/contact", label: "Contact" },
   { href: "/support", label: "Support" },
