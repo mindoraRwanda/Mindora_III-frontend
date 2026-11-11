@@ -12,7 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
-import { SPECIALISATION_OPTIONS, THERAPISTS, matchesSpecialisation } from "@/lib/mock-data/therapists";
+import {
+  SPECIALISATION_OPTIONS,
+  THERAPISTS,
+  matchesSpecialisation,
+} from "@/lib/mock-data/therapists";
 import { Button } from "@/components/ui/button";
 import { useTherapists } from "@/hooks/useTherapists";
 import { toTherapistCard } from "@/lib/therapist-view";
@@ -37,12 +41,12 @@ export function TherapistDirectory() {
     router.replace("/therapists");
   }
 
-  const directoryProfiles = useMemo(() => {
-    if (data?.therapists.length) return data.therapists.map(toTherapistCard);
-    return data ? THERAPISTS : [];
-  }, [data]);
-
-  const isUsingListedFallback = Boolean(data && data.therapists.length === 0);
+  const hasLiveProfiles = Boolean(data?.therapists.length);
+  const directoryProfiles = useMemo(
+    () => (hasLiveProfiles ? data!.therapists.map(toTherapistCard) : THERAPISTS),
+    [data, hasLiveProfiles]
+  );
+  const isUsingListedFallback = !hasLiveProfiles;
 
   const languageOptions = useMemo(() => {
     const options = new Set<string>();
@@ -60,6 +64,7 @@ export function TherapistDirectory() {
             `${therapist.name} ${therapist.title} ${therapist.specialisations.join(" ")} ${(therapist.languages ?? []).join(" ")}`.toLowerCase();
           return (
             (!query || searchable.includes(query.toLowerCase())) &&
+            (!language || language === "all" || therapist.languages?.includes(language)) &&
             matchesSpecialisation(therapist.specialisations, specialisation || null)
           );
         })
@@ -149,17 +154,16 @@ export function TherapistDirectory() {
           </div>
         ) : null}
         {isError ? (
-          <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6">
-            <p className="font-semibold text-red-800">We could not load therapists right now.</p>
-            <p className="mt-1 text-sm text-red-700">
-              {error instanceof Error ? error.message : "Please try again shortly."}
+          <div role="status" className="mb-4 rounded-xl border border-[#E8E4F0] bg-[#FAF8FC] p-4">
+            <p className="text-sm text-[#5B536B]">
+              The live directory could not be refreshed. MINDORA-listed professionals are shown below; please contact the team to confirm current availability.
             </p>
-            <Button className="mt-4" onClick={() => void refetch()}>
-              Try again
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => void refetch()}>
+              Refresh directory
             </Button>
           </div>
         ) : null}
-        {!isLoading && !isError && therapists.length === 0 ? (
+        {!isLoading && therapists.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-mindora-purple-bg p-10 text-center">
             <p className="font-semibold">
               {isUsingListedFallback
@@ -174,18 +178,20 @@ export function TherapistDirectory() {
             </Button>
           </div>
         ) : null}
-        {!isLoading && !isError && therapists.length > 0 ? (
+        {!isLoading && therapists.length > 0 ? (
           <div className="space-y-4">
             {therapists.map((therapist) => (
               <TherapistCard key={therapist.id} therapist={therapist} />
             ))}
           </div>
         ) : null}
-        {data ? (
+        {!isLoading && isUsingListedFallback ? (
           <p className="mt-5 text-xs text-muted-foreground">
-            {isUsingListedFallback
-              ? `Showing ${therapists.length} MINDORA-listed professional. Contact the team to confirm current availability.`
-              : `Showing ${therapists.length} of ${data.total} therapists listed as accepting patients.`}
+            Showing {therapists.length} MINDORA-listed professional. Contact the team to confirm current availability.
+          </p>
+        ) : data ? (
+          <p className="mt-5 text-xs text-muted-foreground">
+            Showing {therapists.length} of {data.total} therapists listed as accepting patients.
           </p>
         ) : null}
       </section>
