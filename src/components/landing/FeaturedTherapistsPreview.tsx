@@ -9,12 +9,11 @@ import { Button } from "@/components/ui/button";
 
 export function FeaturedTherapistsPreview() {
   const { data, isLoading, isError, error, refetch } = useTherapists({});
-  const isUsingListedFallback = Boolean(data && data.therapists.length === 0);
-  const therapists = data?.therapists.length
-    ? data.therapists.slice(0, 3).map(toTherapistCard)
-    : data
-      ? THERAPISTS.slice(0, 3)
-      : [];
+  const hasLiveProfiles = Boolean(data?.therapists.length);
+  const isUsingListedFallback = !hasLiveProfiles;
+  const therapists = hasLiveProfiles
+    ? data!.therapists.slice(0, 3).map(toTherapistCard)
+    : THERAPISTS.slice(0, 3);
 
   return (
     <section className="bg-[#F9FAFB] px-4 py-16 sm:px-6 lg:py-20">
@@ -50,18 +49,17 @@ export function FeaturedTherapistsPreview() {
         ) : null}
 
         {isError ? (
-          <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-6">
-            <p className="font-semibold text-red-800">Therapist profiles could not be loaded.</p>
-            <p className="mt-1 text-sm text-red-700">
-              {error instanceof Error ? error.message : "Please try again shortly."}
+          <div role="status" className="mb-4 rounded-xl border border-[#E8E4F0] bg-white p-4">
+            <p className="text-sm text-[#5B536B]">
+              The live directory could not be refreshed. MINDORA-listed professionals are shown below; contact the team to confirm current availability.
             </p>
-            <Button className="mt-4" size="sm" onClick={() => void refetch()}>
-              Try again
+            <Button variant="outline" className="mt-3" size="sm" onClick={() => void refetch()}>
+              Refresh directory
             </Button>
           </div>
         ) : null}
 
-        {!isLoading && !isError && therapists.length === 0 ? (
+        {!isLoading && therapists.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center">
             <p className="font-semibold text-[#1A1A1A]">
               No approved therapist profiles are available right now.
@@ -75,7 +73,7 @@ export function FeaturedTherapistsPreview() {
           </div>
         ) : null}
 
-        {!isLoading && !isError && therapists.length > 0 ? (
+        {!isLoading && therapists.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {therapists.map((therapist) => (
               <TherapistCard key={therapist.id} therapist={therapist} />
@@ -83,7 +81,7 @@ export function FeaturedTherapistsPreview() {
           </div>
         ) : null}
 
-        {!isLoading && !isError && isUsingListedFallback ? (
+        {!isLoading && isUsingListedFallback ? (
           <p className="mt-4 text-sm text-[#6B7280]">
             Contact MINDORA to confirm current booking availability for these listed professionals.
           </p>
