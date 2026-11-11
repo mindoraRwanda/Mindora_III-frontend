@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { useParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -506,7 +507,7 @@ export default function TherapistWorkspaceModulePage() {
       setShowPrescriptionDraftForm(true);
     }
 
-    function submitPrescriptionDraft(event: React.FormEvent<HTMLFormElement>) {
+    function submitPrescriptionDraft(event: FormEvent<HTMLFormElement>) {
       event.preventDefault();
       if (!prescriptionForm.patientId || !prescriptionForm.medicationName.trim()) return;
       const input = {
