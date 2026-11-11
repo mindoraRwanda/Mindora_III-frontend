@@ -7,12 +7,14 @@ import {
   fetchMedicationReviews,
   fetchPrescriptionDrafts,
   reviewMedicationUpdate,
+  submitMedicationUpdate,
   updatePrescriptionDraft,
   type CreatePrescriptionDraftInput,
   type PrescriptionDraftStatus,
   type ReviewMedicationUpdateInput,
   type UpdatePrescriptionDraftInput,
   type MedicationUpdateStatus,
+  type SubmitMedicationUpdateInput,
 } from "@/lib/clinical-workspace-api";
 
 function errorText(error: unknown, fallback: string): string {
@@ -82,5 +84,19 @@ export function useReviewMedicationUpdate() {
       toast.success("Medication update review recorded.");
     },
     onError: (error) => toast.error(errorText(error, "Could not record the medication review.")),
+  });
+}
+
+
+export function useSubmitMedicationUpdate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SubmitMedicationUpdateInput) => submitMedicationUpdate(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clinical-workspace", "my-medication-updates"] });
+      toast.success("Your medication update was sent to your therapist.");
+    },
+    onError: (error) =>
+      toast.error(errorText(error, "Could not send your medication update.")),
   });
 }
