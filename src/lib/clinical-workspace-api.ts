@@ -68,6 +68,13 @@ export interface ReviewMedicationUpdateInput {
   reviewNote: string;
 }
 
+export interface SubmitMedicationUpdateInput {
+  therapistId: string;
+  medicationName: string;
+  updateType: MedicationUpdateType;
+  note: string;
+}
+
 export function fetchPrescriptionDrafts(
   status?: PrescriptionDraftStatus
 ): Promise<PrescriptionDraftListResponse> {
@@ -117,12 +124,9 @@ export function reviewMedicationUpdate(
   });
 }
 
-export function submitMedicationUpdate(input: {
-  therapistId: string;
-  medicationName: string;
-  updateType: MedicationUpdateType;
-  note: string;
-}): Promise<MedicationUpdateResponse> {
+export function submitMedicationUpdate(
+  input: SubmitMedicationUpdateInput
+): Promise<MedicationUpdateResponse> {
   return apiFetch("/api/v1/users/medication-updates", {
     method: "POST",
     body: JSON.stringify(input),
