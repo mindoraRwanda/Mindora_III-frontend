@@ -63,10 +63,10 @@ jobs:
       - name: Commit canonical formatting to PR branch
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
-          if [[ -n "$(git status --porcelain -- "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx")" ]]; then
+          if [[ -n "$(git status --porcelain -- "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx")" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx"
+            git add "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx"
             git commit -m "style: format MINDORA prototype integration files"
             git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
           fi
