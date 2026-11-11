@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: write
+
 jobs:
   quality:
     name: Lint & Type Check
@@ -28,22 +31,42 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Check out PR source branch for canonical formatting
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git fetch origin "${{ github.event.pull_request.head.ref }}"
+          git checkout -B "${{ github.event.pull_request.head.ref }}" "origin/${{ github.event.pull_request.head.ref }}"
+
       - name: Canonical-format prototype integration files
         run: |
-          npx prettier --write "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/app/therapist/dashboard/page.tsx" "src/app/therapist/page.tsx" "src/lib/community-api.ts"
+          npx prettier --write "src/app/(app)/therapy/page.tsx" "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/app/therapist/dashboard/page.tsx" "src/app/therapist/page.tsx" "src/hooks/useClinicalWorkspace.ts" "src/lib/clinical-workspace-api.ts" "src/lib/community-api.ts"
 
       - name: Upload formatted source for patching the PR branch
         uses: actions/upload-artifact@v4
         with:
           name: mindora-prettier-source
           path: |
+            src/app/(app)/therapy/page.tsx
             src/app/(app)/today/page.tsx
             src/app/admin/[section]/page.tsx
             src/app/therapist/[workspace]/page.tsx
             src/app/therapist/dashboard/page.tsx
             src/app/therapist/page.tsx
+            src/hooks/useClinicalWorkspace.ts
+            src/lib/clinical-workspace-api.ts
             src/lib/community-api.ts
           if-no-files-found: error
+
+      - name: Commit canonical formatting to PR branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if [[ -n "$(git status --porcelain -- "src/app/(app)/therapy/page.tsx")" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "src/app/(app)/therapy/page.tsx"
+            git commit -m "style: format patient medication update screen"
+            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          fi
 
       - name: Format check
         run: npm run format:check

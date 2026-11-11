@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import type { FormEvent } from "react";
 import { useParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -15,6 +16,15 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useTherapistDashboard, useTherapistPatients, useTherapistSchedule } from "@/hooks/useAppointments";
 import { useCreateCarePlan, useTherapistCarePlans, useUpdateCarePlan } from "@/hooks/useCarePlans";
+import {
+  useArchivePrescriptionDraft,
+  useCreatePrescriptionDraft,
+  useMedicationReviews,
+  usePrescriptionDrafts,
+  useReviewMedicationUpdate,
+  useUpdatePrescriptionDraft,
+} from "@/hooks/useClinicalWorkspace";
+import type { PrescriptionDraft } from "@/lib/clinical-workspace-api";
 import {
   useCommunityGroups,
   useCommunityMembership,
@@ -160,9 +170,18 @@ export default function TherapistWorkspaceModulePage() {
   const [editCarePlanGoals, setEditCarePlanGoals] = useState("");
   const [editCarePlanMilestones, setEditCarePlanMilestones] = useState("");
   const [editCarePlanReviewDate, setEditCarePlanReviewDate] = useState("");
-  const [prescriptionDrafts, setPrescriptionDrafts] = useState<Array<{ id: string; createdAt: string }>>([]);
-  const [prescriptionNote, setPrescriptionNote] = useState("");
   const [showPrescriptionDraftForm, setShowPrescriptionDraftForm] = useState(false);
+  const [editingPrescriptionId, setEditingPrescriptionId] = useState<string | null>(null);
+  const [prescriptionStatus, setPrescriptionStatus] = useState<"ALL" | "DRAFT" | "ARCHIVED">("ALL");
+  const [prescriptionForm, setPrescriptionForm] = useState({
+    patientId: "",
+    medicationName: "",
+    strength: "",
+    frequency: "",
+    instructions: "",
+  });
+  const [medicationStatus, setMedicationStatus] = useState<"ALL" | "PENDING" | "REVIEWED" | "FOLLOW_UP_REQUIRED">("ALL");
+  const [medicationReviewNotes, setMedicationReviewNotes] = useState<Record<string, string>>({});
   const carePlanPatients = useTherapistPatients(1, 50);
   const carePlans = useTherapistCarePlans();
   const createCarePlan = useCreateCarePlan();
@@ -173,6 +192,12 @@ export default function TherapistWorkspaceModulePage() {
   const communityMembership = useCommunityMembership(activeCommunityId);
   const updateMembership = useJoinCommunity();
   const createPost = useCreateCommunityPost();
+  const prescriptionQuery = usePrescriptionDrafts(params.workspace === "prescriptions");
+  const createPrescription = useCreatePrescriptionDraft();
+  const updatePrescription = useUpdatePrescriptionDraft();
+  const archivePrescription = useArchivePrescriptionDraft();
+  const medicationReviewQuery = useMedicationReviews(params.workspace === "medication");
+  const reviewMedication = useReviewMedicationUpdate();
   const workspaceKey = params.workspace;
   const info = modules[workspaceKey];
   const { data, isLoading, isError } = useTherapistDashboard();
@@ -294,16 +319,26 @@ export default function TherapistWorkspaceModulePage() {
   }
 
   if (workspaceKey === "medication") {
+    const reviews = medicationReviewQuery.data?.medicationReviews ?? [];
+    const filteredReviews = reviews.filter(
+      (item) => medicationStatus === "ALL" || item.status === medicationStatus
+    );
+    const patients = carePlanPatients.data?.patients ?? [];
+    const patientLabel = (patientId: string) => {
+      const patient = patients.find((item) => item.patientId === patientId);
+      return patient?.userName?.trim() || "Patient " + patientId.slice(0, 8);
+    };
+
     return (
       <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
         <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Clinical tools</p>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-[27px] font-extrabold text-[#28243a]">Medication management</h1>
-            <p className="mt-1 text-sm text-[#77758a]">Review medication-related tasks and patient follow-up workflows.</p>
+            <p className="mt-1 text-sm text-[#77758a]">Review patient-reported medication updates and record follow-up.</p>
           </div>
           <Link href="/therapist/prescriptions" className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white">
-            Open prescriptions
+            Open prescription drafts
           </Link>
         </div>
 
@@ -311,142 +346,128 @@ export default function TherapistWorkspaceModulePage() {
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <div>
             <strong className="block">Medication safety notice</strong>
-            This workspace does not display real medication names, dosages or prescription records. Clinical decisions must be recorded only in MINDORA&apos;s authorised clinical system.
+            This queue records patient-reported updates and your review outcome only. It does not change a medication list, issue treatment instructions or create a prescription.
           </div>
         </div>
-
-        <div className="mt-5 grid gap-4 xl:grid-cols-2">
-          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-bold text-[#28243a]">Medication review queue</h2>
-                <p className="mt-1 text-xs text-[#77758a]">Assigned tasks from the authorised clinical record.</p>
-              </div>
-              <span className="rounded-full bg-[#f1ecf7] px-3 py-1.5 text-[10px] font-bold text-[#7350a0]">Live records only</span>
-            </div>
-            <div className="mt-5 rounded-xl bg-[#faf9fc] p-6 text-center">
-              <Pill className="mx-auto h-6 w-6 text-[#9a86b3]" />
-              <h3 className="mt-3 text-sm font-bold text-[#28243a]">No medication review tasks are connected</h3>
-              <p className="mt-2 text-xs leading-5 text-[#77758a]">
-                There are no verified medication-review records available through the current MINDORA V3 API. No sample patients or medication details are shown.
-              </p>
-            </div>
-            <Link href="/therapist/patients" className="mt-4 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
-              View patient references
-            </Link>
-          </section>
-
-          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
-            <h2 className="text-sm font-bold text-[#28243a]">Medication review workflow</h2>
-            <p className="mt-1 text-xs text-[#77758a]">Use the authorised clinical record for all patient-specific decisions.</p>
-            <ol className="mt-4 space-y-3">
-              {[
-                "Open the authorised patient record.",
-                "Verify the patient's identity and current medication record.",
-                "Document the medication review and clinical decision in the approved system.",
-                "Use an approved prescription workflow only when appropriately authorised.",
-                "Record the follow-up and patient communication.",
-              ].map((item, index) => (
-                <li key={item} className="flex items-start gap-3 text-xs leading-5 text-[#625d70]">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#f1ecf7] text-[10px] font-bold text-[#7350a0]">{index + 1}</span>
-                  {item}
-                </li>
-              ))}
-            </ol>
-            <Link href="/therapist/prescriptions" className="mt-5 inline-flex rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#7350a0]">
-              Review prescription workflow
-            </Link>
-          </section>
-        </div>
-      </main>
-    );
-  }
-
-  if (workspaceKey === "prescriptions") {
-    return (
-      <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
-        <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Clinical tools</p>
-        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-[27px] font-extrabold text-[#28243a]">Prescriptions</h1>
-            <p className="mt-1 text-sm text-[#77758a]">Prescription workflow preview — no real prescriptions are issued.</p>
-          </div>
-          <button type="button" onClick={() => setShowPrescriptionDraftForm((open) => !open)} className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white">
-            {showPrescriptionDraftForm ? "Close draft form" : "New prescription draft"}
-          </button>
-        </div>
-
-        <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <div>
-            <strong className="block">Clinical safety</strong>
-            Drafts on this page are stored only in this browser session. They are not sent to a pharmacy, patient or clinical record and must not be used as medical instructions. Do not enter real patient or medication information.
-          </div>
-        </div>
-
-        {showPrescriptionDraftForm && (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!prescriptionNote.trim()) return;
-              setPrescriptionDrafts((items) => [
-                { id: "RX-DRAFT-" + String(items.length + 1).padStart(3, "0"), createdAt: new Date().toISOString() },
-                ...items,
-              ]);
-              setPrescriptionNote("");
-              setShowPrescriptionDraftForm(false);
-            }}
-            className="mt-5 rounded-2xl border border-[#ebe8f1] bg-white p-5"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-bold text-[#28243a]">Non-clinical workflow draft</h2>
-                <p className="mt-1 text-xs text-[#77758a]">For interface review only. Do not enter patient-specific details.</p>
-              </div>
-              <FileText className="h-5 w-5 text-[#7350a0]" />
-            </div>
-            <label htmlFor="prescription-preview-note" className="mt-4 block text-xs font-semibold text-[#625d70]">Preview note</label>
-            <textarea
-              id="prescription-preview-note"
-              rows={4}
-              maxLength={1000}
-              required
-              value={prescriptionNote}
-              onChange={(event) => setPrescriptionNote(event.target.value)}
-              placeholder="Add a non-prescriptive workflow note only — no medicine, dosage or patient information."
-              className="mt-2 w-full rounded-xl border border-[#e4deeb] p-3 text-sm text-[#28243a]"
-            />
-            <div className="mt-4 flex justify-end gap-2">
-              <button type="button" onClick={() => { setShowPrescriptionDraftForm(false); setPrescriptionNote(""); }} className="rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#625d70]">Cancel</button>
-              <button type="submit" disabled={!prescriptionNote.trim()} className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50">Save local draft</button>
-            </div>
-          </form>
-        )}
 
         <section className="mt-5 overflow-hidden rounded-2xl border border-[#ebe8f1] bg-white">
-          <div className="border-b border-[#f0edf3] px-5 py-4">
-            <h2 className="text-sm font-bold text-[#28243a]">Recent prescription activity</h2>
-            <p className="mt-1 text-xs text-[#77758a]">Local preview drafts only · {prescriptionDrafts.length} drafts in this session</p>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f0edf3] px-5 py-4">
+            <div>
+              <h2 className="text-sm font-bold text-[#28243a]">Medication review queue</h2>
+              <p className="mt-1 text-xs text-[#77758a]">Live patient requests assigned to your therapist account.</p>
+            </div>
+            <select
+              value={medicationStatus}
+              onChange={(event) => setMedicationStatus(event.target.value as typeof medicationStatus)}
+              className="rounded-xl border border-[#e4deeb] bg-white px-3 py-2 text-xs font-semibold text-[#625d70]"
+              aria-label="Filter medication requests by status"
+            >
+              <option value="ALL">All statuses</option>
+              <option value="PENDING">Pending review</option>
+              <option value="REVIEWED">Reviewed</option>
+              <option value="FOLLOW_UP_REQUIRED">Follow-up required</option>
+            </select>
           </div>
-          {prescriptionDrafts.length === 0 ? (
-            <p className="p-8 text-center text-xs text-[#77758a]">No prescription drafts created in this preview.</p>
+
+          {medicationReviewQuery.isError && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 bg-red-50 p-5 text-xs text-red-700">
+              <span>{medicationReviewQuery.error instanceof Error ? medicationReviewQuery.error.message : "Medication updates could not be loaded."}</span>
+              <button type="button" onClick={() => void medicationReviewQuery.refetch()} className="rounded-lg border border-red-200 bg-white px-3 py-2 font-bold">
+                Retry
+              </button>
+            </div>
+          )}
+
+          {medicationReviewQuery.isLoading ? (
+            <div className="space-y-3 p-5">
+              {[1, 2, 3].map((item) => <div key={item} className="h-28 animate-pulse rounded-xl bg-[#f7f6fa]" />)}
+            </div>
+          ) : filteredReviews.length === 0 ? (
+            <div className="px-5 py-12 text-center">
+              <Pill className="mx-auto h-7 w-7 text-[#9a86b3]" />
+              <h3 className="mt-3 text-sm font-bold text-[#28243a]">No medication updates in this view</h3>
+              <p className="mx-auto mt-2 max-w-[430px] text-xs leading-5 text-[#77758a]">
+                Patient-submitted updates will appear here when they are linked to an appointment relationship with you. No sample medication records are displayed.
+              </p>
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-xs">
-                <thead className="bg-[#faf9fc] text-[10px] uppercase tracking-wide text-[#8a789d]">
-                  <tr><th className="px-5 py-3">Reference</th><th className="px-5 py-3">Created</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Action</th></tr>
-                </thead>
-                <tbody>
-                  {prescriptionDrafts.map((draft) => (
-                    <tr key={draft.id} className="border-t border-[#f0edf3] text-[#625d70]">
-                      <td className="px-5 py-4 font-semibold text-[#28243a]">{draft.id}</td>
-                      <td className="px-5 py-4">{new Date(draft.createdAt).toLocaleString()}</td>
-                      <td className="px-5 py-4"><span className="rounded-full bg-[#fff5e5] px-2.5 py-1 text-[10px] font-bold text-[#8d641f]">Draft</span></td>
-                      <td className="px-5 py-4">Preview only — not a valid prescription</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="divide-y divide-[#f0edf3]">
+              {filteredReviews.map((item) => (
+                <article key={item.id} className="p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-bold text-[#28243a]">{patientLabel(item.patientId)}</p>
+                      <p className="mt-1 text-xs text-[#77758a]">
+                        Submitted {new Date(item.createdAt).toLocaleString()} · {item.updateType.replaceAll("_", " ").toLowerCase()}
+                      </p>
+                    </div>
+                    <span className={[
+                      "rounded-full px-3 py-1.5 text-[10px] font-bold",
+                      item.status === "PENDING" ? "bg-[#fff5e5] text-[#8d641f]" :
+                      item.status === "REVIEWED" ? "bg-[#e8f5ef] text-[#39765e]" :
+                      "bg-[#ebf2fb] text-[#47688f]",
+                    ].join(" ")}>
+                      {item.status.replaceAll("_", " ")}
+                    </span>
+                  </div>
+                  <div className="mt-4 rounded-xl bg-[#faf9fc] p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a789d]">Medication reported by patient</p>
+                    <p className="mt-1 text-xs font-semibold text-[#28243a]">{item.medicationName}</p>
+                    {item.note && <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-[#625d70]">{item.note}</p>}
+                    {item.reviewNote && (
+                      <div className="mt-3 border-t border-[#ebe8f1] pt-3">
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a789d]">Previous review note</p>
+                        <p className="mt-1 whitespace-pre-wrap text-xs leading-5 text-[#625d70]">{item.reviewNote}</p>
+                      </div>
+                    )}
+                  </div>
+                  {item.status !== "REVIEWED" && (
+                    <div className="mt-4">
+                      <label htmlFor={"med-review-" + item.id} className="block text-[11px] font-semibold text-[#625d70]">
+                        Review note (optional)
+                      </label>
+                      <textarea
+                        id={"med-review-" + item.id}
+                        maxLength={2000}
+                        rows={2}
+                        value={medicationReviewNotes[item.id] ?? ""}
+                        onChange={(event) => setMedicationReviewNotes((current) => ({ ...current, [item.id]: event.target.value }))}
+                        placeholder="Record review context or next-step follow-up."
+                        className="mt-2 w-full rounded-xl border border-[#e4deeb] bg-white p-3 text-xs text-[#28243a]"
+                      />
+                      <div className="mt-3 flex flex-wrap justify-end gap-2">
+                        <button
+                          type="button"
+                          disabled={reviewMedication.isPending}
+                          onClick={() => reviewMedication.mutate({
+                            id: item.id,
+                            input: { status: "FOLLOW_UP_REQUIRED", reviewNote: medicationReviewNotes[item.id] ?? "" },
+                          })}
+                          className="rounded-xl border border-[#d7e3f1] bg-white px-3 py-2 text-[11px] font-bold text-[#47688f] disabled:opacity-50"
+                        >
+                          Follow-up required
+                        </button>
+                        <button
+                          type="button"
+                          disabled={reviewMedication.isPending}
+                          onClick={() => reviewMedication.mutate({
+                            id: item.id,
+                            input: { status: "REVIEWED", reviewNote: medicationReviewNotes[item.id] ?? "" },
+                          })}
+                          className="rounded-xl bg-[#7350a0] px-3 py-2 text-[11px] font-bold text-white disabled:opacity-50"
+                        >
+                          Mark reviewed
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {item.reviewedAt && (
+                    <p className="mt-3 text-[10px] text-[#8a789d]">
+                      Review recorded {new Date(item.reviewedAt).toLocaleString()}.
+                    </p>
+                  )}
+                </article>
+              ))}
             </div>
           )}
         </section>
@@ -454,285 +475,253 @@ export default function TherapistWorkspaceModulePage() {
     );
   }
 
-  if (workspaceKey === "treatment-plans") {
+  if (workspaceKey === "prescriptions") {
+    const drafts = (prescriptionQuery.data?.prescriptionDrafts ?? []).filter(
+      (draft) => prescriptionStatus === "ALL" || draft.status === prescriptionStatus
+    );
     const patients = carePlanPatients.data?.patients ?? [];
-    const plans = carePlans.data?.carePlans ?? [];
+    const patientOptions = patients.map((patient) => ({
+      value: patient.patientId,
+      label: patient.userName?.trim() || "Patient " + patient.patientId.slice(0, 8),
+    }));
+    const patientLabel = (patientId: string) => {
+      const patient = patients.find((item) => item.patientId === patientId);
+      return patient?.userName?.trim() || "Patient " + patientId.slice(0, 8);
+    };
+
+    function resetPrescriptionForm() {
+      setEditingPrescriptionId(null);
+      setPrescriptionForm({ patientId: "", medicationName: "", strength: "", frequency: "", instructions: "" });
+      setShowPrescriptionDraftForm(false);
+    }
+
+    function editPrescriptionDraft(draft: PrescriptionDraft) {
+      setEditingPrescriptionId(draft.id);
+      setPrescriptionForm({
+        patientId: draft.patientId,
+        medicationName: draft.medicationName,
+        strength: draft.strength,
+        frequency: draft.frequency,
+        instructions: draft.instructions,
+      });
+      setShowPrescriptionDraftForm(true);
+    }
+
+    function submitPrescriptionDraft(event: FormEvent<HTMLFormElement>) {
+      event.preventDefault();
+      if (!prescriptionForm.patientId || !prescriptionForm.medicationName.trim()) return;
+      const input = {
+        patientId: prescriptionForm.patientId,
+        medicationName: prescriptionForm.medicationName.trim(),
+        strength: prescriptionForm.strength.trim(),
+        frequency: prescriptionForm.frequency.trim(),
+        instructions: prescriptionForm.instructions.trim(),
+      };
+      if (editingPrescriptionId) {
+        updatePrescription.mutate(
+          { id: editingPrescriptionId, input: {
+            medicationName: input.medicationName,
+            strength: input.strength,
+            frequency: input.frequency,
+            instructions: input.instructions,
+          }},
+          { onSuccess: resetPrescriptionForm }
+        );
+      } else {
+        createPrescription.mutate(input, { onSuccess: resetPrescriptionForm });
+      }
+    }
+
     return (
       <main className="min-h-full bg-[#f7f6fa] px-5 py-8 sm:px-7 lg:px-10">
-        <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Therapist workspace</p>
-        <h1 className="mt-2 text-[27px] font-extrabold text-[#28243a]">Treatment plans</h1>
-        <p className="mt-1 text-sm text-[#77758a]">
-          Create encrypted goal-setting drafts for patients with an established appointment relationship.
-        </p>
-
-        <div className="mt-5 flex gap-3 rounded-2xl border border-[#d9eadf] bg-[#f1faf4] p-4 text-xs leading-5 text-[#39765e]">
-          <ShieldCheck className="h-4 w-4 shrink-0" />
-          Goals and milestones are encrypted at rest. The assigned patient can review a draft from their Today dashboard; it becomes active only after the patient acknowledges it.
+        <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Clinical tools</p>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-[27px] font-extrabold text-[#28243a]">Prescription drafts</h1>
+            <p className="mt-1 text-sm text-[#77758a]">Create and maintain encrypted drafts for clinical review.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (showPrescriptionDraftForm) resetPrescriptionForm();
+              else setShowPrescriptionDraftForm(true);
+            }}
+            className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white"
+          >
+            {showPrescriptionDraftForm ? "Close draft form" : "New prescription draft"}
+          </button>
         </div>
 
-        {carePlans.isError && (
-          <div role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            Care plans could not be loaded. The secure encryption key may need to be configured on the backend.
-            <button type="button" onClick={() => carePlans.refetch()} className="ml-3 underline">Retry</button>
+        <div className="mt-5 flex gap-3 rounded-2xl border border-[#f0dfbd] bg-[#fff8eb] p-4 text-xs leading-5 text-[#795b2b]">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <div>
+            <strong className="block">Clinical safety boundary</strong>
+            These are encrypted preparation drafts only. Saving or archiving a draft does not sign, issue, dispense or send a prescription to a pharmacy or patient. Clinical authorisation and a separately approved prescribing workflow are still required.
           </div>
+        </div>
+
+        {showPrescriptionDraftForm && (
+          <form onSubmit={submitPrescriptionDraft} className="mt-5 rounded-2xl border border-[#ebe8f1] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-[#28243a]">{editingPrescriptionId ? "Edit prescription draft" : "New prescription draft"}</h2>
+                <p className="mt-1 text-xs text-[#77758a]">Only available for patients with an appointment relationship to you.</p>
+              </div>
+              <FileText className="h-5 w-5 text-[#7350a0]" />
+            </div>
+            {carePlanPatients.isError && (
+              <p role="alert" className="mt-3 text-xs text-red-700">Your patient list could not be loaded. Retry before creating a draft.</p>
+            )}
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <label className="text-xs font-semibold text-[#625d70] md:col-span-2">
+                Patient
+                <select
+                  required
+                  disabled={!!editingPrescriptionId || carePlanPatients.isLoading || patientOptions.length === 0}
+                  value={prescriptionForm.patientId}
+                  onChange={(event) => setPrescriptionForm((current) => ({ ...current, patientId: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] bg-white p-3 text-xs text-[#28243a]"
+                >
+                  <option value="">Select a patient</option>
+                  {patientOptions.map((patient) => <option key={patient.value} value={patient.value}>{patient.label}</option>)}
+                </select>
+              </label>
+              <label className="text-xs font-semibold text-[#625d70] md:col-span-2">
+                Medication name
+                <input
+                  required
+                  maxLength={160}
+                  value={prescriptionForm.medicationName}
+                  onChange={(event) => setPrescriptionForm((current) => ({ ...current, medicationName: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] p-3 text-xs text-[#28243a]"
+                />
+              </label>
+              <label className="text-xs font-semibold text-[#625d70]">
+                Strength / dose
+                <input
+                  maxLength={120}
+                  value={prescriptionForm.strength}
+                  onChange={(event) => setPrescriptionForm((current) => ({ ...current, strength: event.target.value }))}
+                  placeholder="Enter only as an authorised clinician"
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] p-3 text-xs text-[#28243a]"
+                />
+              </label>
+              <label className="text-xs font-semibold text-[#625d70]">
+                Frequency
+                <input
+                  maxLength={160}
+                  value={prescriptionForm.frequency}
+                  onChange={(event) => setPrescriptionForm((current) => ({ ...current, frequency: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] p-3 text-xs text-[#28243a]"
+                />
+              </label>
+              <label className="text-xs font-semibold text-[#625d70] md:col-span-2">
+                Clinical instructions for draft review
+                <textarea
+                  rows={4}
+                  maxLength={2000}
+                  value={prescriptionForm.instructions}
+                  onChange={(event) => setPrescriptionForm((current) => ({ ...current, instructions: event.target.value }))}
+                  className="mt-2 w-full rounded-xl border border-[#e4deeb] p-3 text-xs text-[#28243a]"
+                />
+              </label>
+            </div>
+            {patientOptions.length === 0 && !carePlanPatients.isLoading && (
+              <p className="mt-3 rounded-xl bg-[#faf9fc] p-3 text-xs text-[#77758a]">
+                No assigned patient relationships are available for this account. A draft cannot be created without an eligible patient.
+              </p>
+            )}
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button type="button" onClick={resetPrescriptionForm} className="rounded-xl border border-[#e4deeb] px-4 py-2.5 text-xs font-bold text-[#625d70]">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!prescriptionForm.patientId || !prescriptionForm.medicationName.trim() || createPrescription.isPending || updatePrescription.isPending}
+                className="rounded-xl bg-[#7350a0] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50"
+              >
+                {createPrescription.isPending || updatePrescription.isPending ? "Saving…" : editingPrescriptionId ? "Save changes" : "Save encrypted draft"}
+              </button>
+            </div>
+          </form>
         )}
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              const goals = carePlanGoals.split(/\r?\n/).map((goal) => goal.trim()).filter(Boolean).slice(0, 20);
-              if (!carePlanPatientId || !carePlanTitle.trim() || goals.length === 0) return;
-              createCarePlan.mutate(
-                {
-                  patientId: carePlanPatientId,
-                  title: carePlanTitle.trim(),
-                  goals,
-                  milestones: parseMilestoneLines(carePlanMilestones),
-                  ...(carePlanReviewDate
-                    ? { reviewDate: new Date(carePlanReviewDate + "T00:00:00+02:00").toISOString() }
-                    : {}),
-                },
-                {
-                  onSuccess: () => {
-                    setCarePlanTitle("");
-                    setCarePlanGoals("");
-                    setCarePlanReviewDate("");
-                    setCarePlanMilestones("");
-                  },
-                }
-              );
-            }}
-            className="rounded-2xl border border-[#ebe8f1] bg-white p-5"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-bold text-[#28243a]">New care-plan draft</h2>
-                <p className="mt-1 text-xs text-[#77758a]">Agree goals with the patient during care.</p>
-              </div>
-              <ClipboardList className="h-5 w-5 text-[#7350a0]" />
+        <section className="mt-5 overflow-hidden rounded-2xl border border-[#ebe8f1] bg-white">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f0edf3] px-5 py-4">
+            <div>
+              <h2 className="text-sm font-bold text-[#28243a]">Recent prescription drafts</h2>
+              <p className="mt-1 text-xs text-[#77758a]">Encrypted records from your therapist account.</p>
             </div>
-
-            {carePlanPatients.isError ? (
-              <p role="alert" className="mt-4 text-xs text-red-700">Patient list could not be loaded. Retry the Patients page.</p>
-            ) : patients.length === 0 && !carePlanPatients.isLoading ? (
-              <p className="mt-4 rounded-xl bg-[#fff8eb] p-3 text-xs leading-5 text-[#795b2b]">
-                No patient relationship is available yet. A care plan can only be created for someone who has an appointment history with you.
-              </p>
-            ) : (
-              <>
-                <label htmlFor="care-plan-patient" className="mt-4 block text-xs font-semibold text-[#625d70]">Patient</label>
-                <select
-                  id="care-plan-patient"
-                  required
-                  value={carePlanPatientId}
-                  onChange={(event) => setCarePlanPatientId(event.target.value)}
-                  disabled={carePlanPatients.isLoading}
-                  className="mt-2 w-full rounded-xl border border-[#e4deeb] bg-white px-3 py-2.5 text-sm text-[#28243a]"
-                >
-                  <option value="">Select a patient…</option>
-                  {patients.map((patient) => (
-                    <option key={patient.patientId} value={patient.patientId}>
-                      {patient.userName || "Patient"} · {patient.patientId.slice(0, 8)}
-                    </option>
-                  ))}
-                </select>
-
-                <label htmlFor="care-plan-title" className="mt-4 block text-xs font-semibold text-[#625d70]">Plan title</label>
-                <input
-                  id="care-plan-title"
-                  required
-                  maxLength={120}
-                  value={carePlanTitle}
-                  onChange={(event) => setCarePlanTitle(event.target.value)}
-                  placeholder="e.g. Building a steady sleep routine"
-                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-2.5 text-sm text-[#28243a]"
-                />
-
-                <label htmlFor="care-plan-goals" className="mt-4 block text-xs font-semibold text-[#625d70]">Agreed goals · one per line</label>
-                <textarea
-                  id="care-plan-goals"
-                  required
-                  rows={5}
-                  value={carePlanGoals}
-                  onChange={(event) => setCarePlanGoals(event.target.value)}
-                  placeholder={"Establish a regular evening routine\nPractise a short daily reflection"}
-                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm leading-5 text-[#28243a]"
-                />
-
-                <label htmlFor="care-plan-milestones" className="mt-4 block text-xs font-semibold text-[#625d70]">Milestones · one per line; add | YYYY-MM-DD for a due date (optional)</label>
-                <textarea
-                  id="care-plan-milestones"
-                  rows={3}
-                  value={carePlanMilestones}
-                  onChange={(event) => setCarePlanMilestones(event.target.value)}
-                  placeholder={"Agree first coping strategy | 2026-11-17\nReview progress together"}
-                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-3 text-sm text-[#28243a]"
-                />
-
-                <label htmlFor="care-plan-review" className="mt-4 block text-xs font-semibold text-[#625d70]">Review date (optional)</label>
-                <input
-                  id="care-plan-review"
-                  type="date"
-                  value={carePlanReviewDate}
-                  onChange={(event) => setCarePlanReviewDate(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-[#e4deeb] px-3 py-2.5 text-sm text-[#28243a]"
-                />
-
-                <button
-                  type="submit"
-                  disabled={!carePlanPatientId || !carePlanTitle.trim() || !carePlanGoals.trim() || createCarePlan.isPending}
-                  className="mt-5 w-full rounded-xl bg-[#7350a0] px-4 py-3 text-xs font-bold text-white disabled:opacity-50"
-                >
-                  {createCarePlan.isPending ? "Saving encrypted draft…" : "Save care-plan draft"}
-                </button>
-              </>
-            )}
-          </form>
-
-          <section className="rounded-2xl border border-[#ebe8f1] bg-white p-5">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-bold text-[#28243a]">Your saved plans</h2>
-                <p className="mt-1 text-xs text-[#77758a]">Only records from your own patient relationships.</p>
-              </div>
-              <span className="rounded-full bg-[#f1ecf7] px-3 py-1.5 text-[10px] font-bold text-[#7350a0]">{plans.length} plans</span>
+            <select
+              value={prescriptionStatus}
+              onChange={(event) => setPrescriptionStatus(event.target.value as typeof prescriptionStatus)}
+              className="rounded-xl border border-[#e4deeb] bg-white px-3 py-2 text-xs font-semibold text-[#625d70]"
+              aria-label="Filter prescription drafts"
+            >
+              <option value="ALL">All drafts</option>
+              <option value="DRAFT">Draft</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+          {prescriptionQuery.isError && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 bg-red-50 p-5 text-xs text-red-700">
+              <span>{prescriptionQuery.error instanceof Error ? prescriptionQuery.error.message : "Prescription drafts could not be loaded."}</span>
+              <button type="button" onClick={() => void prescriptionQuery.refetch()} className="rounded-lg border border-red-200 bg-white px-3 py-2 font-bold">
+                Retry
+              </button>
             </div>
-            {carePlans.isLoading ? (
-              <div className="mt-4 space-y-3">{[1, 2, 3].map((n) => <div key={n} className="h-24 animate-pulse rounded-xl bg-[#f5f3f8]" />)}</div>
-            ) : plans.length === 0 ? (
-              <p className="mt-5 rounded-xl bg-[#faf9fc] p-6 text-center text-xs text-[#77758a]">No care plans have been saved yet.</p>
-            ) : (
-              <div className="mt-4 space-y-3">
-                {plans.map((plan) => {
-                  const patient = patients.find((item) => item.patientId === plan.patientId);
-                  return (
-                    <article key={plan.id} className="rounded-xl border border-[#f0edf3] p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <h3 className="text-sm font-bold text-[#28243a]">{plan.title}</h3>
-                          <p className="mt-1 text-[11px] text-[#77758a]">{patient?.userName ?? "Patient"} · {plan.patientId.slice(0, 8)}</p>
-                        </div>
-                        <span className={[
-                          "rounded-full px-2.5 py-1 text-[10px] font-bold",
-                          plan.status === "ACTIVE" ? "bg-[#e8f5ef] text-[#39765e]" : "bg-[#fff5e5] text-[#8d641f]",
-                        ].join(" ")}>
-                          {plan.status === "DRAFT" ? "Awaiting patient acknowledgement" : plan.status}
-                        </span>
-                      </div>
-                      <ul className="mt-3 space-y-1.5">
-                        {plan.goals.map((goal, index) => (
-                          <li key={index} className="flex gap-2 text-xs leading-5 text-[#625d70]">
-                            <span className="text-[#9072b2]">•</span>{goal}
-                          </li>
-                        ))}
-                      </ul>
-                      {plan.milestones.length > 0 && (
-                        <div className="mt-3 rounded-lg bg-[#faf9fc] p-3">
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-[#8a789d]">Milestones</p>
-                          <ul className="mt-2 space-y-1">
-                            {plan.milestones.map((milestone, index) => (
-                              <li key={index} className="text-xs text-[#625d70]">
-                                • {milestone.title}{milestone.dueDate ? " · " + new Date(milestone.dueDate).toLocaleDateString() : ""}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      <p className="mt-3 text-[10px] text-[#9993a2]">
-                        {plan.reviewDate ? "Review " + new Date(plan.reviewDate).toLocaleDateString() : "No review date set"} · Updated {new Date(plan.updatedAt).toLocaleDateString()}
-                      </p>
-                      {plan.status !== "ARCHIVED" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingCarePlanId(plan.id);
-                            setEditCarePlanTitle(plan.title);
-                            setEditCarePlanGoals(plan.goals.join("\n"));
-                            setEditCarePlanMilestones(formatMilestoneLines(plan.milestones));
-                            setEditCarePlanReviewDate(plan.reviewDate ? new Date(plan.reviewDate).toISOString().slice(0, 10) : "");
-                          }}
-                          className="mt-3 rounded-lg border border-[#e4deeb] px-3 py-2 text-[11px] font-bold text-[#7350a0]"
-                        >
-                          Edit goals and milestones
-                        </button>
-                      )}
-                      {editingCarePlanId === plan.id && (
-                        <form
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            const goals = editCarePlanGoals.split(/\r?\n/).map((goal) => goal.trim()).filter(Boolean).slice(0, 20);
-                            if (!editCarePlanTitle.trim() || goals.length === 0) return;
-                            updateCarePlan.mutate(
-                              {
-                                id: plan.id,
-                                input: {
-                                  title: editCarePlanTitle.trim(),
-                                  goals,
-                                  milestones: parseMilestoneLines(editCarePlanMilestones),
-                                  ...(editCarePlanReviewDate
-                                    ? { reviewDate: new Date(editCarePlanReviewDate + "T00:00:00+02:00").toISOString() }
-                                    : {}),
-                                },
-                              },
-                              { onSuccess: () => setEditingCarePlanId(null) }
-                            );
-                          }}
-                          className="mt-4 space-y-3 rounded-xl border border-[#e4deeb] bg-[#faf9fc] p-4"
-                        >
-                          <label className="block text-[11px] font-semibold text-[#625d70]">
-                            Plan title
-                            <input
-                              required
-                              maxLength={120}
-                              value={editCarePlanTitle}
-                              onChange={(event) => setEditCarePlanTitle(event.target.value)}
-                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
-                            />
-                          </label>
-                          <label className="block text-[11px] font-semibold text-[#625d70]">
-                            Agreed goals · one per line
-                            <textarea
-                              required
-                              rows={4}
-                              value={editCarePlanGoals}
-                              onChange={(event) => setEditCarePlanGoals(event.target.value)}
-                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
-                            />
-                          </label>
-                          <label className="block text-[11px] font-semibold text-[#625d70]">
-                            Milestones · one per line
-                            <textarea
-                              rows={3}
-                              value={editCarePlanMilestones}
-                              onChange={(event) => setEditCarePlanMilestones(event.target.value)}
-                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
-                            />
-                          </label>
-                          <label className="block text-[11px] font-semibold text-[#625d70]">
-                            Review date (leave blank to keep current)
-                            <input
-                              type="date"
-                              value={editCarePlanReviewDate}
-                              onChange={(event) => setEditCarePlanReviewDate(event.target.value)}
-                              className="mt-1 w-full rounded-lg border border-[#e4deeb] bg-white px-3 py-2 text-xs"
-                            />
-                          </label>
-                          <div className="flex justify-end gap-2">
-                            <button type="button" onClick={() => setEditingCarePlanId(null)} className="rounded-lg border border-[#e4deeb] px-3 py-2 text-[11px] font-bold text-[#625d70]">Cancel</button>
-                            <button type="submit" disabled={!editCarePlanTitle.trim() || !editCarePlanGoals.trim() || updateCarePlan.isPending} className="rounded-lg bg-[#7350a0] px-3 py-2 text-[11px] font-bold text-white disabled:opacity-50">
-                              {updateCarePlan.isPending ? "Updating…" : "Save changes"}
-                            </button>
-                          </div>
-                        </form>
-                      )}
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        </div>
+          )}
+          {prescriptionQuery.isLoading ? (
+            <div className="space-y-3 p-5">{[1, 2, 3].map((item) => <div key={item} className="h-16 animate-pulse rounded-xl bg-[#f7f6fa]" />)}</div>
+          ) : drafts.length === 0 ? (
+            <div className="px-5 py-12 text-center">
+              <FileText className="mx-auto h-7 w-7 text-[#9a86b3]" />
+              <h3 className="mt-3 text-sm font-bold text-[#28243a]">No prescription drafts in this view</h3>
+              <p className="mt-2 text-xs text-[#77758a]">New drafts you create will appear here. No sample or fabricated draft records are included.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[#f0edf3]">
+              {drafts.map((draft) => (
+                <article key={draft.id} className="flex flex-wrap items-start justify-between gap-4 p-5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-sm font-bold text-[#28243a]">{draft.medicationName}</h3>
+                      <span className={draft.status === "DRAFT" ? "rounded-full bg-[#fff5e5] px-2.5 py-1 text-[10px] font-bold text-[#8d641f]" : "rounded-full bg-[#f0eff3] px-2.5 py-1 text-[10px] font-bold text-[#777483]"}>
+                        {draft.status}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-[#77758a]">{patientLabel(draft.patientId)}</p>
+                    <p className="mt-2 text-xs text-[#625d70]">
+                      {[draft.strength, draft.frequency].filter(Boolean).join(" · ") || "No strength or frequency details"}
+                    </p>
+                    {draft.instructions && <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-[#77758a]">{draft.instructions}</p>}
+                    <p className="mt-2 text-[10px] text-[#9691a0]">Updated {new Date(draft.updatedAt).toLocaleString()}</p>
+                  </div>
+                  {draft.status === "DRAFT" && (
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={() => editPrescriptionDraft(draft)} className="rounded-lg border border-[#e4deeb] px-3 py-2 text-[11px] font-bold text-[#7350a0]">
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        disabled={archivePrescription.isPending}
+                        onClick={() => {
+                          if (window.confirm("Archive this draft? This will not issue or send a prescription.")) archivePrescription.mutate(draft.id);
+                        }}
+                        className="rounded-lg border border-[#f0d7d9] px-3 py-2 text-[11px] font-bold text-[#b84d58] disabled:opacity-50"
+                      >
+                        Archive
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+        <p className="mt-4 rounded-xl border border-[#ebe8f1] bg-white p-4 text-[11px] leading-5 text-[#77758a]">
+          A saved draft remains a draft. This workspace has no signing, issuing, dispensing or pharmacy-transmission action.
+        </p>
       </main>
     );
   }
