@@ -39,7 +39,7 @@ jobs:
 
       - name: Canonical-format prototype integration files
         run: |
-          npx prettier --write "src/app/(app)/therapy/page.tsx" "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/app/therapist/dashboard/page.tsx" "src/app/therapist/page.tsx" "src/hooks/useClinicalWorkspace.ts" "src/lib/clinical-workspace-api.ts" "src/lib/community-api.ts" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx"
+          npx prettier --write "src/app/(app)/therapy/page.tsx" "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/app/therapist/dashboard/page.tsx" "src/app/therapist/page.tsx" "src/hooks/useClinicalWorkspace.ts" "src/lib/clinical-workspace-api.ts" "src/lib/community-api.ts" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx"
 
       - name: Upload formatted source for patching the PR branch
         uses: actions/upload-artifact@v4
@@ -63,10 +63,10 @@ jobs:
       - name: Commit canonical formatting to PR branch
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
-          if [[ -n "$(git status --porcelain -- "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx")" ]]; then
+          if [[ -n "$(git status --porcelain -- "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx")" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx"
+            git add "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx"
             git commit -m "style: format MINDORA prototype integration files"
             git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
           fi
