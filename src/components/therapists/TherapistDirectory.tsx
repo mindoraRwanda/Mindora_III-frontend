@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
-import { SPECIALISATION_OPTIONS, matchesSpecialisation } from "@/lib/mock-data/therapists";
+import { SPECIALISATION_OPTIONS, THERAPISTS, matchesSpecialisation } from "@/lib/mock-data/therapists";
 import { Button } from "@/components/ui/button";
 import { useTherapists } from "@/hooks/useTherapists";
 import { toTherapistCard } from "@/lib/therapist-view";
@@ -37,20 +37,24 @@ export function TherapistDirectory() {
     router.replace("/therapists");
   }
 
+  const directoryProfiles = useMemo(() => {
+    if (data?.therapists.length) return data.therapists.map(toTherapistCard);
+    return data ? THERAPISTS : [];
+  }, [data]);
+
+  const isUsingListedFallback = Boolean(data && data.therapists.length === 0);
+
   const languageOptions = useMemo(() => {
     const options = new Set<string>();
-    (data?.therapists ?? []).forEach((therapist) => {
-      (
-        therapist.languages ?? (therapist.languagePreference ? [therapist.languagePreference] : [])
-      ).forEach((item) => options.add(item));
+    directoryProfiles.forEach((therapist) => {
+      (therapist.languages ?? []).forEach((item) => options.add(item));
     });
     return Array.from(options).sort((a, b) => a.localeCompare(b));
-  }, [data]);
+  }, [directoryProfiles]);
 
   const therapists = useMemo(
     () =>
-      (data?.therapists ?? [])
-        .map(toTherapistCard)
+      directoryProfiles
         .filter((therapist) => {
           const searchable =
             `${therapist.name} ${therapist.title} ${therapist.specialisations.join(" ")} ${(therapist.languages ?? []).join(" ")}`.toLowerCase();
@@ -60,7 +64,7 @@ export function TherapistDirectory() {
           );
         })
         .sort((a, b) => (sort === "name" ? a.name.localeCompare(b.name) : 0)),
-    [data, query, specialisation, sort]
+    [directoryProfiles, query, specialisation, sort]
   );
 
   return (
@@ -157,7 +161,11 @@ export function TherapistDirectory() {
         ) : null}
         {!isLoading && !isError && therapists.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-mindora-purple-bg p-10 text-center">
-            <p className="font-semibold">No approved therapists match these filters yet.</p>
+            <p className="font-semibold">
+              {isUsingListedFallback
+                ? "No listed professionals match these filters."
+                : "No therapists match these filters yet."}
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
               Try another search or clear your filters.
             </p>
@@ -175,7 +183,9 @@ export function TherapistDirectory() {
         ) : null}
         {data ? (
           <p className="mt-5 text-xs text-muted-foreground">
-            Showing {therapists.length} of {data.total} approved therapists accepting patients.
+            {isUsingListedFallback
+              ? `Showing ${therapists.length} MINDORA-listed professional. Contact the team to confirm current availability.`
+              : `Showing ${therapists.length} of ${data.total} therapists listed as accepting patients.`}
           </p>
         ) : null}
       </section>
