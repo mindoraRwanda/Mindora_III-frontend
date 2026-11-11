@@ -9,5 +9,4 @@ describe("Public mock data", () => {
       expect(therapist.nearest).toBeUndefined();
     }
   });
-
 });
