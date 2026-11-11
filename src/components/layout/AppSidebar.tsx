@@ -11,6 +11,7 @@ import {
   MessageCircle,
   PenLine,
   Settings,
+  ClipboardList,
 } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { WorkspaceSupportCard } from "@/components/layout/WorkspaceSupportCard";
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/therapy", label: "Therapy", icon: Calendar },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/reflect", label: "Reflect with AI", icon: PenLine },
+  { href: "/tests", label: "Tests", icon: ClipboardList },
   { href: "/therapist-application", label: "Become a Therapist", icon: Briefcase },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
