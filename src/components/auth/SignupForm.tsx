@@ -118,7 +118,7 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
           <MindoraLogo />
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/tests" className="text-sm font-semibold text-mindora-purple hover:underline">Tests</Link>
+          <Link\n            href="/tests"\n            className="text-sm font-semibold text-mindora-purple hover:underline"\n          >\n            Tests\n          </Link>
         <p className="text-[13px] text-muted-foreground">
           Have an account?{" "}
           <Link
