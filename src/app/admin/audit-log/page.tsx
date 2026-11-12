@@ -4,7 +4,7 @@ import { useAuditLog } from "@/hooks/useAdmin";
 
 export default function AdminAuditLogPage() {
   const { data, isLoading, isError } = useAuditLog({ limit: 50 });
-  const entries = data?.entries ?? [];
+  const entries = data?.auditLogs ?? [];
 
   return (
     <div className="min-h-full bg-[#eae6f4] px-6 py-8 lg:px-10 lg:py-10">
