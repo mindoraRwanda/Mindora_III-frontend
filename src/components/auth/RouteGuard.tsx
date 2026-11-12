@@ -43,8 +43,6 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
   }
 
   if (!isAuthenticated) return null;
-  // Do not render a protected workspace even briefly while the role redirect runs.
-  if (requiredRole && user?.role !== requiredRole) return null;
 
   return <>{children}</>;
 }

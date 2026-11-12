@@ -42,11 +42,11 @@ export default async function SupportPage({
       <section className="relative overflow-hidden px-4 py-14 sm:px-6 lg:py-20">
         <div
           aria-hidden
-          className="pointer-events-none absolute -left-16 top-10 h-56 w-56 rounded-full bg-[#E8F5F4]"
+          className="pointer-events-none absolute -left-16 top-10 h-56 w-56 rounded-full bg-[#F5F3FF]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#F1F9F8]"
+          className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#F9F6FF]"
         />
 
         <div className="relative mx-auto max-w-6xl">
@@ -68,7 +68,7 @@ export default async function SupportPage({
                   <Link
                     key={item.topic}
                     href={`/support?topic=${item.topic}#message`}
-                    className="rounded-full border border-border bg-white px-3.5 py-2 text-sm font-medium text-mindora-purple shadow-sm transition-all hover:-translate-y-0.5 hover:border-mindora-purple/30 hover:bg-[#F1F9F8]"
+                    className="rounded-full border border-border bg-white px-3.5 py-2 text-sm font-medium text-mindora-purple shadow-sm transition-all hover:-translate-y-0.5 hover:border-mindora-purple/30 hover:bg-[#F9F6FF]"
                   >
                     {item.label}
                   </Link>
@@ -82,7 +82,7 @@ export default async function SupportPage({
               </p>
               <ul className="mt-4 space-y-4">
                 <li className="flex gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E8F5F4] text-mindora-purple">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F5F3FF] text-mindora-purple">
                     <Phone className="h-4 w-4" />
                   </span>
                   <div>
@@ -91,7 +91,7 @@ export default async function SupportPage({
                   </div>
                 </li>
                 <li className="flex gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E8F5F4] text-mindora-purple">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F5F3FF] text-mindora-purple">
                     <Mail className="h-4 w-4" />
                   </span>
                   <div>
@@ -161,7 +161,7 @@ export default async function SupportPage({
                   className="rounded-2xl border border-border bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F5F4] text-mindora-purple">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F5F3FF] text-mindora-purple">
                       <Icon className="h-5 w-5" strokeWidth={1.75} />
                     </span>
                     <span className="text-sm font-semibold text-mindora-purple">
@@ -188,7 +188,7 @@ export default async function SupportPage({
               Tell us what you need. We&apos;ll open your email app so your note goes straight to
               our support inbox at {SUPPORT_CONTACT.email}.
             </p>
-            <div className="mt-8 rounded-2xl bg-[#E8F5F4] p-5">
+            <div className="mt-8 rounded-2xl bg-[#F5F3FF] p-5">
               <div className="flex gap-3">
                 <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-mindora-purple" />
                 <div>

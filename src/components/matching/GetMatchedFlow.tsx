@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
+  AudioLines,
   CalendarDays,
   Frown,
   Heart,
@@ -29,9 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { TherapistCard } from "@/components/therapists/TherapistCard";
 import { MATCH_REASONS } from "@/lib/mock-data/public";
-import { matchesSpecialisation } from "@/lib/mock-data/therapists";
-import { useTherapists } from "@/hooks/useTherapists";
-import { toTherapistCard } from "@/lib/therapist-view";
+import { THERAPISTS, matchesSpecialisation } from "@/lib/mock-data/therapists";
 import { cn } from "@/lib/utils";
 
 const reasonIcons = [
@@ -59,7 +58,7 @@ const genderOptions = [
 
 const sessionOptions = [
   { value: "video", label: "Video", icon: Video },
-  { value: "in_person", label: "In person", icon: Users },
+  { value: "audio", label: "Audio", icon: AudioLines },
   { value: "chat", label: "Chat", icon: MessageSquare },
 ];
 
@@ -85,22 +84,17 @@ export function GetMatchedFlow() {
   const [availability, setAvailability] = useState("");
   const [specificDate, setSpecificDate] = useState("");
   const [errors, setErrors] = useState<Record<number, string>>({});
-  const {
-    data: therapistData,
-    isLoading: therapistsLoading,
-    isError: therapistsError,
-  } = useTherapists({});
 
   const firstReason = MATCH_REASONS.find((item) => item.id === reasons[0]);
   const matched = useMemo(() => {
     const spec = reasonToSpecialisation[reasons[0]] ?? firstReason?.label;
-    const liveTherapists = (therapistData?.therapists ?? []).map(toTherapistCard);
-    // Only recommend practitioners returned by the backend's approved,
-    // active and accepting-patients directory. Never fall back to demo data.
-    return liveTherapists
-      .filter((therapist) => matchesSpecialisation(therapist.specialisations, spec))
-      .slice(0, 3);
-  }, [firstReason?.label, reasons, therapistData?.therapists]);
+    const filtered = THERAPISTS.filter((therapist) => {
+      if (gender === "male" || gender === "female") return therapist.gender === gender;
+      return true;
+    }).filter((therapist) => matchesSpecialisation(therapist.specialisations, spec));
+    const list = filtered.length >= 3 ? filtered : THERAPISTS;
+    return list.slice(0, 3);
+  }, [firstReason?.label, gender, reasons]);
 
   function toggleReason(id: string) {
     setReasons((current) =>
@@ -140,7 +134,7 @@ export function GetMatchedFlow() {
           <button
             type="button"
             onClick={() => (step > 1 ? setStep((value) => value - 1) : router.push("/"))}
-            className="rounded-full p-2 hover:bg-[#F1F9F8]"
+            className="rounded-full p-2 hover:bg-[#F9F6FF]"
             aria-label="Back"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -329,44 +323,7 @@ export function GetMatchedFlow() {
                 <p className="mt-2 text-[#6B7280]">
                   Therapists specialising in {firstReason?.label ?? "your selected needs"}
                 </p>
-                {gender === "male" || gender === "female" ? (
-                  <p className="mt-3 text-sm text-[#6B7280]">
-                    Gender preference is noted. MINDORA therapist profiles do not currently expose a
-                    verified gender field, so recommendations are based on approved specialisations
-                    only.
-                  </p>
-                ) : null}
                 <div className="mt-8 space-y-4">
-                  {therapistsLoading ? (
-                    <p
-                      role="status"
-                      className="rounded-xl border border-border p-5 text-sm text-[#6B7280]"
-                    >
-                      Loading approved therapists…
-                    </p>
-                  ) : null}
-                  {therapistsError ? (
-                    <p
-                      role="alert"
-                      className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800"
-                    >
-                      We could not load therapists right now. Please try again or browse the
-                      therapist directory.
-                    </p>
-                  ) : null}
-                  {!therapistsLoading && !therapistsError && matched.length === 0 ? (
-                    <div className="rounded-xl border border-border p-6 text-center">
-                      <p className="font-semibold">
-                        No approved therapist matches this selection yet.
-                      </p>
-                      <p className="mt-2 text-sm text-[#6B7280]">
-                        You can browse all currently available therapists instead.
-                      </p>
-                      <Button className="mt-4" onClick={() => router.push("/therapists")}>
-                        Browse therapists
-                      </Button>
-                    </div>
-                  ) : null}
                   {matched.map((therapist) => (
                     <TherapistCard key={therapist.id} therapist={therapist} />
                   ))}

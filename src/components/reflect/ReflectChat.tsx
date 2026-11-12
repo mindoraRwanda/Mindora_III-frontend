@@ -18,12 +18,6 @@ interface TranscriptEntry {
   failed?: boolean; // user-only: this send failed, offer retry
 }
 
-const STARTER_PROMPTS = [
-  "I feel overwhelmed and need help sorting through it.",
-  "Help me understand what I am feeling today.",
-  "Can we think of one small thing I can do for myself?",
-];
-
 // One history item is a full exchange (both sides) - split it into the two
 // transcript rows it represents rather than pairing separate records.
 function entriesFromInteraction(interaction: AiInteraction): TranscriptEntry[] {
@@ -167,23 +161,8 @@ export function ReflectChat() {
 
         <div className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto">
           {!historyLoading && entries.length === 0 && (
-            <div className="rounded-2xl bg-mindora-purple-bg/40 px-5 py-6 text-center shadow-[inset_3px_3px_7px_#e3ddf3,inset_-3px_-3px_7px_#ffffff]">
-              <p className="text-[13.5px] text-muted-foreground">
-                Start the conversation whenever you&apos;re ready. You can choose a prompt or write
-                your own.
-              </p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {STARTER_PROMPTS.map((prompt) => (
-                  <button
-                    key={prompt}
-                    type="button"
-                    onClick={() => setInput(prompt)}
-                    className="rounded-full border border-mindora-purple/15 bg-white px-3.5 py-2 text-left text-[11.5px] font-medium text-mindora-purple-dark transition hover:border-mindora-purple/40 hover:bg-mindora-purple-pale"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
+            <div className="rounded-2xl bg-mindora-purple-bg/40 px-5 py-6 text-center text-[13.5px] text-muted-foreground shadow-[inset_3px_3px_7px_#e3ddf3,inset_-3px_-3px_7px_#ffffff]">
+              Start the conversation whenever you&apos;re ready.
             </div>
           )}
 
