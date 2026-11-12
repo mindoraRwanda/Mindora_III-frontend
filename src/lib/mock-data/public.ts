@@ -93,20 +93,19 @@ export const MATCH_REASONS = [
 ] as const;
 
 export const PUBLIC_NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/therapists", label: "Find a therapist" },
+  { href: "/therapists", label: "Therapists" },
   { href: "/tests", label: "Tests" },
-  { href: "/therapist-application", label: "Become a therapist" },
+  { href: "/get-matched", label: "Find a Therapist" },
   { href: "/business", label: "Business" },
-  { href: "/contact", label: "Contact" },
+  { href: "/support", label: "Support" },
 ] as const;
 
 export const FOOTER_LINKS = [
-  { href: "/therapists", label: "Find a therapist" },
-  { href: "/get-matched", label: "Get matched" },
-  { href: "/about", label: "About MINDORA" },
+  { href: "/therapists", label: "Therapists" },
+  { href: "/tests", label: "Tests" },
+  { href: "/get-matched", label: "Find a Therapist" },
   { href: "/business", label: "Business" },
-  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
 ] as const;
 

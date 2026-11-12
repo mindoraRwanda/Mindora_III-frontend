@@ -5,7 +5,6 @@ const createJestConfig = nextJest({ dir: "./" });
 /** @type {import('jest').Config} */
 const config = {
   coverageProvider: "v8",
-  roots: ["<rootDir>/src"],
   testEnvironment: "jsdom",
   passWithNoTests: true,
 

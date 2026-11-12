@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pill, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { BookedAppointment } from "@/types/domain";
@@ -21,7 +21,7 @@ const STATUS_LABEL: Record<BookedAppointment["status"], string> = {
 };
 
 function formatSessionType(type: BookedAppointment["sessionType"]): string {
-  return type === "VIDEO" ? "Video call" : type === "IN_PERSON" ? "In person" : "Chat";
+  return type === "VIDEO" ? "Video call" : "Audio call";
 }
 
 function fmtWhen(iso: string): string {
@@ -49,7 +49,6 @@ interface AppointmentRowProps {
   therapistPhotoUrl?: string | null;
   onCancel: () => void;
   onRate: () => void;
-  onMedicationUpdate?: () => void;
 }
 
 export function AppointmentRow({
@@ -58,7 +57,6 @@ export function AppointmentRow({
   therapistPhotoUrl,
   onCancel,
   onRate,
-  onMedicationUpdate,
 }: AppointmentRowProps) {
   const [photoFailed, setPhotoFailed] = useState(false);
   const showPhoto = !!therapistPhotoUrl && !photoFailed;
@@ -111,18 +109,6 @@ export function AppointmentRow({
           )}
         >
           Cancel
-        </button>
-      )}
-      {appointment.status !== "CANCELLED" && onMedicationUpdate && (
-        <button
-          type="button"
-          onClick={onMedicationUpdate}
-          className="shrink-0 rounded-full border border-[#d8cbe7] bg-white px-3 py-2 text-[11px] font-semibold text-mindora-purple-dark shadow-[3px_3px_7px_#cdc6e0,-3px_-3px_7px_#fdfbff]"
-        >
-          <span className="inline-flex items-center gap-1.5">
-            <Pill className="h-3.5 w-3.5" />
-            Medication update
-          </span>
         </button>
       )}
       {showRateButton && (

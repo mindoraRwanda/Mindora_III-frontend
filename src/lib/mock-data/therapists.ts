@@ -1,8 +1,7 @@
-export type TherapistGender = "male" | "female" | "unspecified";
+export type TherapistGender = "male" | "female";
 
 export interface Therapist {
   id: string;
-  userId?: string;
   name: string;
   title: string;
   photo?: string;

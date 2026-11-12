@@ -26,7 +26,6 @@ export function SettingsForm() {
     data: preferences,
     isLoading: preferencesLoading,
     isError: preferencesError,
-    refetch: refetchPreferences,
   } = useUserPreferences(user?.userId);
 
   const updateProfileMutation = useUpdateProfile();
@@ -137,73 +136,53 @@ export function SettingsForm() {
             </p>
 
             {preferencesError && (
-              <div
-                role="alert"
-                className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-red-50 px-4 py-3 text-[13px] font-semibold text-red-700 shadow-[inset_3px_3px_7px_#f3d9d9,inset_-3px_-3px_7px_#ffffff]"
-              >
-                <span>Could not load your notification preferences.</span>
-                <button
-                  type="button"
-                  onClick={() => void refetchPreferences()}
-                  className="shrink-0 font-bold underline"
-                >
-                  Try again
-                </button>
+              <div className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-[13px] font-semibold text-red-700 shadow-[inset_3px_3px_7px_#f3d9d9,inset_-3px_-3px_7px_#ffffff]">
+                Could not load your notification preferences.
               </div>
             )}
 
             {preferencesLoading ? (
               <div className="mt-4 h-28 animate-pulse rounded-2xl bg-mindora-purple-bg" />
-            ) : preferences ? (
-              <div className="mt-4 divide-y divide-border">
-                {PREFERENCE_KEYS.map((key) => {
-                  const value = preferences.notificationPreferences[key];
-                  const isPending = pendingKey === key && updatePreferencesMutation.isPending;
-                  return (
-                    <div key={key} className="flex items-center justify-between py-3.5">
-                      <div>
-                        <p className="text-[14px] font-medium text-foreground">
-                          {PREFERENCE_LABELS[key]}
-                        </p>
-                        {isPending && (
-                          <p className="text-[11.5px] text-muted-foreground">Saving…</p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={value}
-                        aria-label={PREFERENCE_LABELS[key]}
-                        disabled={isPending}
-                        onClick={() => handleToggle(key, value)}
-                        className={cn(
-                          "relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-                          value ? "bg-mindora-purple" : "bg-border"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
-                            value ? "translate-x-5" : "translate-x-0.5"
-                          )}
-                        />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
             ) : (
-              <div className="mt-4 rounded-2xl bg-mindora-purple-bg/70 px-4 py-4 text-[13px] leading-5 text-muted-foreground">
-                Notification settings haven&apos;t been returned yet. They have not been changed.
-                Refresh this section to try loading them again.
-                <button
-                  type="button"
-                  onClick={() => void refetchPreferences()}
-                  className="ml-1 font-bold text-mindora-purple underline"
-                >
-                  Refresh settings
-                </button>
-              </div>
+              preferences && (
+                <div className="mt-4 divide-y divide-border">
+                  {PREFERENCE_KEYS.map((key) => {
+                    const value = preferences.notificationPreferences[key];
+                    const isPending = pendingKey === key && updatePreferencesMutation.isPending;
+                    return (
+                      <div key={key} className="flex items-center justify-between py-3.5">
+                        <div>
+                          <p className="text-[14px] font-medium text-foreground">
+                            {PREFERENCE_LABELS[key]}
+                          </p>
+                          {isPending && (
+                            <p className="text-[11.5px] text-muted-foreground">Saving…</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={value}
+                          aria-label={PREFERENCE_LABELS[key]}
+                          disabled={isPending}
+                          onClick={() => handleToggle(key, value)}
+                          className={cn(
+                            "relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                            value ? "bg-mindora-purple" : "bg-border"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
+                              value ? "translate-x-5" : "translate-x-0.5"
+                            )}
+                          />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
             )}
           </section>
         </div>

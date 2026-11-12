@@ -5,12 +5,12 @@
 
 :root {
   /* Design system - Figma tokens */
-  --color-primary: #7350a0;
-  --color-primary-dark: #38294d;
+  --color-primary: #7c3aed;
+  --color-primary-dark: #5b21d0;
   --color-bg-dark: #0d0d0d;
   --color-bg-card: #1a1a1a;
   --color-bg-light: #ffffff;
-  --color-purple-panel: #30223f;
+  --color-purple-panel: #3b0764;
   --color-text-primary: #f9fafb;
   --color-text-muted: #9ca3af;
   --color-border-dark: #2d2d2d;
@@ -27,24 +27,24 @@
   /* Aliases used across components */
   --mindora-purple: var(--color-primary);
   --mindora-purple-dark: var(--color-primary-dark);
-  --mindora-purple-light: #9b82b8;
-  --mindora-purple-pale: #f1ecf7;
-  --mindora-purple-bg: #f7f6fa;
-  --mindora-section-lavender: #f7f6fa;
-  --mindora-lavender: #ded2eb;
+  --mindora-purple-light: #a78bfa;
+  --mindora-purple-pale: #ede9fe;
+  --mindora-purple-bg: #f5f3ff;
+  --mindora-section-lavender: #ebe4f7;
+  --mindora-lavender: #ddd6fe;
   /* Neumorphic dark surface (sidebars + dark cards) - shared across AppSidebar,
      TherapistSidebar, AdminSidebar, and dark cards on /today. */
-  --mindora-sidebar: #30223f;
-  --mindora-sidebar-elevated: #49375d;
+  --mindora-sidebar: #211d2c;
+  --mindora-sidebar-elevated: #251f33;
   --mindora-sidebar-hover: #1a1a1a;
-  --mindora-gradient-start: #4a3561;
-  --mindora-gradient-mid: #72538f;
-  --mindora-gradient-end: #9b82b8;
+  --mindora-gradient-start: var(--color-purple-panel);
+  --mindora-gradient-mid: #5b21b6;
+  --mindora-gradient-end: var(--color-primary);
   --mindora-card-dark: var(--color-bg-card);
   --mindora-success: #22c55e;
   --mindora-success-bg: #dcfce7;
   --mindora-pending: var(--color-primary);
-  --mindora-pending-bg: #f1ecf7;
+  --mindora-pending-bg: #ede9fe;
 
   /* Type scale */
   --text-caption: 12px;
@@ -56,11 +56,11 @@
   --text-h1: 48px;
 
   /* Shadcn-compatible semantic surfaces */
-  --primary-light: oklch(93% 0.05 300);
+  --primary-light: oklch(93% 0.06 293);
   --primary-foreground: oklch(98% 0 0);
   --bg-elevated: oklch(17% 0 0);
-  --purple-panel-from: oklch(32% 0.08 305);
-  --purple-panel-to: oklch(48% 0.11 305);
+  --purple-panel-from: oklch(22% 0.22 293);
+  --purple-panel-to: oklch(37% 0.25 293);
   --text-subtle: oklch(52% 0 0);
   --text-dark: oklch(11% 0 0);
   --border-light: oklch(90% 0 0);
@@ -89,12 +89,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-primary: #7350a0;
-  --color-primary-dark: #38294d;
+  --color-primary: #7c3aed;
+  --color-primary-dark: #5b21d0;
   --color-bg-dark: #0d0d0d;
   --color-bg-card: #1a1a1a;
   --color-bg-light: #ffffff;
-  --color-purple-panel: #30223f;
+  --color-purple-panel: #3b0764;
   --color-text-primary: #f9fafb;
   --color-text-muted: #9ca3af;
   --color-border-dark: #2d2d2d;
