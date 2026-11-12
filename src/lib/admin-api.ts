@@ -48,7 +48,7 @@ interface AlertListResponse {
 }
 
 interface AuditLogResponse {
-  entries: AuditLogEntry[];
+  auditLogs: AuditLogEntry[];
   total: number;
   page: number;
   limit: number;
