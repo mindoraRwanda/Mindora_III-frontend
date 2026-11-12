@@ -64,8 +64,6 @@ export function useCancelAppointment() {
     mutationFn: ({ id, reason }: { id: string; reason: string }) => cancelAppointment(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments", "mine"] });
-      queryClient.invalidateQueries({ queryKey: ["appointments", "schedule"] });
-      queryClient.invalidateQueries({ queryKey: ["appointments", "dashboard"] });
       toast.success("Appointment cancelled.");
     },
   });
@@ -99,7 +97,6 @@ export function useConfirmAppointment() {
     mutationFn: (id: string) => confirmAppointment(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments", "schedule"] });
-      queryClient.invalidateQueries({ queryKey: ["appointments", "dashboard"] });
       toast.success("Appointment confirmed.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not confirm this appointment.")),
@@ -112,7 +109,6 @@ export function useCompleteAppointment() {
     mutationFn: (id: string) => completeAppointment(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments", "schedule"] });
-      queryClient.invalidateQueries({ queryKey: ["appointments", "dashboard"] });
       toast.success("Appointment marked complete.");
     },
     onError: (error) => toast.error(errorMessage(error, "Could not complete this appointment.")),

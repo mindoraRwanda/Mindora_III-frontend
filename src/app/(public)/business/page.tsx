@@ -26,7 +26,7 @@ export default function BusinessPage() {
       <section className="relative overflow-hidden px-4 py-14 sm:px-6 lg:py-20">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#F1F9F8]"
+          className="pointer-events-none absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#F9F6FF]"
         />
         <div className="relative mx-auto max-w-6xl">
           <BackLink fallback="/" className="mb-6" />
@@ -72,26 +72,26 @@ export default function BusinessPage() {
                 <article
                   key={segment.id}
                   id={segment.id}
-                  className="overflow-hidden rounded-2xl border border-[#D4EBE9] bg-white"
+                  className="overflow-hidden rounded-2xl border border-[#EDE9FE] bg-white"
                 >
                   <div className="grid items-center lg:grid-cols-2">
                     <div
                       className={cn(
-                        "relative flex items-center justify-center overflow-hidden bg-[#E8F5F4] px-8 py-12 sm:px-12 sm:py-14",
+                        "relative flex items-center justify-center overflow-hidden bg-[#F5F3FF] px-8 py-12 sm:px-12 sm:py-14",
                         imageFirst && "lg:order-2"
                       )}
                     >
                       <div
                         aria-hidden
-                        className="pointer-events-none absolute -left-10 bottom-6 h-28 w-40 rounded-[40%] bg-[#D4EBE9]"
+                        className="pointer-events-none absolute -left-10 bottom-6 h-28 w-40 rounded-[40%] bg-[#EDE9FE]"
                       />
                       <div
                         aria-hidden
-                        className="pointer-events-none absolute -right-8 bottom-10 h-24 w-32 rounded-[45%] bg-[#BFE3E1]/70"
+                        className="pointer-events-none absolute -right-8 bottom-10 h-24 w-32 rounded-[45%] bg-[#DDD6FE]/70"
                       />
                       <div
                         aria-hidden
-                        className="pointer-events-none absolute left-1/2 top-8 h-16 w-16 -translate-x-1/2 rounded-full bg-[#D4EBE9]/80"
+                        className="pointer-events-none absolute left-1/2 top-8 h-16 w-16 -translate-x-1/2 rounded-full bg-[#EDE9FE]/80"
                       />
                       <Image
                         src={segment.image}
@@ -102,7 +102,7 @@ export default function BusinessPage() {
                       />
                     </div>
                     <div className={cn("px-6 py-8 sm:px-8 sm:py-10", imageFirst && "lg:order-1")}>
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#E8F5F4] text-mindora-purple">
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#F5F3FF] text-mindora-purple">
                         <Icon className="h-5 w-5" strokeWidth={1.75} />
                       </span>
                       <h3 className="mt-4 text-2xl font-bold tracking-tight text-[#1A1A1A]">

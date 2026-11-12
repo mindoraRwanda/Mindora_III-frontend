@@ -11,9 +11,3 @@ README.md
 Dockerfile*
 docker-compose*
 .dockerignore
-companion_apps
-**/node_modules
-**/.next
-**/dist
-**/coverage
-.env.*

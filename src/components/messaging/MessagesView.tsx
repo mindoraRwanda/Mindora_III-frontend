@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, CheckCheck, MessageCircle, Send } from "lucide-react";
@@ -236,14 +235,8 @@ export function MessagesView() {
                 </div>
                 <p className="text-[14px] font-semibold text-foreground">No conversations yet</p>
                 <p className="text-[13px] text-muted-foreground">
-                  Start one from a therapist&apos;s profile. Your conversations will appear here.
+                  Start one from a therapist&apos;s profile on the Therapy page.
                 </p>
-                <Link
-                  href="/therapy"
-                  className="mt-1 inline-flex rounded-full bg-mindora-purple px-4 py-2 text-[12px] font-bold text-white hover:bg-mindora-purple-dark"
-                >
-                  Browse therapists
-                </Link>
               </div>
             ) : (
               conversations.map((c) => (
@@ -294,31 +287,9 @@ export function MessagesView() {
         {/* Thread */}
         <div className={cn("flex min-h-0 flex-1 flex-col", !selectedId && "hidden sm:flex")}>
           {!selectedConversation ? (
-            <div className="flex flex-1 flex-col items-center justify-center px-6 text-center text-muted-foreground">
+            <div className="flex flex-1 flex-col items-center justify-center text-center text-muted-foreground">
               <MessageCircle className="mb-3 h-10 w-10 text-mindora-lavender" />
-              {conversations.length === 0 && !conversationsLoading && !conversationsError ? (
-                <>
-                  <p className="text-[15px] font-semibold text-foreground">
-                    Your message space is ready
-                  </p>
-                  <p className="mt-1 max-w-sm text-[13px] leading-5 text-muted-foreground">
-                    Choose a therapist first. After you start a conversation, your messages and
-                    replies will appear here.
-                  </p>
-                  <Link
-                    href="/therapy"
-                    className="mt-4 inline-flex rounded-full bg-mindora-purple px-5 py-2.5 text-[13px] font-bold text-white hover:bg-mindora-purple-dark"
-                  >
-                    Find a therapist
-                  </Link>
-                </>
-              ) : conversationsError ? (
-                <p className="text-[14px]">
-                  Your conversations could not be loaded. Please try refreshing.
-                </p>
-              ) : (
-                <p className="text-[14px]">Select a conversation to start chatting.</p>
-              )}
+              <p className="text-[14px]">Select a conversation to start chatting.</p>
             </div>
           ) : (
             <>

@@ -10,7 +10,7 @@ function appointment(overrides: Partial<BookedAppointment> = {}): BookedAppointm
     therapistId: "therapist-1",
     slotStart: "2026-08-25T12:00:00.000Z",
     slotEnd: "2026-08-25T13:00:00.000Z",
-    sessionType: "VIDEO",
+    sessionType: "AUDIO",
     status: "CONFIRMED",
     cancellationReason: null,
     rating: null,

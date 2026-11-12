@@ -2,16 +2,15 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Flame, Heart, Sparkles, ClipboardList, Briefcase } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { HomeHeroPortrait } from "@/components/home/HomeSections";
 import { WeeklyMoodCard } from "@/components/home/WeeklyMoodCard";
 import { NextSessionCard } from "@/components/home/NextSessionCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
-import { useMoodStreak, useMoodToday } from "@/hooks/useMood";
+import { useMoodStreak } from "@/hooks/useMood";
 import { useMyAppointments } from "@/hooks/useAppointments";
 import { useTherapists } from "@/hooks/useTherapists";
-import { useAcknowledgeCarePlan, useMyCarePlans } from "@/hooks/useCarePlans";
 import { selectNextSession } from "@/lib/appointments";
 import type { TherapistProfile } from "@/types/domain";
 
@@ -32,15 +31,12 @@ export default function TodayPage() {
   const { user } = useAuth();
   const { data: profile } = useMyProfile();
   const { data: streak, isLoading: streakLoading, isError: streakErrored } = useMoodStreak();
-  const { data: moodToday, isLoading: moodTodayLoading, isError: moodTodayErrored } = useMoodToday();
   const {
     data: appointmentData,
     isLoading: appointmentsLoading,
     isError: appointmentsErrored,
   } = useMyAppointments();
   const { data: therapistData } = useTherapists({});
-  const carePlans = useMyCarePlans();
-  const acknowledgeCarePlan = useAcknowledgeCarePlan();
 
   const displayName = profile?.profile?.userName ?? user?.email ?? "there";
   const firstName = displayName.split(" ")[0];
@@ -121,35 +117,6 @@ export default function TodayPage() {
         </div>
       </header>
 
-      <section aria-label="Your wellbeing summary" className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Daily check-in" value={moodTodayLoading ? "Loading…" : moodTodayErrored ? "Unavailable" : moodToday?.hasCheckedIn ? "Completed" : "Not yet"} note="Your latest check-in status" icon={<Heart className="h-4 w-4" />} />
-        <SummaryCard label="Upcoming session" value={appointmentsLoading ? "Loading…" : appointmentsErrored ? "Unavailable" : nextSession ? "Scheduled" : "None yet"} note="Your next appointment" icon={<ClipboardList className="h-4 w-4" />} />
-        <SummaryCard label="Reflection streak" value={streakLoading ? "Loading…" : streakErrored ? "Unavailable" : streakLabel ?? "0 days"} note="Keep your gentle rhythm" icon={<Sparkles className="h-4 w-4" />} />
-        <SummaryCard label="Care plans" value={carePlans.isLoading ? "Loading…" : carePlans.isError ? "Unavailable" : String(carePlans.data?.carePlans.length ?? 0)} note="Plans shared by your therapist" icon={<Briefcase className="h-4 w-4" />} />
-      </section>
-
-      <section className="mb-6 rounded-[28px] bg-white p-5 shadow-[8px_8px_18px_#cbc4de,-8px_-8px_18px_#fdfbff] sm:p-6">
-        <div className="mb-4">
-          <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#8a789d]">Quick support</p>
-          <h2 className="mt-1 text-lg font-extrabold tracking-tight text-[#2c1c55]">Choose what feels useful now</h2>
-          <p className="mt-1 text-xs text-[#6a6383]">Take a small next step whenever you feel ready.</p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Link href="/reflect" className="group rounded-2xl border border-[#e8e1f1] bg-[#faf8fd] p-4 transition hover:border-mindora-purple hover:bg-[#f4effb]">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#eee7f8] text-mindora-purple"><Sparkles className="h-5 w-5" /></span>
-            <h3 className="mt-3 text-sm font-bold text-[#2c1c55]">Reflect with AI</h3>
-            <p className="mt-1 text-xs leading-5 text-[#6a6383]">Talk through what is on your mind in a private reflection space.</p>
-            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-mindora-purple">Open reflection <ArrowRight className="h-3.5 w-3.5" /></span>
-          </Link>
-          <Link href="/therapy" className="group rounded-2xl border border-[#e8e1f1] bg-[#faf8fd] p-4 transition hover:border-mindora-purple hover:bg-[#f4effb]">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#e6f5f2] text-[#16877e]"><Heart className="h-5 w-5" /></span>
-            <h3 className="mt-3 text-sm font-bold text-[#2c1c55]">Find a therapist</h3>
-            <p className="mt-1 text-xs leading-5 text-[#6a6383]">Explore professional support and available appointments.</p>
-            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-mindora-purple">Browse therapists <ArrowRight className="h-3.5 w-3.5" /></span>
-          </Link>
-        </div>
-      </section>
-
       <section className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(330px,1fr))]">
         <div className="relative flex min-h-[420px] flex-col overflow-hidden rounded-[34px] bg-gradient-to-br from-[#efeafa] via-[#e6dff6] to-[#ded4f4] shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff]">
           <div className="pointer-events-none absolute -right-24 -top-28 h-[360px] w-[360px] rounded-full bg-[#e8e1f8] shadow-[inset_10px_10px_24px_#d2c9ea,inset_-10px_-10px_24px_#fdfbff]" />
@@ -185,95 +152,6 @@ export default function TodayPage() {
         <WeeklyMoodCard />
       </section>
 
-      <section className="mt-6">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-extrabold text-[#2c1c55]">Your care plan</h2>
-            <p className="mt-1 text-xs text-[#6a6383]">
-              Goals shared by your therapist for you to review.
-            </p>
-          </div>
-        </div>
-        {carePlans.isError ? (
-          <div role="alert" className="rounded-2xl bg-red-50 p-4 text-sm text-red-700">
-            Care plans could not be loaded.
-            <button type="button" onClick={() => carePlans.refetch()} className="ml-3 underline">
-              Retry
-            </button>
-          </div>
-        ) : carePlans.isLoading ? (
-          <div className="h-24 animate-pulse rounded-2xl bg-white/70" />
-        ) : (carePlans.data?.carePlans.length ?? 0) === 0 ? (
-          <div className="rounded-2xl border border-[#dcd5ea] bg-white/60 p-5 text-xs text-[#6a6383]">
-            There are no care plans shared with you yet.
-          </div>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {carePlans.data?.carePlans.map((plan) => (
-              <article
-                key={plan.id}
-                className="rounded-2xl border border-[#dcd5ea] bg-white/80 p-5"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-sm font-bold text-[#2c1c55]">{plan.title}</h3>
-                  <span
-                    className={[
-                      "rounded-full px-2.5 py-1 text-[10px] font-bold",
-                      plan.status === "ACTIVE"
-                        ? "bg-[#e8f5ef] text-[#39765e]"
-                        : "bg-[#fff5e5] text-[#8d641f]",
-                    ].join(" ")}
-                  >
-                    {plan.status === "DRAFT" ? "Review requested" : plan.status}
-                  </span>
-                </div>
-                <ul className="mt-3 space-y-2">
-                  {plan.goals.map((goal, index) => (
-                    <li key={index} className="flex gap-2 text-xs leading-5 text-[#5d4d85]">
-                      <span className="text-mindora-purple">•</span>
-                      {goal}
-                    </li>
-                  ))}
-                </ul>
-                {plan.milestones.length > 0 && (
-                  <div className="mt-3 rounded-lg bg-[#faf9fc] p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#8f87a4]">Milestones</p>
-                    <ul className="mt-2 space-y-1">
-                      {plan.milestones.map((milestone, index) => (
-                        <li key={index} className="text-xs text-[#5d4d85]">
-                          • {milestone.title}{milestone.dueDate ? " · " + new Date(milestone.dueDate).toLocaleDateString() : ""}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {plan.reviewDate && (
-                  <p className="mt-3 text-[11px] text-[#8f87a4]">
-                    Review date: {new Date(plan.reviewDate).toLocaleDateString()}
-                  </p>
-                )}
-                {plan.status === "DRAFT" && (
-                  <div className="mt-4 border-t border-[#eee9f6] pt-3">
-                    <p className="text-[11px] leading-5 text-[#6a6383]">
-                      Acknowledge this plan only after you have reviewed and discussed these goals
-                      with your therapist.
-                    </p>
-                    <button
-                      type="button"
-                      disabled={acknowledgeCarePlan.isPending}
-                      onClick={() => acknowledgeCarePlan.mutate(plan.id)}
-                      className="mt-3 rounded-full bg-mindora-purple px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50"
-                    >
-                      {acknowledgeCarePlan.isPending ? "Saving…" : "I have reviewed this plan"}
-                    </button>
-                  </div>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
       <section className="mt-6 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(272px,1fr))]">
         <NextSessionCard
           appointment={nextSession}
@@ -283,19 +161,5 @@ export default function TodayPage() {
         />
       </section>
     </div>
-  );
-}
-
-
-function SummaryCard({ label, value, note, icon }: { label: string; value: string; note: string; icon: React.ReactNode }) {
-  return (
-    <article className="rounded-2xl bg-white p-4 shadow-[7px_7px_16px_#cbc4de,-7px_-7px_16px_#fdfbff]">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[#8f87a4]">{label}</p>
-        <span className="grid h-8 w-8 place-items-center rounded-xl bg-[#f2eef8] text-mindora-purple">{icon}</span>
-      </div>
-      <p className="mt-2 text-xl font-extrabold tracking-tight text-[#2c1c55]">{value}</p>
-      <p className="mt-1 text-[11px] text-[#8f87a4]">{note}</p>
-    </article>
   );
 }

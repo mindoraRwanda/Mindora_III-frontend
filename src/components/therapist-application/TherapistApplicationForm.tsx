@@ -58,9 +58,7 @@ export const LOCATION_SUGGESTIONS = [
 ];
 
 const DOCUMENT_TYPE_OPTIONS: { value: TherapistDocumentType; label: string }[] = [
-  { value: "CV", label: "Curriculum Vitae (CV)" },
-  { value: "LICENSE", label: "Practising License" },
-  { value: "DIPLOMA", label: "Diploma / Degree" },
+  { value: "LICENSE", label: "License" },
   { value: "CERTIFICATION", label: "Certification" },
   { value: "ID", label: "Government ID" },
   { value: "OTHER", label: "Other" },

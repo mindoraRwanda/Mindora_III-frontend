@@ -84,18 +84,10 @@ export default function LandingPage() {
 
       <footer className="border-t border-border px-6 py-8 text-center lg:px-14">
         <p className="text-xs text-muted-foreground">
-          Need to contact MINDORA?{" "}
-          <a href="tel:+250783974066" className="font-semibold text-mindora-purple hover:underline">
-            Call +250 783 974-066
-          </a>{" "}
-          Monday to Friday, 9am to 5pm. Email{" "}
-          <a
-            href="mailto:info@mindora.rw"
-            className="font-semibold text-mindora-purple hover:underline"
-          >
-            info@mindora.rw
+          24/7 crisis line - always answered.{" "}
+          <a href="tel:+250783974068" className="font-semibold text-mindora-purple hover:underline">
+            Call +250 783 974 068
           </a>
-          .
         </p>
         <p className="mt-3 text-xs text-muted-foreground/70">
           &copy; {new Date().getFullYear()} Mindora. Mindora is not a crisis service.

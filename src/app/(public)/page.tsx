@@ -1,45 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Activity, ArrowRight, Check, Heart, Sparkles } from "lucide-react";
+import { ArrowRight, Check, MessageCircle, Play, Plus, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RedirectIfAuthenticated } from "@/components/landing/RedirectIfAuthenticated";
-import { FeaturedTherapistsPreview } from "@/components/landing/FeaturedTherapistsPreview";
+import { HOW_IT_WORKS, SPECIALITIES } from "@/lib/mock-data/public";
+import { cn } from "@/lib/utils";
 
-const HERO_IMAGE = "/images/landing/diverse-people.jpg";
+const DIVERSE_PEOPLE = "/images/landing/diverse-people.jpg";
 
-const SUPPORT_PATHS = [
-  {
-    title: "Find a therapist",
-    description:
-      "Explore therapist profiles and choose a professional whose experience fits your needs.",
-    href: "/therapists",
-    action: "Explore therapists",
-    icon: Heart,
-  },
-  {
-    title: "Reflect with AI",
-    description:
-      "Use guided reflection to organise your thoughts and explore supportive next steps.",
-    href: "/reflect",
-    action: "Open AI reflection",
-    icon: Sparkles,
-  },
-  {
-    title: "Track your wellbeing",
-    description: "Check in with yourself and notice patterns in your mood over time.",
-    href: "/check-in",
-    action: "Try a check-in",
-    icon: Activity,
-  },
-] as const;
+const TRUST_AVATARS = [
+  { initials: "JM", position: "22% 40%" },
+  { initials: "KW", position: "52% 28%" },
+  { initials: "AN", position: "78% 42%" },
+];
 
 export default function LandingPage() {
   return (
     <div className="bg-white">
       <RedirectIfAuthenticated />
       <Hero />
-      <ExploreSupport />
-      <FeaturedTherapistsPreview />
+      <Specialities />
+      <HowItWorks />
+      <WhyMindora />
+      <HelpWidget />
     </div>
   );
 }
@@ -49,69 +32,78 @@ function Hero() {
     <section className="relative overflow-hidden px-4 py-14 sm:px-6 lg:py-20">
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full bg-[#F1F9F8]"
+        className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full bg-[#F9F6FF]"
       />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-14">
+
+      <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
         <div>
-          <p className="inline-flex rounded-full bg-[#F1F9F8] px-3.5 py-2 text-xs font-semibold text-mindora-purple">
-            Mental wellbeing, made more accessible
+          <p className="text-xs font-semibold tracking-[0.18em] text-[#6B7280]">
+            YOU TALK. WE LISTEN.
           </p>
-          <h1 className="mt-5 max-w-xl text-4xl font-bold leading-[1.12] tracking-tight text-[#1A1A1A] sm:text-5xl lg:text-[58px]">
-            Support for your mind, at every step.
+
+          <div className="mt-5 inline-flex items-center gap-3 rounded-full border border-border bg-white px-3 py-1.5 shadow-sm">
+            <div className="flex -space-x-2">
+              {TRUST_AVATARS.map((person) => (
+                <AvatarSlot
+                  key={person.initials}
+                  initials={person.initials}
+                  position={person.position}
+                />
+              ))}
+            </div>
+            <span className="pr-1 text-xs font-medium text-[#6B7280]">
+              Trusted by thousands across Africa
+            </span>
+          </div>
+
+          <h1 className="mt-6 text-4xl font-bold leading-[1.15] tracking-tight text-[#1A1A1A] sm:text-5xl">
+            Talk with a therapist online, privately, anytime.
           </h1>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-[#6B7280] sm:text-lg">
-            Connect with qualified mental health professionals, reflect on how you feel, and find
-            support that fits your life.
+          <p className="mt-4 max-w-lg text-base leading-relaxed text-[#6B7280] sm:text-lg">
+            Mindora helps you find licensed care that fits your life. Match in minutes, book a
+            session, and speak from a place that feels safe.
           </p>
 
-          <form
-            action="/therapists"
-            method="get"
-            className="mt-8 flex flex-col gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-2 shadow-sm sm:flex-row"
-          >
-            <label className="flex min-w-0 flex-1 items-center px-3">
-              <span className="sr-only">What would you like support with?</span>
-              <select
-                name="specialisation"
-                defaultValue=""
-                className="h-11 w-full min-w-0 bg-transparent text-sm text-[#51445f] outline-none"
-              >
-                <option value="">What would you like support with?</option>
-                <option value="Anxiety">Anxiety &amp; stress</option>
-                <option value="Couple therapy">Relationships</option>
-                <option value="Depression">Depression</option>
-                <option value="Trauma">Trauma support</option>
-              </select>
-            </label>
-            <Button type="submit" size="lg" className="h-11 shrink-0 rounded-xl px-5">
-              Find a therapist
-              <ArrowRight className="h-4 w-4" />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-12 rounded-xl px-7">
+              <Link href="/therapists">
+                Explore therapists
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
-          </form>
-
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs font-medium text-[#6B7280]">
-            {["Private and confidential", "Qualified professionals", "Flexible sessions"].map(
-              (item) => (
-                <span key={item} className="inline-flex items-center gap-1.5">
-                  <Check className="h-3.5 w-3.5 text-mindora-purple" />
-                  {item}
-                </span>
-              )
-            )}
+            <Button asChild variant="outline" size="lg" className="h-12 rounded-xl px-7">
+              <Link href="/get-matched">Get matched</Link>
+            </Button>
           </div>
         </div>
 
         <div className="relative">
-          <div aria-hidden className="absolute -inset-4 rounded-[2rem] bg-[#E8F5F4] sm:-inset-6" />
-          <div className="relative overflow-hidden rounded-[1.6rem] bg-[#F1F9F8] shadow-sm">
+          <div className="relative mx-auto aspect-square w-full max-w-lg">
             <Image
-              src={HERO_IMAGE}
-              alt="People talking with a mental health professional"
-              width={960}
-              height={960}
+              src="/images/landing/hero-session.png"
+              alt="A patient meeting a therapist online"
+              width={800}
+              height={800}
               priority
-              className="aspect-[5/4] w-full object-cover sm:aspect-square"
+              className="h-full w-full object-contain"
             />
+          </div>
+
+          <div className="absolute -left-2 bottom-6 hidden max-w-[200px] rounded-2xl border border-white/50 bg-white/80 p-4 shadow-lg backdrop-blur-md sm:block">
+            <p className="text-[10px] font-semibold tracking-[0.14em] text-[#6B7280]">
+              HOW WE WORK
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {["Compassionate", "Confidential", "Evidence-based"].map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 rounded-full bg-[#F9F6FF] px-2.5 py-1 text-[11px] font-medium text-mindora-purple"
+                >
+                  {tag === "Confidential" ? <Check className="h-3 w-3" /> : null}
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -119,60 +111,201 @@ function Hero() {
   );
 }
 
-function ExploreSupport() {
+function Specialities() {
   return (
-    <section className="border-t border-[#EEF0F1] px-4 py-16 sm:px-6 lg:py-20">
+    <section className="bg-[#F9FAFB] px-4 py-16 sm:px-6 lg:py-20">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.18em] text-[#6B7280]">
-              EXPLORE SUPPORT
-            </p>
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-[#1A1A1A]">
-              How can MINDORA support you?
-            </h2>
-            <p className="mt-2 text-[#6B7280]">Choose a path that feels right for you.</p>
-          </div>
-          <Button asChild variant="outline" className="h-11 shrink-0 rounded-xl px-5">
-            <Link href="/about">
-              Learn about MINDORA
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {SUPPORT_PATHS.map((path) => {
-            const Icon = path.icon;
+        <h2 className="text-center text-3xl font-bold tracking-tight text-[#1A1A1A]">
+          Licensed therapists for what you are carrying
+        </h2>
+        <p className="mt-2 text-center text-[#6B7280]">
+          Choose a speciality to see people who can help.
+        </p>
+        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {SPECIALITIES.map((item) => {
+            const Icon = item.icon;
+            const href =
+              item.label === "Others"
+                ? "/therapists"
+                : `/therapists?specialisation=${encodeURIComponent(item.label)}`;
             return (
-              <article
-                key={path.title}
-                className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              <Link
+                key={item.label}
+                href={href}
+                className="flex items-center gap-3 rounded-xl bg-white px-4 py-5 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#F9F6FF] hover:shadow-md"
               >
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#F1F9F8] text-mindora-purple">
-                  <Icon className="h-5 w-5" strokeWidth={1.75} />
+                <span className="flex h-10 w-10 items-center justify-center text-mindora-purple">
+                  <Icon className="h-6 w-6" strokeWidth={1.6} />
                 </span>
-                <h3 className="mt-5 text-xl font-bold tracking-tight text-[#1A1A1A]">
-                  {path.title}
-                </h3>
-                <p className="mt-2 min-h-14 text-sm leading-relaxed text-[#6B7280]">
-                  {path.description}
-                </p>
-                <Button
-                  asChild
-                  variant="ghost"
-                  className="mt-4 h-10 px-0 text-mindora-purple hover:bg-transparent hover:text-mindora-purple-dark"
-                >
-                  <Link href={path.href}>
-                    {path.action}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </article>
+                <span className="font-semibold text-mindora-purple">{item.label}</span>
+              </Link>
             );
           })}
         </div>
       </div>
     </section>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <section className="bg-[#F9FAFB] px-4 pb-16 sm:px-6 lg:pb-20">
+      <div className="mx-auto max-w-6xl">
+        <h2 className="text-center text-3xl font-bold tracking-tight text-[#1A1A1A]">
+          How it works
+        </h2>
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-md sm:p-10">
+          <div className="grid gap-10 md:grid-cols-3">
+            {HOW_IT_WORKS.map((step) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.step} className="text-center md:text-left">
+                  <Image
+                    src={step.image}
+                    alt=""
+                    width={400}
+                    height={400}
+                    className="mx-auto mb-5 h-44 w-auto object-contain md:mx-0"
+                  />
+                  <p className="mb-2 flex items-center justify-center gap-2 text-sm font-semibold text-mindora-purple md:justify-start">
+                    <Icon className="h-4 w-4" />
+                    Step {step.step}
+                  </p>
+                  <h3 className="text-lg font-bold text-[#1A1A1A]">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#6B7280]">{step.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyMindora() {
+  return (
+    <section className="relative overflow-hidden px-4 py-16 sm:px-6 lg:py-20">
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-8 h-[520px] w-[520px] -translate-x-1/2 text-[#E5E7EB]"
+        viewBox="0 0 520 520"
+        fill="none"
+      >
+        <circle cx="260" cy="260" r="120" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="260" cy="260" r="180" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="260" cy="260" r="240" stroke="currentColor" strokeWidth="1.5" />
+      </svg>
+
+      <div className="relative mx-auto max-w-6xl">
+        <p className="text-right text-sm font-semibold tracking-[0.16em]">
+          WHY <span className="text-mindora-purple">MINDORA</span>
+        </p>
+
+        <div className="pointer-events-none absolute right-[8%] top-16 hidden lg:block">
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#6B7280] shadow-sm">
+            <Plus className="h-3 w-3" /> Check in
+          </span>
+        </div>
+        <div className="pointer-events-none absolute right-[22%] top-36 hidden lg:block">
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#6B7280] shadow-sm">
+            <Plus className="h-3 w-3" /> See progress
+          </span>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <article className="flex min-h-[420px] flex-col justify-between overflow-hidden rounded-2xl bg-[#F5F3FF] p-5 md:row-span-2">
+            <Image
+              src="/images/landing/phone-checkin.png"
+              alt="Mindora daily check-in on a phone"
+              width={600}
+              height={900}
+              className="mx-auto -translate-x-6 h-auto max-h-[520px] w-[130%] max-w-none origin-center object-contain"
+            />
+            <div className="mt-4">
+              <h3 className="font-semibold text-[#1A1A1A]">A quieter daily check-in</h3>
+              <p className="mt-1 text-sm text-[#6B7280]">
+                Thirty seconds to notice how you really feel.
+              </p>
+            </div>
+          </article>
+
+          <article className="flex items-end justify-between rounded-2xl bg-[#F5F3FF] p-6 lg:col-span-2">
+            <div>
+              <p className="text-4xl font-bold tracking-tight sm:text-5xl">10,000+</p>
+              <p className="mt-2 text-sm text-[#6B7280]">People supported on their care journey</p>
+              <TrendingUp className="mt-6 h-8 w-8 text-[#1A1A1A]" />
+            </div>
+            <div className="flex -space-x-3">
+              {TRUST_AVATARS.map((person) => (
+                <AvatarSlot
+                  key={person.initials}
+                  initials={person.initials}
+                  position={person.position}
+                  size="lg"
+                />
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded-2xl bg-[#F9F6FF] p-6">
+            <p className="text-4xl font-bold">
+              4.9 <Star className="mb-1 inline h-7 w-7 fill-amber-400 text-amber-400" />
+            </p>
+            <p className="mt-2 text-sm text-[#6B7280]">
+              Average rating from people who booked a first session
+            </p>
+          </article>
+
+          <article className="relative rounded-2xl bg-[#F5F3FF] p-6">
+            <Play className="absolute right-5 top-5 h-8 w-8 rounded-full bg-[#1A1A1A] p-2 text-white" />
+            <p className="text-4xl font-bold">96%</p>
+            <p className="mt-2 max-w-[200px] text-sm text-[#6B7280]">
+              Notice a shift after the first week of care
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HelpWidget() {
+  return (
+    <Link
+      href="/support"
+      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-mindora-purple px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-mindora-purple-dark"
+    >
+      <MessageCircle className="h-4 w-4" />
+      Need help?
+    </Link>
+  );
+}
+
+function AvatarSlot({
+  initials,
+  position,
+  size = "sm",
+}: {
+  initials: string;
+  position: string;
+  size?: "sm" | "lg";
+}) {
+  return (
+    <span
+      className={cn(
+        "relative inline-flex overflow-hidden rounded-full border-2 border-white bg-mindora-purple-pale",
+        size === "lg" ? "h-12 w-12" : "h-7 w-7"
+      )}
+    >
+      <Image
+        src={DIVERSE_PEOPLE}
+        alt=""
+        fill
+        className="object-cover"
+        style={{ objectPosition: position }}
+      />
+      <span className="sr-only">{initials}</span>
+    </span>
   );
 }

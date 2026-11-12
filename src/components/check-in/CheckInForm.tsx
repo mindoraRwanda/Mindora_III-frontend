@@ -32,12 +32,7 @@ export function CheckInForm() {
   const [submitted, setSubmitted] = useState(false);
   const [backfillOpen, setBackfillOpen] = useState(false);
 
-  const {
-    data: today,
-    isLoading: todayLoading,
-    isError: todayError,
-    refetch: refetchToday,
-  } = useMoodToday();
+  const { data: today } = useMoodToday();
   const logMoodMutation = useLogMood();
   const updateMutation = useUpdateMoodEntry();
   const activeMutation = editingEntry ? updateMutation : logMoodMutation;
@@ -140,36 +135,12 @@ export function CheckInForm() {
               <p className="mt-2 text-[14px] text-muted-foreground">
                 {editingEntry ? "Update this entry." : "Pick the face that fits."}
               </p>
-              {!editingEntry && (
-                <div className="mt-2 space-y-1.5">
-                  {todayLoading && (
-                    <p role="status" className="text-[12.5px] text-muted-foreground">
-                      Checking today&apos;s check-in allowance…
-                    </p>
-                  )}
-                  {todayError && (
-                    <div className="flex flex-wrap items-center gap-2 text-[12.5px] text-amber-700">
-                      <span>
-                        Could not check today&apos;s limit. You can still try to save; the server
-                        will confirm whether another check-in is allowed.
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => void refetchToday()}
-                        className="font-bold underline"
-                      >
-                        Try again
-                      </button>
-                    </div>
-                  )}
-                  {today && (
-                    <p className="text-[12.5px] text-muted-foreground">
-                      {today.remainingToday > 0
-                        ? `${today.remainingToday} check-in${today.remainingToday === 1 ? "" : "s"} left today`
-                        : "You've reached today's check-in limit"}
-                    </p>
-                  )}
-                </div>
+              {!editingEntry && today && (
+                <p className="mt-1.5 text-[12.5px] text-muted-foreground">
+                  {today.remainingToday > 0
+                    ? `${today.remainingToday} check-in${today.remainingToday === 1 ? "" : "s"} left today`
+                    : "You've reached today's check-in limit"}
+                </p>
               )}
             </div>
             {!editingEntry && (
