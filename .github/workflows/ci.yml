@@ -1,4 +1,4 @@
-name: CI
+name: MINDORA Frontend CI
 
 on:
   push:
@@ -7,69 +7,28 @@ on:
     branches: [main, develop]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   quality:
-    name: Lint & Type Check
+    name: Lint, Type Check and Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Type check
         run: npm run type-check
 
       - name: Lint
         run: npm run lint
-
-      - name: Check out PR source branch for canonical formatting
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          git fetch origin "${{ github.event.pull_request.head.ref }}"
-          git checkout -B "${{ github.event.pull_request.head.ref }}" "origin/${{ github.event.pull_request.head.ref }}"
-
-      - name: Canonical-format prototype integration files
-        run: |
-          npx prettier --write "src/app/(app)/therapy/page.tsx" "src/app/(app)/today/page.tsx" "src/app/admin/[section]/page.tsx" "src/app/therapist/[workspace]/page.tsx" "src/app/therapist/dashboard/page.tsx" "src/app/therapist/page.tsx" "src/hooks/useClinicalWorkspace.ts" "src/lib/clinical-workspace-api.ts" "src/lib/community-api.ts" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx"
-
-      - name: Upload formatted source for patching the PR branch
-        uses: actions/upload-artifact@v4
-        with:
-          name: mindora-prettier-source
-          path: |
-            src/app/(app)/therapy/page.tsx
-            src/app/(app)/today/page.tsx
-            src/app/admin/[section]/page.tsx
-            src/app/therapist/[workspace]/page.tsx
-            src/app/therapist/dashboard/page.tsx
-            src/app/therapist/page.tsx
-            src/hooks/useClinicalWorkspace.ts
-            src/lib/clinical-workspace-api.ts
-            src/lib/community-api.ts
-            src/components/landing/FeaturedTherapistsPreview.tsx
-            src/components/layout/TherapistSidebar.tsx
-            src/components/therapists/TherapistDirectory.tsx
-          if-no-files-found: error
-
-      - name: Commit canonical formatting to PR branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          if [[ -n "$(git status --porcelain -- "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx")" ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add "src/app/(app)/therapy/page.tsx" "src/components/landing/FeaturedTherapistsPreview.tsx" "src/components/layout/TherapistSidebar.tsx" "src/components/therapists/TherapistDirectory.tsx" "src/components/auth/LoginForm.tsx" "src/components/auth/SignupForm.tsx"
-            git commit -m "style: format MINDORA prototype integration files"
-            git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
-          fi
 
       - name: Format check
         run: npm run format:check
@@ -80,14 +39,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Run tests
         run: npm run test:coverage
@@ -100,26 +58,28 @@ jobs:
           retention-days: 7
 
   build:
-    name: Build
+    name: Next.js Production Build
     runs-on: ubuntu-latest
     needs: [quality, test]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.mindora.rw' }}
+          NEXT_PUBLIC_SOCKET_URL: ${{ secrets.NEXT_PUBLIC_SOCKET_URL || 'https://api.mindora.rw' }}
 
   docker:
-    name: Docker Build
+    name: Docker Image Build
     runs-on: ubuntu-latest
     needs: [build]
     if: github.ref == 'refs/heads/main'
@@ -130,7 +90,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: false

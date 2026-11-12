@@ -34,15 +34,7 @@ export function PublicNavbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden h-10 px-4 text-sm font-semibold sm:inline-flex"
-          >
-            <Link href="/therapist/login">Therapist Portal</Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm" className="h-10 px-3 text-sm font-semibold">
+          <Button asChild variant="ghost" size="sm" className="h-10 px-4 text-sm font-semibold">
             <Link href="/login">Sign In</Link>
           </Button>
           <Button asChild size="sm" className="h-10 rounded-xl px-4 text-sm">

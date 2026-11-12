@@ -60,20 +60,14 @@ export function Sidebar() {
       {/* Crisis block */}
       <div className="p-3 border-t border-border">
         <div className="bg-bg-elevated rounded-lg p-3 mb-3">
-          <p className="text-white text-xs font-medium mb-1">Contact MINDORA</p>
-          <p className="text-text-muted text-xs mb-2">Monday to Friday, 9am to 5pm.</p>
+          <p className="text-white text-xs font-medium mb-1">Need someone now?</p>
+          <p className="text-text-muted text-xs mb-2">24/7 crisis line - always answered.</p>
           <a
-            href="tel:+250783974066"
+            href="tel:+250783974068"
             className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white text-xs font-medium py-1.5 rounded-md transition-colors"
           >
             <Phone size={12} />
-            +250 783 974-066
-          </a>
-          <a
-            href="mailto:info@mindora.rw"
-            className="mt-2 block text-center text-xs text-text-muted underline"
-          >
-            info@mindora.rw
+            Call +250 783 974 068
           </a>
         </div>
 

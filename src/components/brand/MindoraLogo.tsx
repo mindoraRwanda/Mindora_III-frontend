@@ -33,7 +33,7 @@ export function MindoraLogo({
   return (
     <Link href={href} className={cn("flex items-center", s.gap, className)}>
       <Image
-        src="/images/Mindora_Logo.webp"
+        src="/images/Mindora_Logo.png"
         alt="Mindora"
         width={s.icon}
         height={s.icon}

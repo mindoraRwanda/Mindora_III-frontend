@@ -15,31 +15,19 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { safeReturnUrl } from "@/lib/booking";
 import { BackLink } from "@/components/public/BackLink";
-import { ApiError, getGoogleOAuthUrl } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
 
-const signupSchema = z
-  .object({
-    name: z.string().min(2, "Please enter your name"),
-    email: z.string().email("Please enter a valid email"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(
-        /^(?=.*[A-Za-z])(?=.*\d).{8,128}$/,
-        "Use at least 8 characters with letters and numbers"
-      ),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-    terms: z.boolean().refine((val) => val === true, { message: "You must agree to continue" }),
-  })
-  .refine((values) => values.password === values.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match.",
-  });
+const signupSchema = z.object({
+  name: z.string().min(2, "Please enter your name"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  terms: z.boolean().refine((val) => val === true, { message: "You must agree to continue" }),
+});
 
 type SignupForm = z.infer<typeof signupSchema>;
 
-export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean }) {
+export function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { register: registerAccount } = useAuth();
@@ -59,7 +47,6 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
       name: "",
       email: "",
       password: "",
-      confirmPassword: "",
       // Must start unchecked - a pre-ticked consent checkbox lets someone
       // submit without ever affirmatively agreeing to anything, which isn't
       // valid consent for a platform handling health data.
@@ -79,13 +66,7 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
         role: "PATIENT",
         userName: data.name,
       });
-      router.push(
-        therapistFlow
-          ? "/therapist-application/new"
-          : returnUrl
-            ? safeReturnUrl(returnUrl)
-            : dashboardPathForRole(user.role)
-      );
+      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {
         const formFieldForServerField: Record<string, keyof SignupForm> = {
@@ -117,31 +98,20 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
           <BackLink fallback="/" />
           <MindoraLogo />
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/tests" className="text-sm font-semibold text-mindora-purple hover:underline">
-            Tests
+        <p className="text-[13px] text-muted-foreground">
+          Have an account?{" "}
+          <Link
+            href={returnUrl ? `/login?returnUrl=${encodeURIComponent(returnUrl)}` : "/login"}
+            className="font-semibold text-mindora-purple hover:underline"
+          >
+            Sign in
           </Link>
-          <p className="text-[13px] text-muted-foreground">
-            Have an account?{" "}
-            <Link
-              href={
-                therapistFlow
-                  ? "/therapist/login"
-                  : returnUrl
-                    ? `/login?returnUrl=${encodeURIComponent(returnUrl)}`
-                    : "/login"
-              }
-              className="font-semibold text-mindora-purple hover:underline"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
+        </p>
       </div>
 
       <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center py-8">
         <h1 className="text-[32px] font-bold leading-tight tracking-tight text-foreground">
-          {therapistFlow ? "Apply to join our therapist network." : "Create your gentle space."}
+          Create your gentle space.
         </h1>
         <p className="mt-2 text-[14px] text-muted-foreground">
           Takes about 40 seconds - no clinical forms, promise.
@@ -177,23 +147,6 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
             {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="confirmPassword" className="text-[13px] font-medium text-foreground/80">
-              Confirm password
-            </label>
-            <PasswordInput
-              id="confirmPassword"
-              value={watch("confirmPassword")}
-              {...register("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Use at least 8 characters, including letters and numbers.
-          </p>
-
           <div className="flex items-start gap-3 pt-1">
             <Checkbox
               id="terms"
@@ -218,70 +171,11 @@ export function SignupForm({ therapistFlow = false }: { therapistFlow?: boolean 
             size="lg"
             disabled={isSubmitting}
           >
-            {isSubmitting
-              ? "Creating your space..."
-              : therapistFlow
-                ? "Create account and apply"
-                : "Create my space"}
+            {isSubmitting ? "Creating your space..." : "Create my space"}
             <ArrowRight className="h-4 w-4" />
           </Button>
-
-          {!therapistFlow && (
-            <>
-              <div className="relative my-2">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-3 text-muted-foreground">or sign up with</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                size="lg"
-                disabled={!termsAccepted || isSubmitting}
-                onClick={() => {
-                  window.location.href = getGoogleOAuthUrl();
-                }}
-              >
-                <GoogleIcon />
-                Continue with Google
-              </Button>
-              {!termsAccepted && (
-                <p className="text-center text-xs text-muted-foreground">
-                  Agree to the Terms and Privacy Notice above to continue with Google.
-                </p>
-              )}
-            </>
-          )}
         </form>
       </div>
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#4285F4"
-        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-      />
-    </svg>
   );
 }

@@ -44,7 +44,7 @@ export function TestQuiz({ test }: { test: TestDefinition }) {
         <button
           type="button"
           onClick={() => (index === 0 ? router.push("/tests") : setIndex((value) => value - 1))}
-          className="rounded-full p-2 text-[#1A1A1A] hover:bg-[#F1F9F8]"
+          className="rounded-full p-2 text-[#1A1A1A] hover:bg-[#F9F6FF]"
           aria-label="Back"
         >
           <ArrowLeft className="h-5 w-5" />

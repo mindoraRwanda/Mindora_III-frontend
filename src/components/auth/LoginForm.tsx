@@ -26,7 +26,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }) {
+export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -55,13 +55,7 @@ export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }
     setApiError(null);
     try {
       const user = await login(data.email, data.password);
-      router.push(
-        therapistMode && user.role === "PATIENT"
-          ? "/therapist-application"
-          : returnUrl
-            ? safeReturnUrl(returnUrl)
-            : dashboardPathForRole(user.role)
-      );
+      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
     } catch (err) {
       setApiError(
         err instanceof ApiError ? err.message : "Something went wrong. Please try again."
@@ -71,15 +65,7 @@ export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }
 
   return (
     <div className="flex flex-1 flex-col p-8 lg:p-14">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <BackLink fallback="/" />
-        <Link
-          href="/tests"
-          className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-mindora-purple transition-colors hover:bg-mindora-purple-pale"
-        >
-          Tests
-        </Link>
-      </div>
+      <BackLink fallback="/" className="mb-6" />
       <MindoraLogo />
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
@@ -87,14 +73,8 @@ export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }
           Welcome back
         </span>
 
-        <h1 className="text-3xl font-bold tracking-tight">
-          {therapistMode ? "Therapist sign in" : "Good to see you again."}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {therapistMode
-            ? "Sign in to manage your application or therapist dashboard."
-            : "Sign in to continue your gentle practice."}
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">Good to see you again.</h1>
+        <p className="mt-2 text-muted-foreground">Sign in to continue your gentle practice.</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
           <div className="space-y-2">
@@ -115,11 +95,8 @@ export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }
               <label htmlFor="password" className="text-sm font-medium">
                 Password
               </label>
-              <Link
-                href="/forgot-password"
-                className="text-xs font-medium text-mindora-purple hover:underline"
-              >
-                Forgot password?
+              <Link href="#" className="text-xs font-medium text-mindora-purple hover:underline">
+                Forgot?
               </Link>
             </div>
             <PasswordInput id="password" value={password} {...register("password")} />
@@ -170,13 +147,7 @@ export function LoginForm({ therapistMode = false }: { therapistMode?: boolean }
         <p className="mt-8 text-center text-sm text-muted-foreground">
           New to Mindora?{" "}
           <Link
-            href={
-              therapistMode
-                ? "/therapist/signup"
-                : returnUrl
-                  ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}`
-                  : "/signup"
-            }
+            href={returnUrl ? `/signup?returnUrl=${encodeURIComponent(returnUrl)}` : "/signup"}
             className="font-semibold text-mindora-purple hover:underline"
           >
             Create a free account

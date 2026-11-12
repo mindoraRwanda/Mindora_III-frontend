@@ -46,8 +46,3 @@ package-lock.json
 .claude/
 CLAUDE.md
 AG
-# Independent companion applications
-companion_apps/**/node_modules/
-companion_apps/**/dist/
-companion_apps/**/build/
-companion_apps/**/.next/

@@ -30,11 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "**/build/**",
-    "**/dist/**",
-    "**/node_modules/**",
-    "companion_apps/**",
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

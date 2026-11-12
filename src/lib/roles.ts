@@ -7,7 +7,7 @@ export function dashboardPathForRole(role: UserRole): string {
     case "ADMIN":
       return "/admin";
     case "THERAPIST":
-      return "/therapist/dashboard";
+      return "/therapist";
     case "PATIENT":
       return "/today";
   }
