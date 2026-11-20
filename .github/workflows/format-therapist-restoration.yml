@@ -1,0 +1,28 @@
+name: Format restored therapist files
+on:
+  push:
+    branches:
+      - restore/therapist-workspace-and-clinical-modules-2026-11-20
+permissions:
+  contents: write
+jobs:
+  format:
+    if: ${{ !contains(github.event.head_commit.message, '[formatted]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: restore/therapist-workspace-and-clinical-modules-2026-11-20
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Format restored files
+        run: npx prettier --write 'src/app/therapist/[workspace]/page.tsx' src/app/therapist/dashboard/page.tsx src/app/therapist/page.tsx src/components/layout/TherapistSidebar.tsx src/hooks/useClinicalWorkspace.ts
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'src/app/therapist/[workspace]/page.tsx' src/app/therapist/dashboard/page.tsx src/app/therapist/page.tsx src/components/layout/TherapistSidebar.tsx src/hooks/useClinicalWorkspace.ts
+          git diff --cached --quiet || (git commit -m "chore: format restored therapist files [formatted]" && git push origin HEAD:restore/therapist-workspace-and-clinical-modules-2026-11-20)
