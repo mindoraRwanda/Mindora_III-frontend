@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import {
-  CalendarX,
-  CheckCircle2,
-  Download,
-  XCircle,
-} from "lucide-react";
+import { CalendarX, CheckCircle2, Download, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -197,9 +192,16 @@ export default function TherapistSchedulePage() {
       </section>
 
       {schedule.isError && (
-        <div role="alert" className="mb-5 rounded-xl border border-[#f2d5d8] bg-[#fff0f1] p-4 text-[12px] text-[#9c4651]">
+        <div
+          role="alert"
+          className="mb-5 rounded-xl border border-[#f2d5d8] bg-[#fff0f1] p-4 text-[12px] text-[#9c4651]"
+        >
           Your schedule could not be loaded.
-          <button type="button" onClick={() => void schedule.refetch()} className="ml-3 font-bold underline">
+          <button
+            type="button"
+            onClick={() => void schedule.refetch()}
+            className="ml-3 font-bold underline"
+          >
             Retry
           </button>
         </div>
@@ -209,7 +211,9 @@ export default function TherapistSchedulePage() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ebe8f1] px-5 py-4">
           <div>
             <h2 className="text-[15px] font-extrabold text-[#28243a]">My appointments</h2>
-            <p className="mt-1 text-[11px] text-[#77758a]">Choose a date range and booking status.</p>
+            <p className="mt-1 text-[11px] text-[#77758a]">
+              Choose a date range and booking status.
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {(["today", "week", "upcoming"] as const).map((filter) => (
@@ -255,9 +259,12 @@ export default function TherapistSchedulePage() {
         ) : appointments.length === 0 ? (
           <div className="flex flex-col items-center px-5 py-14 text-center">
             <CalendarX className="h-8 w-8 text-[#b1a3c2]" />
-            <p className="mt-3 text-[13px] font-extrabold text-[#28243a]">No appointments in this view</p>
+            <p className="mt-3 text-[13px] font-extrabold text-[#28243a]">
+              No appointments in this view
+            </p>
             <p className="mt-1 max-w-[320px] text-[11px] leading-5 text-[#77758a]">
-              Bookings from your MINDORA patients will appear here when they match the selected filters.
+              Bookings from your MINDORA patients will appear here when they match the selected
+              filters.
             </p>
           </div>
         ) : (
@@ -274,7 +281,10 @@ export default function TherapistSchedulePage() {
               </thead>
               <tbody>
                 {appointments.map((appointment) => (
-                  <tr key={appointment.id} className="border-t border-[#f0edf3] text-[11px] text-[#625d70]">
+                  <tr
+                    key={appointment.id}
+                    className="border-t border-[#f0edf3] text-[11px] text-[#625d70]"
+                  >
                     <td className="px-5 py-4 font-semibold text-[#28243a]">
                       {formatWhen(appointment.slotStart)}
                     </td>
@@ -282,7 +292,9 @@ export default function TherapistSchedulePage() {
                       {patientReference(appointment.patientId)}
                     </td>
                     <td className="px-5 py-4">{formatSession(appointment.sessionType)}</td>
-                    <td className="px-5 py-4"><AppointmentStatusBadge status={appointment.status} /></td>
+                    <td className="px-5 py-4">
+                      <AppointmentStatusBadge status={appointment.status} />
+                    </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-2">
                         {appointment.status === "PENDING" && (
@@ -338,7 +350,8 @@ export default function TherapistSchedulePage() {
 
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#f0edf3] px-5 py-3 text-[10px] text-[#8c8798]">
           <span>
-            Showing {appointments.length} filtered record(s) from {schedule.data?.total ?? 0} total appointment record(s).
+            Showing {appointments.length} filtered record(s) from {schedule.data?.total ?? 0} total
+            appointment record(s).
           </span>
           <Link href="/therapist/dashboard" className="font-bold text-[#7350a0] hover:underline">
             Back to dashboard
@@ -366,7 +379,10 @@ export default function TherapistSchedulePage() {
             </p>
           </DialogHeader>
           <div>
-            <label htmlFor="decline-reason" className="mb-2 block text-[12px] font-bold text-[#625d70]">
+            <label
+              htmlFor="decline-reason"
+              className="mb-2 block text-[12px] font-bold text-[#625d70]"
+            >
               Reason for declining
             </label>
             <Textarea
@@ -379,16 +395,15 @@ export default function TherapistSchedulePage() {
             />
             <p className="mt-1 text-right text-[10px] text-[#9691a0]">{declineReason.length}/500</p>
             {cancelAppointment.isError && (
-              <p role="alert" className="mt-3 rounded-lg bg-[#fff0f1] p-3 text-[11px] text-[#9c4651]">
+              <p
+                role="alert"
+                className="mt-3 rounded-lg bg-[#fff0f1] p-3 text-[11px] text-[#9c4651]"
+              >
                 {cancelAppointment.error.message}
               </p>
             )}
             <div className="mt-4 flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDeclineTarget(null)}
-              >
+              <Button type="button" variant="outline" onClick={() => setDeclineTarget(null)}>
                 Keep request
               </Button>
               <Button

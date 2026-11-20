@@ -87,7 +87,6 @@ export function useReviewMedicationUpdate() {
   });
 }
 
-
 export function useSubmitMedicationUpdate() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -96,7 +95,6 @@ export function useSubmitMedicationUpdate() {
       queryClient.invalidateQueries({ queryKey: ["clinical-workspace", "my-medication-updates"] });
       toast.success("Your medication update was sent to your therapist.");
     },
-    onError: (error) =>
-      toast.error(errorText(error, "Could not send your medication update.")),
+    onError: (error) => toast.error(errorText(error, "Could not send your medication update.")),
   });
 }

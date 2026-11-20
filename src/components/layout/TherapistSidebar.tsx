@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, CalendarClock, ClipboardList, FileText, LayoutDashboard, LogOut, Pill, Users, Clock, Settings, Video } from "lucide-react";
+import {
+  Activity,
+  CalendarClock,
+  ClipboardList,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Pill,
+  Users,
+  Clock,
+  Settings,
+  Video,
+} from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";

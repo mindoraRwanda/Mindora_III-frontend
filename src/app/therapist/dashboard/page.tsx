@@ -13,7 +13,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
-import { useAvailability, useTherapistDashboard, useTherapistSchedule } from "@/hooks/useAppointments";
+import {
+  useAvailability,
+  useTherapistDashboard,
+  useTherapistSchedule,
+} from "@/hooks/useAppointments";
 import type { BookedAppointment } from "@/types/domain";
 
 const STATUS_VARIANT = {
@@ -146,7 +150,9 @@ function AppointmentRow({ appointment }: { appointment: BookedAppointment }) {
         <p className="truncate text-[12px] font-bold text-[#28243a]">
           {patientReference(appointment.patientId)}
         </p>
-        <p className="mt-1 text-[11px] text-[#77758a]">{formatSessionType(appointment.sessionType)}</p>
+        <p className="mt-1 text-[11px] text-[#77758a]">
+          {formatSessionType(appointment.sessionType)}
+        </p>
       </div>
       <Badge variant={STATUS_VARIANT[appointment.status]}>
         {appointment.status.charAt(0) + appointment.status.slice(1).toLowerCase()}
@@ -216,7 +222,10 @@ export default function TherapistDashboardPage() {
       </header>
 
       {(dashboard.isError || schedule.isError || availability.isError) && (
-        <div role="alert" className="mb-5 rounded-xl border border-[#f2d5d8] bg-[#fff0f1] p-4 text-[12px] text-[#9c4651]">
+        <div
+          role="alert"
+          className="mb-5 rounded-xl border border-[#f2d5d8] bg-[#fff0f1] p-4 text-[12px] text-[#9c4651]"
+        >
           Some practice information could not be loaded. Figures marked unavailable have not been
           replaced with sample values.
           <button
@@ -278,7 +287,10 @@ export default function TherapistDashboardPage() {
                 }).format(new Date())}
               </p>
             </div>
-            <Link href="/therapist" className="text-[11px] font-bold text-[#7350a0] hover:underline">
+            <Link
+              href="/therapist"
+              className="text-[11px] font-bold text-[#7350a0] hover:underline"
+            >
               Full schedule
             </Link>
           </div>
@@ -322,7 +334,10 @@ export default function TherapistDashboardPage() {
           ) : (
             <div className="mt-5 grid h-40 grid-cols-7 items-end gap-2">
               {lastSevenDays.map((day) => (
-                <div key={day.key} className="flex h-full min-w-0 flex-col items-center justify-end gap-2">
+                <div
+                  key={day.key}
+                  className="flex h-full min-w-0 flex-col items-center justify-end gap-2"
+                >
                   <span className="text-[10px] font-bold text-[#625d70]">{day.completed}</span>
                   <div className="flex h-28 w-full items-end overflow-hidden rounded-t-lg bg-[#f5f2f8]">
                     <div
@@ -348,10 +363,14 @@ export default function TherapistDashboardPage() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-[16px] font-extrabold text-[#28243a]">Requests to review</h2>
-              <p className="mt-1 text-[11px] text-[#77758a]">Patient booking requests awaiting a decision</p>
+              <p className="mt-1 text-[11px] text-[#77758a]">
+                Patient booking requests awaiting a decision
+              </p>
             </div>
             {pendingCount !== null && (
-              <Badge variant={pendingCount > 0 ? "pending" : "secondary"}>{pendingCount} pending</Badge>
+              <Badge variant={pendingCount > 0 ? "pending" : "secondary"}>
+                {pendingCount} pending
+              </Badge>
             )}
           </div>
           {schedule.isLoading ? (
@@ -363,27 +382,36 @@ export default function TherapistDashboardPage() {
           ) : pendingRequests.length === 0 ? (
             <div className="rounded-xl bg-[#f7f6fa] px-4 py-6 text-center">
               <CheckCircle2 className="mx-auto h-6 w-6 text-[#2f8a68]" />
-              <p className="mt-2 text-[12px] font-bold text-[#28243a]">No pending requests in this page</p>
+              <p className="mt-2 text-[12px] font-bold text-[#28243a]">
+                No pending requests in this page
+              </p>
               <p className="mt-1 text-[10px] text-[#77758a]">
                 Open your schedule to see the full appointment register.
               </p>
             </div>
           ) : (
             pendingRequests.map((appointment) => (
-              <div key={appointment.id} className="flex flex-wrap items-center gap-3 border-b border-[#f0edf3] py-3 last:border-0">
+              <div
+                key={appointment.id}
+                className="flex flex-wrap items-center gap-3 border-b border-[#f0edf3] py-3 last:border-0"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-bold text-[#28243a]">
                     {patientReference(appointment.patientId)}
                   </p>
                   <p className="mt-1 text-[11px] text-[#77758a]">
-                    {formatDate(appointment.slotStart)} · {formatTime(appointment.slotStart)} · {formatSessionType(appointment.sessionType)}
+                    {formatDate(appointment.slotStart)} · {formatTime(appointment.slotStart)} ·{" "}
+                    {formatSessionType(appointment.sessionType)}
                   </p>
                 </div>
                 <Badge variant="pending">Pending</Badge>
               </div>
             ))
           )}
-          <Link href="/therapist" className="mt-4 inline-flex text-[11px] font-bold text-[#7350a0] hover:underline">
+          <Link
+            href="/therapist"
+            className="mt-4 inline-flex text-[11px] font-bold text-[#7350a0] hover:underline"
+          >
             Review appointment requests →
           </Link>
         </article>
@@ -391,7 +419,9 @@ export default function TherapistDashboardPage() {
         <article className="rounded-[18px] border border-[#ebe8f1] bg-white p-5 shadow-[0_12px_34px_rgba(45,32,65,.055)]">
           <div className="mb-3">
             <h2 className="text-[16px] font-extrabold text-[#28243a]">Quick actions</h2>
-            <p className="mt-1 text-[11px] text-[#77758a]">Open the tools in your practice workspace</p>
+            <p className="mt-1 text-[11px] text-[#77758a]">
+              Open the tools in your practice workspace
+            </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {QUICK_ACTIONS.map((action) => {
@@ -405,8 +435,12 @@ export default function TherapistDashboardPage() {
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f1ecf7] text-[#7350a0]">
                     <Icon className="h-4 w-4" />
                   </span>
-                  <span className="mt-3 block text-[12px] font-extrabold text-[#28243a]">{action.title}</span>
-                  <span className="mt-1 block text-[10px] leading-4 text-[#77758a]">{action.description}</span>
+                  <span className="mt-3 block text-[12px] font-extrabold text-[#28243a]">
+                    {action.title}
+                  </span>
+                  <span className="mt-1 block text-[10px] leading-4 text-[#77758a]">
+                    {action.description}
+                  </span>
                 </Link>
               );
             })}
