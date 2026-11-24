@@ -153,6 +153,19 @@ export function LoginForm() {
             Create a free account
           </Link>
         </p>
+
+        <div className="mt-4 rounded-lg border border-mindora-purple/20 bg-mindora-purple-pale/50 p-4 text-center">
+          <p className="text-sm font-medium text-mindora-purple">Are you a therapist?</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Sign in above with your therapist credentials, or{" "}
+            <Link
+              href="/therapist-application"
+              className="font-semibold text-mindora-purple hover:underline"
+            >
+              apply to join our team
+            </Link>
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
