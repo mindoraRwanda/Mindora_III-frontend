@@ -17,6 +17,7 @@ import { safeReturnUrl } from "@/lib/booking";
 import { BackLink } from "@/components/public/BackLink";
 import { ApiError, getGoogleOAuthUrl } from "@/lib/api";
 import { dashboardPathForRole } from "@/lib/roles";
+import { fetchMyTherapistApplications } from "@/lib/therapist-application-api";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -55,7 +56,28 @@ export function LoginForm() {
     setApiError(null);
     try {
       const user = await login(data.email, data.password);
-      router.push(returnUrl ? safeReturnUrl(returnUrl) : dashboardPathForRole(user.role));
+
+      if (returnUrl) {
+        router.push(safeReturnUrl(returnUrl));
+        return;
+      }
+
+      // If PATIENT, check for a pending therapist application and route
+      // them to the pending therapist dashboard instead of the patient portal.
+      if (user.role === "PATIENT") {
+        try {
+          const apps = await fetchMyTherapistApplications();
+          const latest = apps.applications[0];
+          if (latest && latest.status !== "REJECTED" && latest.status !== "APPROVED") {
+            router.push("/therapist-application/dashboard");
+            return;
+          }
+        } catch {
+          // If the check fails, fall through to default routing.
+        }
+      }
+
+      router.push(dashboardPathForRole(user.role));
     } catch (err) {
       setApiError(
         err instanceof ApiError ? err.message : "Something went wrong. Please try again."
@@ -153,6 +175,22 @@ export function LoginForm() {
             Create a free account
           </Link>
         </p>
+
+        <div className="mt-4 rounded-lg border border-mindora-purple/20 bg-mindora-purple-pale/50 p-4 text-center">
+          <p className="text-sm font-medium text-mindora-purple">Are you a therapist?</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Sign in above with your therapist credentials.
+          </p>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Want to join our team?{" "}
+            <Link
+              href="/join-as-therapist"
+              className="font-semibold text-mindora-purple hover:underline"
+            >
+              Learn more & apply
+            </Link>
+          </p>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground">

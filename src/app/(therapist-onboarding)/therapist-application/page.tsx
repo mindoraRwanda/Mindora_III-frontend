@@ -99,6 +99,9 @@ function StatusPanel({ application }: { application: TherapistApplication }) {
             it&apos;s pending.
           </p>
           <Summary application={application} />
+          <Button asChild variant="outline" className="mt-2">
+            <Link href="/therapist-application/dashboard">Go to my dashboard</Link>
+          </Button>
         </div>
       );
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   AlertTriangle,
-  Briefcase,
   Calendar,
   Heart,
   Home,
@@ -33,7 +32,6 @@ const navItems = [
   { href: "/therapy", label: "Therapy", icon: Calendar },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/reflect", label: "Reflect", icon: PenLine },
-  { href: "/therapist-application", label: "Become a Therapist", icon: Briefcase },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
