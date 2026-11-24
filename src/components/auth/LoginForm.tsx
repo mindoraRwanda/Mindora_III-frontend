@@ -157,12 +157,15 @@ export function LoginForm() {
         <div className="mt-4 rounded-lg border border-mindora-purple/20 bg-mindora-purple-pale/50 p-4 text-center">
           <p className="text-sm font-medium text-mindora-purple">Are you a therapist?</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Sign in above with your therapist credentials, or{" "}
+            Sign in above with your therapist credentials.
+          </p>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Want to join our team?{" "}
             <Link
-              href="/therapist-application"
+              href="/signup?returnUrl=%2Ftherapist-application"
               className="font-semibold text-mindora-purple hover:underline"
             >
-              apply to join our team
+              Create an account & apply
             </Link>
           </p>
         </div>
