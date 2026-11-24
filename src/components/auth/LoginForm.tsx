@@ -162,10 +162,10 @@ export function LoginForm() {
           <p className="mt-1.5 text-xs text-muted-foreground">
             Want to join our team?{" "}
             <Link
-              href="/signup?returnUrl=%2Ftherapist-application"
+              href="/join-as-therapist"
               className="font-semibold text-mindora-purple hover:underline"
             >
-              Create an account & apply
+              Learn more & apply
             </Link>
           </p>
         </div>

@@ -96,6 +96,7 @@ export const PUBLIC_NAV_LINKS = [
   { href: "/therapists", label: "Therapists" },
   { href: "/tests", label: "Tests" },
   { href: "/get-matched", label: "Find a Therapist" },
+  { href: "/join-as-therapist", label: "Join as Therapist" },
   { href: "/business", label: "Business" },
   { href: "/support", label: "Support" },
 ] as const;
@@ -104,6 +105,7 @@ export const FOOTER_LINKS = [
   { href: "/therapists", label: "Therapists" },
   { href: "/tests", label: "Tests" },
   { href: "/get-matched", label: "Find a Therapist" },
+  { href: "/join-as-therapist", label: "Join as Therapist" },
   { href: "/business", label: "Business" },
   { href: "/about", label: "About" },
   { href: "/support", label: "Support" },
