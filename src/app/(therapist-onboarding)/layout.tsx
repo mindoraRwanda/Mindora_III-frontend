@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MindoraLogo } from "@/components/brand/MindoraLogo";
+import { PendingTherapistSidebar } from "@/components/layout/PendingTherapistSidebar";
 import { RouteGuard } from "@/components/auth/RouteGuard";
 
 export const metadata: Metadata = {
@@ -9,11 +9,9 @@ export const metadata: Metadata = {
 export default function TherapistOnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
     <RouteGuard requiredRole="PATIENT">
-      <div className="flex min-h-screen flex-col bg-[#eae6f4]">
-        <header className="flex items-center px-6 py-5">
-          <MindoraLogo size="md" href="/today" />
-        </header>
-        <main className="flex-1">{children}</main>
+      <div className="flex h-screen overflow-hidden bg-white">
+        <PendingTherapistSidebar />
+        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
       </div>
     </RouteGuard>
   );

@@ -100,7 +100,7 @@ function StatusPanel({ application }: { application: TherapistApplication }) {
           </p>
           <Summary application={application} />
           <Button asChild variant="outline" className="mt-2">
-            <Link href="/today">Go to my account</Link>
+            <Link href="/therapist-application/dashboard">Go to my dashboard</Link>
           </Button>
         </div>
       );
