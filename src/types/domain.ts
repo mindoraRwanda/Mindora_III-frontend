@@ -16,7 +16,7 @@ export interface RegisterRequest {
 
 export type AppointmentStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
 
-export type SessionType = "VIDEO" | "IN_PERSON" | "CHAT";
+export type SessionType = "VIDEO" | "AUDIO" | "IN_PERSON" | "CHAT";
 
 // --- Real backend API types (Appointment Service + User Service) ---
 // See src/lib/appointments-api.ts for the endpoints these are fetched from.
