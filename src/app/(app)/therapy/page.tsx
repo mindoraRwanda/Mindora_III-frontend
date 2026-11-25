@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CalendarX, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +26,6 @@ type BrowseTab = "browse" | "mine";
 type MineStatus = AppointmentTab;
 
 export default function TherapyPage() {
-  const router = useRouter();
   const [tab, setTab] = useState<BrowseTab>("browse");
   const [search, setSearch] = useState("");
   const [mineStatus, setMineStatus] = useState<MineStatus>("upcoming");
@@ -307,10 +305,6 @@ export default function TherapyPage() {
         onOpenChange={(open) => !open && setStartTherapist(null)}
         onBookAppointment={() => {
           setBookingTherapist(startTherapist);
-          setStartTherapist(null);
-        }}
-        onChat={() => {
-          if (startTherapist) router.push(`/messages?therapistId=${startTherapist.userId}`);
           setStartTherapist(null);
         }}
       />

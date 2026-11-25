@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2, X } from "lucide-react";
+import {
+  Camera,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Loader2,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +33,7 @@ import {
   useUpdateTherapistApplication,
   useUploadTherapistDocument,
 } from "@/hooks/useTherapistApplication";
+import { uploadProfilePhoto } from "@/lib/user-api";
 import type {
   TherapistApplication,
   TherapistDocumentType,
@@ -299,6 +308,9 @@ export function TherapistApplicationForm({ application }: TherapistApplicationFo
   const [documentType, setDocumentType] = useState<TherapistDocumentType>("LICENSE");
   const [viewingDocId, setViewingDocId] = useState<string | null>(null);
   const [viewError, setViewError] = useState<string | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const updateMutation = useUpdateTherapistApplication();
   const uploadMutation = useUploadTherapistDocument();
@@ -351,6 +363,19 @@ export function TherapistApplicationForm({ application }: TherapistApplicationFo
 
   async function handleFileSelected(file: File) {
     await uploadMutation.mutateAsync({ id: application.id, file, documentType });
+  }
+
+  async function handlePhotoSelected(file: File) {
+    setPhotoError(null);
+    setPhotoUploading(true);
+    try {
+      const { photoUrl: url } = await uploadProfilePhoto(file);
+      setPhotoUrl(url);
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : "Photo upload failed");
+    } finally {
+      setPhotoUploading(false);
+    }
   }
 
   async function handleView(docId: string) {
@@ -446,6 +471,46 @@ export function TherapistApplicationForm({ application }: TherapistApplicationFo
               {errors.contactEmail && (
                 <p className="text-xs text-red-500">{errors.contactEmail.message}</p>
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Profile photo (optional)</Label>
+              <p className="text-[12px] text-muted-foreground">
+                A photo helps patients feel more comfortable. Max 5 MB, JPG/PNG.
+              </p>
+              <div className="mt-2 flex items-center gap-4">
+                {photoUrl ? (
+                  <img
+                    src={photoUrl}
+                    alt="Profile preview"
+                    className="h-16 w-16 rounded-full object-cover shadow-sm"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-mindora-purple-pale text-mindora-purple shadow-[inset_3px_3px_7px_#d3caeb,inset_-3px_-3px_7px_#ffffff]">
+                    <Camera className="h-5 w-5" />
+                  </div>
+                )}
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-[13px] font-semibold text-mindora-purple hover:bg-mindora-purple-pale">
+                  {photoUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                  {photoUploading ? "Uploading…" : photoUrl ? "Change photo" : "Upload photo"}
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    disabled={photoUploading || !editable}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (file) handlePhotoSelected(file);
+                    }}
+                  />
+                </label>
+              </div>
+              {photoError && <p className="text-xs text-red-500">{photoError}</p>}
             </div>
           </div>
         )}

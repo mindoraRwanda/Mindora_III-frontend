@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  AlertTriangle,
-  Calendar,
-  Heart,
-  Home,
-  LogOut,
-  MessageCircle,
-  PenLine,
-  Settings,
-} from "lucide-react";
+import { AlertTriangle, Calendar, Heart, Home, LogOut, PenLine, Settings } from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
@@ -27,11 +18,10 @@ function initialsFor(name: string): string {
 }
 
 const navItems = [
-  { href: "/today", label: "Today", icon: Home },
-  { href: "/check-in", label: "Check-in", icon: Heart },
+  { href: "/today", label: "Check in", icon: Home },
+  { href: "/tests", label: "Test", icon: Heart },
   { href: "/therapy", label: "Therapy", icon: Calendar },
-  { href: "/messages", label: "Messages", icon: MessageCircle },
-  { href: "/reflect", label: "Reflect", icon: PenLine },
+  { href: "/reflect", label: "AI Companion", icon: PenLine },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -71,7 +61,7 @@ export function AppSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          const showDue = item.href === "/check-in" && checkInDue;
+          const showDue = item.href === "/today" && checkInDue;
           return (
             <Link
               key={item.href}

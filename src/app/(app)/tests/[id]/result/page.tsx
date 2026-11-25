@@ -5,7 +5,11 @@ export function generateStaticParams() {
   return TESTS.map((test) => ({ id: test.id }));
 }
 
-export default async function TestResultPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AppTestResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <TestResultView id={id} />;
+  return (
+    <div className="min-h-full bg-[#eae6f4]">
+      <TestResultView id={id} />
+    </div>
+  );
 }

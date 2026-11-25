@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiUpload } from "@/lib/api";
 import type {
   MeResponse,
   NotificationPreferences,
@@ -37,6 +37,13 @@ export function updateNotificationPreferences(
     method: "PUT",
     body: JSON.stringify(prefs),
   });
+}
+
+// POST /api/v1/users/me/photo - therapist only, uploads a profile photo.
+export function uploadProfilePhoto(file: File): Promise<{ photoUrl: string }> {
+  const formData = new FormData();
+  formData.append("photo", file);
+  return apiUpload("/api/v1/users/me/photo", formData);
 }
 
 // GET /api/v1/users/:userId/preferences - callable by the user themselves or a
