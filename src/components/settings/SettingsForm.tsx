@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfile, useUpdateProfile } from "@/hooks/useMyProfile";
 import { useUpdateNotificationPreferences, useUserPreferences } from "@/hooks/useNotifications";
+import { uploadProfilePhoto } from "@/lib/user-api";
 import { cn } from "@/lib/utils";
 import type { NotificationPreferences } from "@/types/domain";
 
@@ -40,6 +41,31 @@ export function SettingsForm() {
   const [bioDraft, setBioDraft] = useState<string | null>(null);
   const [profileSaved, setProfileSaved] = useState(false);
   const [pendingKey, setPendingKey] = useState<keyof NotificationPreferences | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isTherapist = user?.role === "THERAPIST";
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError("File must be under 5 MB.");
+      return;
+    }
+    setPhotoError(null);
+    setPhotoUploading(true);
+    try {
+      const result = await uploadProfilePhoto(file);
+      setPhotoUrl(result.photoUrl);
+    } catch {
+      setPhotoError("Upload failed. Please try again.");
+    } finally {
+      setPhotoUploading(false);
+    }
+  }
 
   const userName = userNameDraft ?? profile?.profile?.userName ?? "";
   const bio = bioDraft ?? profile?.profile?.bio ?? "";
@@ -117,6 +143,44 @@ export function SettingsForm() {
                     rows={4}
                   />
                 </div>
+
+                {isTherapist && (
+                  <div className="space-y-1.5">
+                    <Label>Profile photo</Label>
+                    <div className="flex items-center gap-4">
+                      {(photoUrl ?? profile?.profile?.photoUrl) && (
+                        <img
+                          src={photoUrl ?? profile?.profile?.photoUrl ?? ""}
+                          alt="Profile"
+                          className="h-16 w-16 rounded-full object-cover border-2 border-mindora-purple"
+                        />
+                      )}
+                      <div>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png"
+                          className="hidden"
+                          onChange={handlePhotoChange}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={photoUploading}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          {photoUploading ? "Uploading…" : "Upload photo"}
+                        </Button>
+                        <p className="mt-1 text-[11.5px] text-muted-foreground">
+                          JPG or PNG, max 5 MB
+                        </p>
+                        {photoError && (
+                          <p className="mt-1 text-[11.5px] text-red-600">{photoError}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {profileSaved && !updateProfileMutation.isPending && (
                   <p className="text-[13px] font-medium text-mindora-success">Saved.</p>
