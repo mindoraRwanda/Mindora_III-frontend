@@ -44,6 +44,7 @@ export class ApiError extends Error {
 }
 
 export function setAccessToken(token: string | null) {
+  if (inMemoryAccessToken === token) return;
   inMemoryAccessToken = token;
   tokenListeners.forEach((listener) => listener(token));
 }
