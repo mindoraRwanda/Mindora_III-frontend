@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarClock, LayoutDashboard, LogOut, Users, Clock, Settings } from "lucide-react";
+import {
+  Activity,
+  CalendarClock,
+  ClipboardList,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Pill,
+  Users,
+  Clock,
+  Settings,
+  Video,
+} from "lucide-react";
 import { MindoraLogo } from "@/components/brand/MindoraLogo";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +26,12 @@ const navItems = [
   { href: "/therapist/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/therapist/availability", label: "Availability", icon: Clock },
   { href: "/therapist/patients", label: "Patients", icon: Users },
+  { href: "/therapist/treatment-plans", label: "Treatment plans", icon: ClipboardList },
+  { href: "/therapist/medication", label: "Medication", icon: Pill },
+  { href: "/therapist/prescriptions", label: "Prescriptions", icon: FileText },
+  { href: "/therapist/reports", label: "Reports", icon: Activity },
+  { href: "/therapist/communities", label: "Communities", icon: Users },
+  { href: "/therapist/video-sessions", label: "Video sessions", icon: Video },
   { href: "/therapist/settings", label: "Settings", icon: Settings },
 ];
 
