@@ -2,6 +2,8 @@ import { apiFetch } from "@/lib/api";
 import { toQueryString } from "@/lib/query-string";
 import type {
   AdminUserRecord,
+  AppointmentStatus,
+  BookedAppointment,
   AuditLogEntry,
   DetailedAnalytics,
   PlatformAnalytics,
@@ -52,6 +54,22 @@ interface AuditLogResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+interface AdminAppointmentListResponse {
+  appointments: BookedAppointment[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// GET /api/v1/admin/appointments - read-only platform appointment register.
+export function fetchAdminAppointments(params: {
+  page?: number;
+  limit?: number;
+  status?: AppointmentStatus;
+}): Promise<AdminAppointmentListResponse> {
+  return apiFetch(`/api/v1/admin/appointments${toQueryString(params)}`);
 }
 
 // GET /api/v1/admin/users - proxies through User Service to Auth Service.
