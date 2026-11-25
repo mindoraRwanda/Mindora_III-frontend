@@ -144,7 +144,7 @@ export function ReflectChat() {
       <div className="flex min-h-0 flex-1 flex-col rounded-[34px] bg-white p-6 shadow-[12px_12px_26px_#cbc4de,-12px_-12px_26px_#fdfbff] lg:p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-[28px] font-bold tracking-tight">Reflect</h1>
+            <h1 className="text-[28px] font-bold tracking-tight">Mindora AI Companion</h1>
             <p className="mt-1.5 text-[14px] text-muted-foreground">
               A safe space to untangle your thoughts, anytime. Not a replacement for care.
             </p>

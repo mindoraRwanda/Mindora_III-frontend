@@ -70,7 +70,7 @@ export function TestResultView({ id }: { id: string }) {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-      <BackLink fallback="/tests" className="mb-2" />
+      <BackLink fallback="/tests" className="mb-2 text-mindora-purple" />
       <h1 className="mt-4 text-3xl font-bold tracking-tight">{test.name}</h1>
       <p className="mt-6 text-4xl font-bold text-[#1A1A1A]">{scoreLabel}</p>
       <Badge className={`mt-4 ${severityColor[result.severity] ?? "bg-mindora-purple text-white"}`}>
@@ -99,9 +99,7 @@ export function TestResultView({ id }: { id: string }) {
           variant="outline"
           className="mt-4 border-white bg-white text-mindora-purple hover:bg-white/90"
         >
-          <Link href={`/therapists?specialisation=${encodeURIComponent(test.category)}`}>
-            Find a Therapist
-          </Link>
+          <Link href="/therapy">Find a Therapist</Link>
         </Button>
       </div>
     </div>
