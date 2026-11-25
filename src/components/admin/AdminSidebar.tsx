@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   BarChart3,
   Briefcase,
+  CalendarCheck,
   LayoutDashboard,
   ListChecks,
   LogOut,
@@ -20,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/appointments", label: "Appointments", icon: CalendarCheck },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/therapist-applications", label: "Therapist Applications", icon: Briefcase },

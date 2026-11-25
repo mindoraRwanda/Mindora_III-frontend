@@ -4,6 +4,7 @@ import {
   addTherapistApplicationNote,
   approveTherapistApplication,
   decryptPostAuthor,
+  fetchAdminAppointments,
   fetchAlerts,
   fetchAnalytics,
   fetchAuditLog,
@@ -22,7 +23,7 @@ import {
   suspendUser,
 } from "@/lib/admin-api";
 import { ApiError } from "@/lib/api";
-import type { TherapistApplicationStatus } from "@/types/domain";
+import type { AppointmentStatus, TherapistApplicationStatus } from "@/types/domain";
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof ApiError ? error.message : fallback;
@@ -37,6 +38,17 @@ export function useAdminUsers(params: {
   return useQuery({
     queryKey: ["admin", "users", params],
     queryFn: () => fetchUsers(params),
+  });
+}
+
+export function useAdminAppointments(params: {
+  page?: number;
+  limit?: number;
+  status?: AppointmentStatus;
+}) {
+  return useQuery({
+    queryKey: ["admin", "appointments", params],
+    queryFn: () => fetchAdminAppointments(params),
   });
 }
 
