@@ -62,7 +62,14 @@ function formatWhen(iso: string): string {
 }
 
 function formatSession(type: BookedAppointment["sessionType"]): string {
-  return type === "AUDIO" ? "Audio session" : "Video session";
+  switch (type) {
+    case "VIDEO":
+      return "Video session";
+    case "IN_PERSON":
+      return "In-person session";
+    case "CHAT":
+      return "Chat session";
+  }
 }
 
 function patientReference(patientId: string): string {
